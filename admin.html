@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Jersey Product</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    input, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 8px;
+      font-size: 1rem;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Add Jersey Product</h2>
+  <form id="addProductForm">
+    <label for="name">Product Name:</label>
+    <input type="text" id="name" placeholder="Product Name" required />
+
+    <label for="description">Description:</label>
+    <input type="text" id="description" placeholder="Description" />
+
+    <label for="price">Price:</label>
+    <input type="number" id="price" placeholder="Price" required />
+
+    <label for="imageUrl">Image URL:</label>
+    <input type="text" id="imageUrl" placeholder="Image URL" />
+
+    <h4>Variations</h4>
+
+    <label for="color">Color:</label>
+    <input type="text" id="color" placeholder="e.g., Red" required />
+
+    <label for="small">Small Stock:</label>
+    <input type="number" id="small" placeholder="Small stock" required />
+
+    <label for="medium">Medium Stock:</label>
+    <input type="number" id="medium" placeholder="Medium stock" required />
+
+    <label for="large">Large Stock:</label>
+    <input type="number" id="large" placeholder="Large stock" required />
+
+    <button type="submit">Add Product</button>
+  </form>
+
+  <script type="module" src="add_products.js"></script>
+
+</body>
+</html>
