@@ -3,65 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Add Jersey Product</title>
+  <title>Admin Dashboard</title>
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 30px auto;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #2c3e50;
+      color: white;
+      height: 100vh;
+      padding-top: 20px;
+      position: fixed;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 15px 25px;
+      color: white;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .sidebar a:hover {
+      background-color: #34495e;
+    }
+
+    .main {
+      margin-left: 220px;
       padding: 20px;
-    }
-
-    input, button {
-      display: block;
-      width: 100%;
-      margin-bottom: 15px;
-      padding: 8px;
-      font-size: 1rem;
-    }
-
-    label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      display: block;
+      flex-grow: 1;
     }
   </style>
 </head>
-
 <body>
 
-  <h2>Add Jersey Product</h2>
-  <form id="addProductForm">
-    <label for="name">Product Name:</label>
-    <input type="text" id="name" placeholder="Product Name" required />
+  <div class="sidebar">
+    <h2>Admin</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="add_products.html">Add Products</a>
+    <a href="orders.html">View Orders</a>
+    <a href="products.html">View Products</a>
+    <a href="users.html">Users</a>
+    <a href="settings.html">Settings</a>
+    <a href="logout.html">Logout</a>
+  </div>
 
-    <label for="description">Description:</label>
-    <input type="text" id="description" placeholder="Description" />
-
-    <label for="price">Price:</label>
-    <input type="number" id="price" placeholder="Price" required />
-
-    <label for="imageUrl">Image URL:</label>
-    <input type="text" id="imageUrl" placeholder="Image URL" />
-
-    <h4>Variations</h4>
-
-    <label for="color">Color:</label>
-    <input type="text" id="color" placeholder="e.g., Red" required />
-
-    <label for="small">Small Stock:</label>
-    <input type="number" id="small" placeholder="Small stock" required />
-
-    <label for="medium">Medium Stock:</label>
-    <input type="number" id="medium" placeholder="Medium stock" required />
-
-    <label for="large">Large Stock:</label>
-    <input type="number" id="large" placeholder="Large stock" required />
-
-    <button type="submit">Add Product</button>
-  </form>
-
-  <script type="module" src="add_products.js"></script>
+  <div class="main">
+    <h1>Welcome to Admin Dashboard</h1>
+    <p>Select a menu item from the left to get started.</p>
+  </div>
 
 </body>
 </html>
