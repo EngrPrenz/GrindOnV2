@@ -33,7 +33,7 @@ submit.addEventListener("click", function (event) {
                 // Signed in 
                 const user = userCredential.user;
                 alert("Welcome, you have logged in successfully!");
-                window.location.href = "home.html"; // Or another page you want
+                window.location.href = "homepage.html"; // Or another page you want
             })
             .catch((error) => {
                 const errorCode = error.code;
