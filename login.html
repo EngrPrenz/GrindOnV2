@@ -3,79 +3,114 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>login Page</title>
+  <title>GrindOn Login</title>
+  <script type="module" src="login.js" defer></script>
 
-    <script type="module" src="login.js" defer></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-    <style>
-        body {
-          font-family: Arial, sans-serif;
-          background: #f4f4f4;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-        }
-    
-        .login-container {
-          background: #fff;
-          padding: 30px;
-          border-radius: 8px;
-          box-shadow: 0 0 10px rgba(0,0,0,0.1);
-          width: 300px;
-        }
-    
-        .login-container h2 {
-          text-align: center;
-          margin-bottom: 20px;
-        }
-    
-        label {
-          display: block;
-          margin-top: 10px;
-        }
-    
-        input[type="text"],
-        input[type="password"] {
-          width: 100%;
-          padding: 10px;
-          margin-top: 5px;
-          box-sizing: border-box;
-        }
-    
-        button {
-          width: 100%;
-          padding: 10px;
-          background: #4CAF50;
-          color: white;
-          border: none;
-          cursor: pointer;
-          font-size: 16px;
-          margin-top: 15px;
-        }
-    
-        button:hover {
-          background: #45a049;
-        }
-      </style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f0f0f;
+      background-image: 
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #fff;
+    }
+
+    .login-container {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      padding: 32px;
+      width: 320px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+
+    .logo {
+      width: 160px;
+      max-width: 100%;
+      margin-bottom: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .login-container h2 {
+      font-weight: 600;
+      font-size: 22px;
+      margin-bottom: 24px;
+      color: #f0f0f0;
+      letter-spacing: 1px;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin-top: 16px;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #cccccc;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: #111;
+      border: 1px solid #444;
+      color: #eee;
+      font-size: 14px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #777;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      background-color: #2e2e2e;
+      border: 1px solid #444;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #3a3a3a;
+    }
+  </style>
 </head>
 <body>
 
-<!-- just remove <form> and </form> -->
-<div class="login-container">
-  <h2>Login</h2>
+  <div class="login-container">
+    <img src="images/Wordmark White.png" alt="GrindOn Logo" class="logo" />
+    <h2>Sign In</h2>
 
-  <label for="email">Email or Username</label>
-  <input type="text" id="email" name="email" required />
+    <label for="email">Email or Username</label>
+    <input type="text" id="email" name="email" required />
 
-  <label for="password">Password</label>
-  <input type="password" id="password" name="password" required />
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required />
 
-  <button id="submit">Login</button>
-</div>
+    <button id="submit">Sign In</button>
+  </div>
 
-  
-
- </body>
+</body>
 </html>
-  
