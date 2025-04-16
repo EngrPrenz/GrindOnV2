@@ -25,6 +25,18 @@
       margin-bottom: 5px;
       display: block;
     }
+
+    #imagePreviewContainer {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    #imagePreviewContainer img {
+      max-width: 100px;
+      height: auto;
+      border: 1px solid #ccc;
+    }
   </style>
 </head>
 
@@ -41,14 +53,16 @@
     <label for="price">Price:</label>
     <input type="number" id="price" placeholder="Price" required />
 
-    <label for="uploadImage">Upload Image:</label>
+    <label for="uploadImage">Upload Images:</label>
+    <input type="file" id="uploadImage" accept="image/*" multiple />
+    
+    <!-- Preview images here -->
+    <div id="imagePreviewContainer"></div>
 
-<input type="file" id="uploadImage" accept="image/*" />
-<img id="imagePreview" src="" style="max-width: 100%; display: none; margin-bottom: 10px;" />
-<button type="button" id="uploadToImgBB">Upload to ImgBB</button>
+    <button type="button" id="uploadToImgBB">Upload to ImgBB</button>
 
-<label for="imageUrl">Image URL:</label>
-<input type="text" id="imageUrl" placeholder="Image URL" readonly />
+    <label for="imageUrl">Image URLs:</label>
+    <input type="text" id="imageUrl" placeholder="Image URL(s)" readonly />
 
     <h4>Variations</h4>
 
