@@ -537,22 +537,30 @@ a:focus {
 }
 
 .why_section .box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%; /* Make each box fill its column */
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fff;
+  min-height: 300px; /* Set a fixed minimum height for all boxes */
   text-align: center;
-  margin-top: 45px;
-  background-color: #f9f8f7;
-  padding: 25px;
-  border-radius: 5px;
 }
 
-.why_section .box .img-box {
+.why_section .img-box {
   margin-bottom: 15px;
 }
 
-.why_section .box .img-box svg {
-  width: 55px;
-  height: auto;
-  fill: #320b57;
+.why_section .detail-box {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
+
 
 .gift_section {
   padding-left: 45px;
