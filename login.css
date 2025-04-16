@@ -86,3 +86,21 @@
   button:hover {
     background-color: #3a3a3a;
   }
+
+  .register-prompt {
+    margin-top: 18px;
+    font-size: 14px;
+    color: #cccccc;
+  }
+  
+  .register-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+  }
+  
+  .register-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }

@@ -41,19 +41,17 @@
   }
 
   .signin-link {
-    position: absolute;
-    top: 20px;
-    right: 40px;
+    margin: 15px 0;
+    text-align: center;
     font-size: 14px;
   }
-
+  
   .signin-link a {
     text-decoration: none;
-    margin-left: 48px;
-    color: blue;
+    color: black;
     font-weight: 500;
   }
-
+  
   .signin-link a:hover {
     text-decoration: underline;
   }
