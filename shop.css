@@ -1,0 +1,38 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.product {
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 10px;
+    background: #f9f9f9;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.product img {
+    width: 100%;
+    max-width: 150px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+button {
+    margin-top: 10px;
+    margin-right: 10px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+#editModal {
+    display: none; /* This hides the modal initially */
+    /* Other styling for the modal */
+}
+      
