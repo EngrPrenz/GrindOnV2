@@ -41,9 +41,11 @@ async function loadProducts() {
       const productDiv = document.createElement("div");
       productDiv.className = "product";
 
-      const imagesHtml = Array.isArray(data.imageUrls)
-        ? data.imageUrls.map(url => `<img src="${url}" alt="${data.name}" />`).join("")
-        : `<img src="${data.imageUrl || ''}" alt="${data.name}" />`;
+      const thumbnail = Array.isArray(data.imageUrls) && data.imageUrls.length > 0
+  ? data.imageUrls[0]
+  : data.imageUrl || '';
+
+const imagesHtml = `<img src="${thumbnail}" alt="${data.name}" style="max-width:150px; cursor:pointer;" onclick='openGallery(${JSON.stringify(data.imageUrls || [data.imageUrl])})' />`;
 
       productDiv.innerHTML = `
         ${imagesHtml}
@@ -158,3 +160,33 @@ document.getElementById("closeModal").onclick = () => {
 };
 
 loadProducts();
+
+let currentImageIndex = 0;
+let currentImages = [];
+
+window.openGallery = function (images) {
+  if (!images.length) return;
+  currentImages = images;
+  currentImageIndex = 0;
+  document.getElementById("modalImage").src = images[0];
+  document.getElementById("imageModal").style.display = "flex";
+};
+
+document.getElementById("closeImageModal").onclick = () => {
+  document.getElementById("imageModal").style.display = "none";
+};
+
+document.getElementById("prevImage").onclick = () => {
+  if (currentImageIndex > 0) {
+    currentImageIndex--;
+    document.getElementById("modalImage").src = currentImages[currentImageIndex];
+  }
+};
+
+document.getElementById("nextImage").onclick = () => {
+  if (currentImageIndex < currentImages.length - 1) {
+    currentImageIndex++;
+    document.getElementById("modalImage").src = currentImages[currentImageIndex];
+  }
+};
+
