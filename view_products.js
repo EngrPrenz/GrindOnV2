@@ -40,8 +40,13 @@ async function loadProducts() {
 
       const productDiv = document.createElement("div");
       productDiv.className = "product";
+
+      const imagesHtml = Array.isArray(data.imageUrls)
+        ? data.imageUrls.map(url => `<img src="${url}" alt="${data.name}" />`).join("")
+        : `<img src="${data.imageUrl || ''}" alt="${data.name}" />`;
+
       productDiv.innerHTML = `
-        <img src="${data.imageUrl}" alt="${data.name}" style="max-width:150px;" />
+        ${imagesHtml}
         <h3>${data.name}</h3>
         <p><strong>Description:</strong> ${data.description}</p>
         <p><strong>Price:</strong> $${data.price}</p>
@@ -104,7 +109,11 @@ function openEditModal(id, data) {
   document.getElementById("editName").value = data.name;
   document.getElementById("editDesc").value = data.description;
   document.getElementById("editPrice").value = data.price;
-  document.getElementById("editImage").value = data.imageUrl;
+
+  // Use the first image if imageUrls exist
+  document.getElementById("editImage").value = Array.isArray(data.imageUrls)
+    ? data.imageUrls[0]
+    : data.imageUrl || "";
 
   const color = Object.keys(data.variations)[0];
   const sizes = data.variations[color];
@@ -123,7 +132,7 @@ document.getElementById("editForm").addEventListener("submit", async function (e
     name: document.getElementById("editName").value,
     description: document.getElementById("editDesc").value,
     price: parseFloat(document.getElementById("editPrice").value),
-    imageUrl: document.getElementById("editImage").value,
+    imageUrl: document.getElementById("editImage").value, // This only edits one image for now
     variations: {
       [document.getElementById("editColor").value.toLowerCase()]: {
         small: parseInt(document.getElementById("editSmall").value),
