@@ -38,12 +38,22 @@ const nextBtn = document.getElementById("nextImage");
 const prevBtn = document.getElementById("prevImage");
 const userOptionDiv = document.querySelector('.user_option');
 
+// Store references to page elements we need to hide/show
+const heroArea = document.querySelector('.hero_area');
+const clientSection = document.querySelector('.client_section');
+const infoSection = document.querySelector('.info_section');
+const footerSection = document.querySelector('.footer_section');
+
 onAuthStateChanged(auth, (user) => {
   if (!userOptionDiv) return; // if navbar not present, do nothing
 
   if (user) {
+    // Get email and truncate it to first 4 characters + ellipsis
+    const email = user.email;
+    const truncatedEmail = email.length > 4 ? email.substring(0, 4) + "..." : email;
+    
     userOptionDiv.innerHTML = `
-      <span style="color: white; margin-right: 10px;">Hi, ${user.email}</span>
+      <span style="color: white; margin-right: 10px;">Hi, ${truncatedEmail}</span>
       <a href="#" id="logoutBtn">
         <i class="fa fa-sign-out" aria-hidden="true"></i>
         <span style="color: white;">Logout</span>
@@ -73,37 +83,79 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-
-function showModal(images, index) {
+function showModal(images, index, event) {
+  // Stop event propagation to prevent navigation when clicking on images
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  
   currentImages = images;
   currentIndex = index;
   modalImage.src = currentImages[currentIndex];
+  
+  // Hide all page sections except the modal
+  if (heroArea) heroArea.style.display = 'none';
+  if (clientSection) clientSection.style.display = 'none';
+  if (infoSection) infoSection.style.display = 'none';
+  if (footerSection) footerSection.style.display = 'none';
+  
+  // Show the modal
   modal.style.display = "flex";
+  document.body.style.overflow = 'hidden'; // Prevent scrolling
+  document.body.style.margin = '0';
+  document.body.style.padding = '0';
+  document.body.style.backgroundColor = '#000';
 }
 
-closeModal.onclick = () => {
+function hideModal() {
   modal.style.display = "none";
+  
+  // Show all page sections again
+  if (heroArea) heroArea.style.display = '';
+  if (clientSection) clientSection.style.display = '';
+  if (infoSection) infoSection.style.display = '';
+  if (footerSection) footerSection.style.display = '';
+  
+  document.body.style.overflow = '';
+  document.body.style.margin = '';
+  document.body.style.padding = '';
+  document.body.style.backgroundColor = '';
+}
+
+closeModal.onclick = (e) => {
+  e.stopPropagation();
+  hideModal();
 };
 
-nextBtn.onclick = () => {
+nextBtn.onclick = (e) => {
+  e.stopPropagation(); // Prevent click from bubbling to modal background
   currentIndex = (currentIndex + 1) % currentImages.length;
   modalImage.src = currentImages[currentIndex];
 };
 
-prevBtn.onclick = () => {
+prevBtn.onclick = (e) => {
+  e.stopPropagation(); // Prevent click from bubbling to modal background
   currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
   modalImage.src = currentImages[currentIndex];
 };
 
 window.onclick = (e) => {
   if (e.target === modal) {
-    modal.style.display = "none";
+    hideModal();
   }
 };
 
+// Close modal on escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.style.display === 'flex') {
+    hideModal();
+  }
+});
+
 async function loadProducts() {
   const productsList = document.getElementById("productsList");
-  productsList.innerHTML = "Loading...";
+  productsList.innerHTML = "<div class='loading'>Loading products...</div>";
 
   try {
     const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
@@ -111,7 +163,7 @@ async function loadProducts() {
     productsList.innerHTML = "";
 
     if (snapshot.empty) {
-      productsList.innerHTML = "<p>No products found.</p>";
+      productsList.innerHTML = "<p class='no-products'>No products found.</p>";
       return;
     }
 
@@ -130,30 +182,35 @@ async function loadProducts() {
     
       const productDiv = document.createElement("div");
       productDiv.className = "product";
+      productDiv.setAttribute("data-product-id", id);
       productDiv.innerHTML = `
-        <img src="${firstImage}" alt="${data.name}" style="max-width:150px; cursor:pointer;" />
-        <h3>${data.name}</h3>
-        <p>$${data.price}</p>
-        <hr/>
+        <div class="product-image-container">
+          <img src="${firstImage}" alt="${data.name}" class="product-image" />
+        </div>
+        <div class="product-info">
+          <div class="product-name">${data.name}</div>
+          <div class="product-price">₱${data.price}</div>
+        </div>
       `;
     
-      const img = productDiv.querySelector("img");
-      img.addEventListener("click", () => showModal(imageArray, 0));
-      productDiv.addEventListener("click", (e) => {
-        if (e.target.tagName !== "IMG") {
-          window.location.href = `product.html?id=${id}`;
-        }
+      // Make the whole product box clickable
+      productDiv.addEventListener("click", () => {
+        window.location.href = `product.html?id=${id}`;
+      });
+      
+      // Image click handler for modal - stop propagation to prevent navigation
+      const img = productDiv.querySelector(".product-image");
+      img.addEventListener("click", (e) => {
+        showModal(imageArray, 0, e);
       });
     
       productsList.appendChild(productDiv);
     });
     
-
   } catch (err) {
     console.error("Error fetching products:", err);
-    productsList.innerHTML = "<p>Error loading products.</p>";
+    productsList.innerHTML = "<p class='error'>Error loading products.</p>";
   }
 }
-
 
 loadProducts();
