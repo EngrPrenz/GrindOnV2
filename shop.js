@@ -7,6 +7,12 @@ import {
   orderBy,
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
 // Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyC5n40vPlIjXQ25X4NJlr8Z2jRGux0C1Y8",
@@ -19,6 +25,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // Modal variables
 let currentImages = [];
@@ -29,6 +36,43 @@ const modalImage = document.getElementById("modalImage");
 const closeModal = document.getElementById("closeImageModal");
 const nextBtn = document.getElementById("nextImage");
 const prevBtn = document.getElementById("prevImage");
+const userOptionDiv = document.querySelector('.user_option');
+
+onAuthStateChanged(auth, (user) => {
+  if (!userOptionDiv) return; // if navbar not present, do nothing
+
+  if (user) {
+    userOptionDiv.innerHTML = `
+      <span style="color: white; margin-right: 10px;">Hi, ${user.email}</span>
+      <a href="#" id="logoutBtn">
+        <i class="fa fa-sign-out" aria-hidden="true"></i>
+        <span style="color: white;">Logout</span>
+      </a>
+    `;
+
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        location.reload();
+      }).catch((error) => {
+        alert("Logout failed: " + error.message);
+      });
+    });
+
+  } else {
+    userOptionDiv.innerHTML = `
+      <a href="login.html">
+        <i class="fa fa-user" aria-hidden="true"></i>
+        <span style="color: white;">Login</span>
+      </a>
+      <a href="register.html">
+        <i class="fa fa-vcard" aria-hidden="true"></i>
+        <span style="color: white;">Register</span>
+      </a>
+    `;
+  }
+});
+
 
 function showModal(images, index) {
   currentImages = images;
@@ -89,14 +133,17 @@ async function loadProducts() {
       productDiv.innerHTML = `
         <img src="${firstImage}" alt="${data.name}" style="max-width:150px; cursor:pointer;" />
         <h3>${data.name}</h3>
-        <p><strong>Description:</strong> ${data.description}</p>
-        <p><strong>Price:</strong> $${data.price}</p>
-        <div>${renderVariations(data.variations)}</div>
+        <p>$${data.price}</p>
         <hr/>
       `;
     
       const img = productDiv.querySelector("img");
       img.addEventListener("click", () => showModal(imageArray, 0));
+      productDiv.addEventListener("click", (e) => {
+        if (e.target.tagName !== "IMG") {
+          window.location.href = `product.html?id=${id}`;
+        }
+      });
     
       productsList.appendChild(productDiv);
     });
@@ -108,10 +155,5 @@ async function loadProducts() {
   }
 }
 
-function renderVariations(variations) {
-  return Object.entries(variations).map(([color, sizes]) => {
-    return `<p><strong>${color.toUpperCase()}</strong>: Small(${sizes.small}), Medium(${sizes.medium}), Large(${sizes.large})</p>`;
-  }).join("");
-}
 
 loadProducts();
