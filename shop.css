@@ -1,57 +1,175 @@
 body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
+  padding: 20px;
 }
 
 #productsList {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding: 20px;
-  }
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
-  .product {
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
+.product {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  cursor: pointer; /* Add cursor pointer to indicate clickable */
+  position: relative; /* For positioning overlay */
+}
+
+.product:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.product:hover::after {
+  content: "View Details";
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #2e2e2e;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.product-image-container {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f9f9f9;
+  overflow: hidden;
+}
 
 .product img {
-    width: 100%;
-    max-width: 150px;
-    display: block;
-    margin-bottom: 10px;
+  max-width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.3s;
 }
 
-button {
-    margin-top: 10px;
-    margin-right: 10px;
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+.product img:hover {
+  transform: scale(1.05);
 }
 
-button:hover {
-    opacity: 0.8;
+.product-info {
+  padding: 15px 20px;
+  border-top: 1px solid #f0f0f0;
+  text-align: left;
+  margin-bottom: 20px; /* Add some margin at the bottom for the hover text */
 }
 
-#editModal {
-    display: none; /* This hides the modal initially */
-    /* Other styling for the modal */
+.product-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 8px;
 }
-      
 
+.product-price {
+  font-size: 18px;
+  color: #2e2e2e;
+  font-weight: bold;
+}
+
+.loading, .no-products, .error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 30px;
+  font-size: 18px;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+/* Modal styles */
+#imageModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#modalImage {
+  max-height: 90vh;
+  max-width: 90vw;
+  object-fit: contain;
+}
+
+#closeImageModal {
+  position: absolute !important;
+  top: 20px !important;
+  right: 20px !important;
+  font-size: 20px !important;
+  background: white !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+  z-index: 10000 !important;
+  padding: 0 !important;
+}
+
+#prevImage, #nextImage {
+  position: absolute !important;
+  background: rgba(255,255,255,0.2) !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 50px !important;
+  height: 50px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 10000 !important;
+  border: none !important;
+  font-size: 24px !important;
+}
+
+#prevImage {
+  left: 20px !important;
+}
+
+#nextImage {
+  right: 20px !important;
+}
+
+/* Responsive design */
 @media (max-width: 992px) {
-    #productsList {
+  #productsList {
       grid-template-columns: repeat(2, 1fr);
-    }
   }
-  
-  @media (max-width: 600px) {
-    #productsList {
-      grid-template-columns: repeat(1, 1fr);
-    }
+}
+
+@media (max-width: 600px) {
+  #productsList {
+      grid-template-columns: 1fr;
   }
+}

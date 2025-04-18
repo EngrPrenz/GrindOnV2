@@ -166,6 +166,14 @@
   </footer>
   <!-- footer section -->
 
+  <!-- Image Gallery Modal -->
+  <div id="imageModal">
+    <button id="closeImageModal">✖</button>
+    <button id="prevImage">◀</button>
+    <img id="modalImage" src="" />
+    <button id="nextImage">▶</button>
+  </div>
+
   <!-- JavaScript Files -->
   <!-- jQuery (required for Bootstrap JS) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -181,14 +189,5 @@
     document.getElementById("displayYear").innerHTML = new Date().getFullYear();
   </script>
   <script type="module" src="shop.js"></script>
-
-  <!-- Image Gallery Modal -->
-  <div id="imageModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000;">
-    <button id="closeImageModal" style="position: absolute; top: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 4px; cursor: pointer;">✖</button>
-    <button id="prevImage" style="position: absolute; left: 20px; color: white; font-size: 30px; background: none; border: none; cursor: pointer;">◀</button>
-    <img id="modalImage" src="" style="max-height: 80%; max-width: 90%;" />
-    <button id="nextImage" style="position: absolute; right: 20px; color: white; font-size: 30px; background: none; border: none; cursor: pointer;">▶</button>
-  </div>
-
 </body>
 </html>
