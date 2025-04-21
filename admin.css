@@ -1,0 +1,634 @@
+/* Base Styles */
+:root {
+    --primary-color: #6366f1;
+    --sidebar-color: #2c3e50;
+    --sidebar-hover: #34495e;
+    --light-bg: #f5f5f9;
+    --dark-bg: #1e1e2d;
+    --light-text: #333;
+    --dark-text: #e4e6eb;
+    --card-bg-light: #fff;
+    --card-bg-dark: #2a2a3c;
+    --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --shadow-dark: 0 2px 10px rgba(0, 0, 0, 0.3);
+    --sales-icon: #4f46e5;
+    --expenses-icon: #f43f5e;
+    --income-icon: #10b981;
+    --pending-bg: #fff9db;
+    --pending-color: #f59e0b;
+    --declined-bg: #fee2e2;
+    --declined-color: #ef4444;
+    --delivered-bg: #d1fae5;
+    --delivered-color: #10b981;
+    --transition-speed: 0.3s;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  display: flex;
+  background-color: var(--light-bg);
+  color: var(--light-text);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-mode {
+  background-color: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 240px;
+  background-color: var(--sidebar-color);
+  color: white;
+  height: 100vh;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s;
+}
+
+.logo {
+  padding: 25px 20px;
+  text-align: center;
+}
+
+/* Add styles for the woodmark logo */
+.woodmark-logo {
+  max-width: 100%;
+  height: auto;
+  max-height: 40px;
+}
+
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  padding: 12px 25px;
+  color: white;
+  text-decoration: none;
+  transition: all var(--transition-speed) ease;
+  margin: 4px 10px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar a i {
+  width: 20px;
+  margin-right: 10px;
+  font-size: 18px;
+  transition: transform var(--transition-speed);
+}
+
+/* Enhanced hover animation for sidebar items */
+.sidebar a:hover {
+  background-color: var(--primary-color);
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar a:hover i {
+  transform: scale(1.2);
+}
+
+.sidebar a.active {
+  background-color: var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar a.logout {
+  margin-top: auto;
+  color: #f87171;
+}
+
+/* Main Content Area */
+.main {
+  margin-left: 240px;
+  flex-grow: 1;
+  padding: 20px;
+  transition: all 0.3s;
+}
+
+/* Top Bar */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  margin-bottom: 30px;
+}
+
+.top-bar h1 {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.right-elements {
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle {
+  margin-right: 20px;
+}
+
+/* Theme Switch Styles - Replace button with toggle switch */
+/* Enhanced Theme Toggle Switch */
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 70px;
+  height: 34px;
+  border-radius: 34px;
+  transition: all 0.4s ease;
+}
+  
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+  
+.slider {
+  position: absolute;
+  cursor: pointer; 
+  top: 0; 
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e0e7ff;
+  border-radius: 34px;
+  transition: 0.4s; 
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  padding: 0 6px;  
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+  
+.light-icon, .dark-icon {
+  font-size: 16px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+}
+  
+.light-icon {
+  color: #fbbf24;
+  margin-left: 2px;
+}
+  
+.dark-icon {
+  color: #94a3b8;
+  margin-right: 2px;
+}
+  
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+  
+/* When toggle is checked (dark mode) */
+.theme-switch input:checked + .slider {
+  background-color: #334155;
+}
+  
+.theme-switch input:checked + .slider:before {
+  transform: translateX(36px);
+}
+  
+.theme-switch input:checked + .slider .light-icon {
+  color: #94a3b8;
+}
+  
+.theme-switch input:checked + .slider .dark-icon {
+  color: #818cf8;
+}
+  
+/* Hover effects */
+.theme-switch:hover .slider:before {
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+}
+  
+.theme-switch:hover {
+  transform: translateY(-2px);
+  transition: transform 0.3s ease;
+}
+
+.admin-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-info {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.admin-role {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.dark-mode .admin-role {
+  color: #adb5bd;
+}
+
+.admin-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #e2e8f0;
+  transition: transform 0.3s ease;
+}
+
+.admin-avatar:hover {
+  transform: scale(1.1);
+}
+
+.admin-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Stats Cards with enhanced hover effects */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background-color: var(--card-bg-light);
+  border-radius: 15px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  box-shadow: var(--shadow-light);
+  transition: all var(--transition-speed) ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Enhanced hover animation for stat cards */
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dark-mode .stat-card {
+  background-color: var(--card-bg-dark);
+  box-shadow: var(--shadow-dark);
+}
+
+.dark-mode .stat-card:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-right: 15px;
+  transition: transform var(--transition-speed) ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1) rotate(10deg);
+}
+
+.stat-icon.sales {
+  background-color: rgba(79, 70, 229, 0.1);
+  color: var(--sales-icon);
+}
+
+.stat-icon.expenses {
+  background-color: rgba(244, 63, 94, 0.1);
+  color: var(--expenses-icon);
+}
+
+.stat-icon.income {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--income-icon);
+}
+
+.stat-info {
+  flex-grow: 1;
+  transition: transform var(--transition-speed) ease;
+}
+
+.stat-card:hover .stat-info {
+  transform: translateX(5px);
+}
+
+.stat-info h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+
+.dark-mode .stat-info h3 {
+  color: #94a3b8;
+}
+
+.stat-info h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.stat-info p {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.dark-mode .stat-info p {
+  color: #94a3b8;
+}
+
+.stat-chart {
+  width: 80px;
+  height: 80px;
+  position: relative;
+  transition: transform var(--transition-speed) ease;
+}
+
+.stat-card:hover .stat-chart {
+  transform: scale(1.1);
+}
+
+.progress-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(var(--primary-color) 0% var(--value), #e2e8f0 var(--value) 100%);
+  position: relative;
+  transition: filter var(--transition-speed) ease;
+}
+
+.stat-card:hover .progress-circle {
+  filter: brightness(1.1);
+}
+
+.dark-mode .progress-circle {
+  background: conic-gradient(var(--primary-color) 0% var(--value), #2d3748 var(--value) 100%);
+}
+
+.progress-circle::before {
+  content: '';
+  position: absolute;
+  width: 70%;
+  height: 70%;
+  background-color: var(--card-bg-light);
+  border-radius: 50%;
+  transition: background-color var(--transition-speed) ease;
+}
+
+.dark-mode .progress-circle::before {
+  background-color: var(--card-bg-dark);
+}
+
+.progress-circle span {
+  position: relative;
+  z-index: 1;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Add a subtle ripple effect on stat cards */
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+}
+
+.stat-card:hover::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(100, 100);
+    opacity: 0;
+  }
+}
+
+/* Orders Section */
+.orders-section {
+  background-color: var(--card-bg-light);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: var(--shadow-light);
+  transition: all 0.3s;
+}
+
+.dark-mode .orders-section {
+  background-color: var(--card-bg-dark);
+  box-shadow: var(--shadow-dark);
+}
+
+.orders-section h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.orders-table-container {
+  overflow-x: auto;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table th {
+  text-align: left;
+  padding: 12px 15px;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.dark-mode .orders-table th {
+  border-bottom: 1px solid #2d3748;
+  color: #94a3b8;
+}
+
+.orders-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.dark-mode .orders-table td {
+  border-bottom: 1px solid #2d3748;
+}
+
+.orders-table tr {
+  transition: background-color 0.3s ease;
+}
+
+.orders-table tr:hover {
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+.dark-mode .orders-table tr:hover {
+  background-color: rgba(99, 102, 241, 0.1);
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.status:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.status.pending {
+  background-color: var(--pending-bg);
+  color: var(--pending-color);
+}
+
+.status.declined {
+  background-color: var(--declined-bg);
+  color: var(--declined-color);
+}
+
+.status.delivered {
+  background-color: var(--delivered-bg);
+  color: var(--delivered-color);
+}
+
+.details-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 6px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.details-btn:hover {
+  background-color: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .stats-row {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 70px;
+  }
+  
+  .sidebar .logo-text, .sidebar a span {
+    display: none;
+  }
+  
+  .sidebar a {
+    justify-content: center;
+    padding: 15px;
+  }
+  
+  .sidebar a i {
+    margin-right: 0;
+  }
+  
+  .sidebar a:hover {
+    transform: translateX(0);
+  }
+  
+  .main {
+    margin-left: 70px;
+  }
+  
+  /* Adjust logo size for collapsed sidebar */
+  .woodmark-logo {
+    max-height: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .right-elements {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+}

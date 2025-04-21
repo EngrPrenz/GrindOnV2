@@ -133,3 +133,86 @@ function fileToBase64(file) {
     reader.readAsDataURL(file);
   });
 }
+
+// Theme toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const themeToggle = document.getElementById('themeToggle');
+  const body = document.body;
+  
+  // Check if user previously set a theme preference
+  const currentTheme = localStorage.getItem('theme');
+  if (currentTheme === 'dark') {
+    body.classList.add('dark-mode');
+    themeToggle.checked = true;
+  }
+  
+  // Theme toggle event listener
+  themeToggle.addEventListener('change', function() {
+    if (this.checked) {
+      body.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+    }
+  });
+  
+  // Initialize progress circles in stats cards (if they exist)
+  const progressCircles = document.querySelectorAll('.progress-circle');
+  progressCircles.forEach(circle => {
+    const value = circle.getAttribute('data-value');
+    circle.style.setProperty('--value', value + '%');
+  });
+  
+  // Load admin info from localStorage if available
+  const adminName = document.getElementById('adminName');
+  if (adminName) {
+    const savedAdminName = localStorage.getItem('adminName');
+    if (savedAdminName) {
+      adminName.textContent = savedAdminName;
+    }
+  }
+  
+  // Handle file upload display for add products page
+  const uploadImage = document.getElementById('uploadImage');
+  if (uploadImage) {
+    uploadImage.addEventListener('change', function(e) {
+      const files = this.files;
+      const previewContainer = document.getElementById('imagePreviewContainer');
+      
+      if (previewContainer) {
+        previewContainer.innerHTML = '';
+        
+        if (files.length > 0) {
+          for (let file of files) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+    });
+    
+    // Make the upload area highlight on drag
+    const uploadArea = document.querySelector('.upload-area');
+    if (uploadArea) {
+      ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, function(e) {
+          e.preventDefault();
+          this.classList.add('active');
+        });
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, function(e) {
+          e.preventDefault();
+          this.classList.remove('active');
+        });
+      });
+    }
+  }
+});

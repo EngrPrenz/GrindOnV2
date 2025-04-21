@@ -4,63 +4,175 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-    }
-
-    .sidebar {
-      width: 220px;
-      background-color: #2c3e50;
-      color: white;
-      height: 100vh;
-      padding-top: 20px;
-      position: fixed;
-    }
-
-    .sidebar h2 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .sidebar a {
-      display: block;
-      padding: 15px 25px;
-      color: white;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
-
-    .sidebar a:hover {
-      background-color: #34495e;
-    }
-
-    .main {
-      margin-left: 220px;
-      padding: 20px;
-      flex-grow: 1;
-    }
-  </style>
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body>
+<body class="light-mode">
 
   <div class="sidebar">
-    <h2>Admin</h2>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="add_products.html">Add Products</a>
-    <a href="orders.html">View Orders</a>
-    <a href="admin_view_products.html">View Products</a>
-    <a href="users.html">Users</a>
-    <a href="settings.html">Settings</a>
-    <a href="logout.html">Logout</a>
+    <div class="logo">
+      <!-- Replace text with woodmark logo -->
+      <img src="images/Wordmark White.png" alt="Woodmark Logo" class="woodmark-logo">
+    </div>
+    
+    <div class="menu-items">
+      <a href="dashboard.html" class="active">
+        <i class="fas fa-chart-pie"></i>
+        <span><strong>Dashboard</strong></span>
+      </a>
+      <a href="add_products.html">
+        <i class="fas fa-plus-circle"></i>
+        <span><strong>Add Products</strong></span>
+      </a>
+      <a href="view_orders.html">
+        <i class="fas fa-shopping-bag"></i>
+        <span><strong>View Orders</strong></span>
+      </a>
+      <a href="admin_view_products.html">
+        <i class="fas fa-box"></i>
+        <span><strong>View Products</strong></span>
+      </a>
+      <a href="users.html">
+        <i class="fas fa-users"></i>
+        <span><strong>Users</strong></span>
+      </a>
+      <a href="settings.html">
+        <i class="fas fa-cog"></i>
+        <span><strong>Settings</strong></span>
+      </a>
+      <a href="logout.html" class="logout">
+        <i class="fas fa-sign-out-alt"></i>
+        <span><strong>Logout</strong></span>
+      </a>
+    </div>
   </div>
 
   <div class="main">
-    <h1>Welcome to Admin Dashboard</h1>
-    <p>Select a menu item from the left to get started.</p>
+    <div class="top-bar">
+      <h1><strong>Dashboard</strong></h1>
+      <div class="right-elements">
+        <div class="theme-toggle">
+          <!-- Replace button with toggle switch -->
+          <label class="theme-switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider">
+              <i class="fas fa-sun light-icon"></i>
+              <i class="fas fa-moon dark-icon"></i>
+            </span>
+          </label>
+        </div>
+        <div class="admin-profile">
+          <div class="admin-info">
+            <span>Hey, <strong id="adminName">KUPAL</strong></span>
+            <span class="admin-role"><strong>Admin</strong></span>
+          </div>
+          <div class="admin-avatar">
+            <img src="images/marky.jpg" alt="Admin Avatar">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-content">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon sales">
+            <i class="fas fa-peso-sign"></i>
+          </div>
+          <div class="stat-info">
+            <h3><strong>Total Sales</strong></h3>
+            <h2><strong>₱25,024</strong></h2>
+            <p>Last 24 Hours</p>
+          </div>
+          <div class="stat-chart">
+            <div class="progress-circle" data-value="81">
+              <span><strong>81%</strong></span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon expenses">
+            <i class="fas fa-receipt"></i>
+          </div>
+          <div class="stat-info">
+            <h3><strong>Total Expenses</strong></h3>
+            <h2><strong>₱14,160</strong></h2>
+            <p>Last 24 Hours</p>
+          </div>
+          <div class="stat-chart">
+            <div class="progress-circle" data-value="62">
+              <span><strong>62%</strong></span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon income">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div class="stat-info">
+            <h3><strong>Total Income</strong></h3>
+            <h2><strong>₱10,864</strong></h2>
+            <p>Last 24 Hours</p>
+          </div>
+          <div class="stat-chart">
+            <div class="progress-circle" data-value="44">
+              <span><strong>44%</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="orders-section">
+        <h2><strong>Recent Orders</strong></h2>
+        <div class="orders-table-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th><strong>Product Name</strong></th>
+                <th><strong>Product Number</strong></th>
+                <th><strong>Payment</strong></th>
+                <th><strong>Status</strong></th>
+                <th><strong>Action</strong></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Foldable Mini Drone</strong></td>
+                <td>85631</td>
+                <td>Due</td>
+                <td><span class="status pending"><strong>Pending</strong></span></td>
+                <td><button class="details-btn"><strong>Details</strong></button></td>
+              </tr>
+              <tr>
+                <td><strong>LARVENDER KF102 Drone</strong></td>
+                <td>36378</td>
+                <td>Refunded</td>
+                <td><span class="status declined"><strong>Declined</strong></span></td>
+                <td><button class="details-btn"><strong>Details</strong></button></td>
+              </tr>
+              <tr>
+                <td><strong>Ruko F11 Pro Drone</strong></td>
+                <td>49347</td>
+                <td>Due</td>
+                <td><span class="status pending"><strong>Pending</strong></span></td>
+                <td><button class="details-btn"><strong>Details</strong></button></td>
+              </tr>
+              <tr>
+                <td><strong>Drone with Camera Drone</strong></td>
+                <td>96996</td>
+                <td>Paid</td>
+                <td><span class="status delivered"><strong>Delivered</strong></span></td>
+                <td><button class="details-btn"><strong>Details</strong></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <script src="admin.js"></script>
 </body>
 </html>
