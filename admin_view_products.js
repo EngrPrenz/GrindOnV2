@@ -67,11 +67,32 @@ function showLoading() {
       <p>Loading products...</p>
     </div>
   `;
+  
+  // Disable all pagination buttons during loading
+  const buttons = pagination.querySelectorAll('.page-button');
+  buttons.forEach(button => {
+    button.disabled = true;
+    button.classList.add('loading');
+    if (!button.querySelector('.fa-spinner')) {
+      button.insertAdjacentHTML('beforeend', '<i class="fas fa-spinner fa-spin"></i>');
+    }
+  });
 }
 
 // Hide loading animation
 function hideLoading() {
   isLoading = false;
+  
+  // Re-enable pagination buttons
+  const buttons = pagination.querySelectorAll('.page-button');
+  buttons.forEach(button => {
+    button.disabled = false;
+    button.classList.remove('loading');
+    const spinner = button.querySelector('.fa-spinner');
+    if (spinner) {
+      spinner.remove();
+    }
+  });
 }
 
 // Load products from Firestore
@@ -128,9 +149,9 @@ function goToPage(page) {
     currentPage = page;
     renderProducts();
     renderPagination();
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     hideLoading();
-  }, 500); // Slight delay to show loading animation
+  }, 300);
 }
 
 // Render products for current page
@@ -238,6 +259,7 @@ function calculateTotalStock(variations) {
 }
 
 // Render pagination buttons
+// Render pagination buttons
 function renderPagination() {
   // Clear pagination
   pagination.innerHTML = '';
@@ -251,11 +273,15 @@ function renderPagination() {
   prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
   prevButton.disabled = currentPage === 1;
   prevButton.addEventListener('click', () => {
-    if (currentPage > 1) {
-      currentPage--;
-      renderProducts();
-      renderPagination();
-      window.scrollTo(0, 0);
+    if (currentPage > 1 && !isLoading) {
+      showLoading();
+      setTimeout(() => {
+        currentPage--;
+        renderProducts();
+        renderPagination();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        hideLoading();
+      }, 300);
     }
   });
   pagination.appendChild(prevButton);
@@ -270,11 +296,15 @@ function renderPagination() {
     pageButton.className = `page-button ${i === currentPage ? 'active' : ''}`;
     pageButton.textContent = i;
     pageButton.addEventListener('click', () => {
-      if (i !== currentPage) {
-        currentPage = i;
-        renderProducts();
-        renderPagination();
-        window.scrollTo(0, 0);
+      if (i !== currentPage && !isLoading) {
+        showLoading();
+        setTimeout(() => {
+          currentPage = i;
+          renderProducts();
+          renderPagination();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          hideLoading();
+        }, 300);
       }
     });
     pagination.appendChild(pageButton);
@@ -286,15 +316,20 @@ function renderPagination() {
   nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
   nextButton.disabled = currentPage === totalPages;
   nextButton.addEventListener('click', () => {
-    if (currentPage < totalPages) {
-      currentPage++;
-      renderProducts();
-      renderPagination();
-      window.scrollTo(0, 0);
+    if (currentPage < totalPages && !isLoading) {
+      showLoading();
+      setTimeout(() => {
+        currentPage++;
+        renderProducts();
+        renderPagination();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        hideLoading();
+      }, 300);
     }
   });
   pagination.appendChild(nextButton);
 }
+
   
 
 // Filter and search products
