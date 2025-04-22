@@ -406,7 +406,7 @@ a:focus {
 }
 
 .shop_section .box .detail-box h6 span {
-  color: #db4f66;
+  color: #01610e;
 }
 
 .shop_section .box .new {
@@ -442,9 +442,9 @@ a:focus {
 .shop_section .btn-box a {
   display: inline-block;
   padding: 10px 40px;
-  background-color: #f16179;
+  background-color: #000000;
   color: #ffffff;
-  border: 1px solid #f16179;
+  border: 1px solid #251e1f;
   border-radius: 5px;
   -webkit-transition: all .3s;
   transition: all .3s;
@@ -452,7 +452,7 @@ a:focus {
 
 .shop_section .btn-box a:hover {
   background-color: transparent;
-  color: #f16179;
+  color: #312c2d;
 }
 
 .saving_section {
