@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
   <!-- Basic -->
   <meta charset="utf-8" />
@@ -14,7 +13,7 @@
   <link rel="shortcut icon" href="images/Logomark White.png" type="image/png">
 
   <title>
-    GrindOn
+    My Orders - GrindOn
   </title>
 
   <!-- slider stylesheet -->
@@ -28,14 +27,15 @@
 
   <!-- Custom styles for this template -->
   <link href="homepage.css" rel="stylesheet" />
-  <link rel="stylesheet" href="shop.css">
   <!-- responsive style -->
   <link href="responsive.css" rel="stylesheet" />
+  <!-- Orders page specific CSS -->
+  <link rel="stylesheet" href="my_orders.css">
 </head>
 
 <body>
   <div class="hero_area">
-    <!-- header section starts -->
+    <!-- header section strats -->
     <header class="header_section">
       <nav class="navbar navbar-expand-lg custom_nav-container">
         <!-- Logo Section -->
@@ -64,6 +64,10 @@
           </ul>
 
           <div class="user_option">
+            <!-- Cart icon -->
+            <a href="cart.html">
+              <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+            </a>
             <!-- Login/Register links (replace with logout when logged in) -->
             <a href="login.html">
               <i class="fa fa-user" aria-hidden="true"></i>
@@ -81,17 +85,101 @@
   </div>
   <!-- end hero area -->
 
-  <!-- client section -->
-  <section class="client_section layout_padding">
-    <div class="container">
-      <div class="heading_container heading_center">
-        <h2>
-          My Orders
-        </h2>
+  <!-- Orders content section -->
+  <div class="container order-container">
+    <div class="heading_container heading_center">
+      <h2>Your Orders</h2>
+    </div>
+    
+    <div class="card">
+      <div class="order-summary">
+        <div>
+          <strong>Total Orders:</strong> 3
+        </div>
+        <div>
+          <strong>Active Orders:</strong> 2
+        </div>
+      </div>
+      
+      <!-- Order 1 -->
+      <div class="order-item">
+        <div class="order-header">
+          <div>
+            <div class="order-id">Order #ORD-001</div>
+            <div class="order-date">Placed on: April 20, 2025</div>
+          </div>
+          <div>
+            <div>Status: <span class="status-pending">Pending</span></div>
+            <div>Estimated Delivery: April 25, 2025</div>
+          </div>
+        </div>
+        
+        <div class="product-info">
+          <div class="product-image">Product<br>Image</div>
+          <div class="product-details">
+            <div class="product-name">Custom Gaming Jersey</div>
+            <div class="quantity">Quantity: 1</div>
+            <div class="product-price">$49.99</div>
+          </div>
+        </div>
+        
+        <div class="total-price">Total: $49.99</div>
+        <button class="track-button">Track Order</button>
+      </div>
+      
+      <!-- Order 2 -->
+      <div class="order-item">
+        <div class="order-header">
+          <div>
+            <div class="order-id">Order #ORD-002</div>
+            <div class="order-date">Placed on: April 19, 2025</div>
+          </div>
+          <div>
+            <div>Status: <span class="status-shipped">Shipped</span></div>
+            <div>Estimated Delivery: April 23, 2025</div>
+          </div>
+        </div>
+        
+        <div class="product-info">
+          <div class="product-image">Product<br>Image</div>
+          <div class="product-details">
+            <div class="product-name">Team Hoodie</div>
+            <div class="quantity">Quantity: 2</div>
+            <div class="product-price">$39.99 each</div>
+          </div>
+        </div>
+        
+        <div class="total-price">Total: $79.98</div>
+        <button class="track-button">Track Shipment</button>
+      </div>
+      
+      <!-- Order 3 -->
+      <div class="order-item">
+        <div class="order-header">
+          <div>
+            <div class="order-id">Order #ORD-003</div>
+            <div class="order-date">Placed on: April 18, 2025</div>
+          </div>
+          <div>
+            <div>Status: <span class="status-delivered">Delivered</span></div>
+            <div>Delivered on: April 21, 2025</div>
+          </div>
+        </div>
+        
+        <div class="product-info">
+          <div class="product-image">Product<br>Image</div>
+          <div class="product-details">
+            <div class="product-name">Esports Cap</div>
+            <div class="quantity">Quantity: 3</div>
+            <div class="product-price">$19.99 each</div>
+          </div>
+        </div>
+        
+        <div class="total-price">Total: $59.97</div>
+        <button class="track-button">View Details</button>
       </div>
     </div>
-    <div id="cart">Loading...</div>
-  </section>
+  </div>
 
   <!-- footer section -->
   <section class="info_section layout_padding2-top">
@@ -151,21 +239,17 @@
         </div>
       </div>
     </div>
+    <!-- footer section -->
+    <footer class="footer_section">
+      <div class="container">
+        <p>&copy; <span id="displayYear"></span> All Rights Reserved By <a href="https://html.design/">GrindOn</a></p>
+      </div>
+    </footer>
+    <!-- footer section -->
   </section>
-
-  <footer class="footer_section">
-    <div class="container">
-      <p>&copy; <span id="displayYear"></span> All Rights Reserved By <a href="https://html.design/"><strong>GrindOn</strong></a></p>
-    </div>
-  </footer>
-  <!-- footer section -->
+  <!-- end info section -->
 
   <!-- JavaScript Files -->
-  <!-- jQuery (required for Bootstrap JS) -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-  <!-- Bootstrap JS -->
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="js/jquery-3.4.1.min.js"></script>
   <script src="js/bootstrap.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
@@ -173,8 +257,15 @@
   <script>
     // Set the current year for the footer
     document.getElementById("displayYear").innerHTML = new Date().getFullYear();
+    
+    // Add click event listeners to track buttons
+    document.querySelectorAll('.track-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const orderId = this.closest('.order-item').querySelector('.order-id').textContent.split('#')[1];
+        alert(`Tracking information for ${orderId} will be displayed here.`);
+        // In a real application, this would navigate to a tracking page or open a modal
+      });
+    });
   </script>
-
-  <script type="module" src="cart.js"></script>
 </body>
 </html>
