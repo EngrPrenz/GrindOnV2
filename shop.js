@@ -2,6 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebas
 import {
   getFirestore,
   collection,
+  doc,
+  getDoc,
   getDocs,
   query,
   orderBy,
@@ -22,6 +24,7 @@ const firebaseConfig = {
   messagingSenderId: "606558901364",
   appId: "1:606558901364:web:e39156bea8d403f191ed21"
 };
+
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -48,17 +51,54 @@ onAuthStateChanged(auth, (user) => {
   if (!userOptionDiv) return; // if navbar not present, do nothing
 
   if (user) {
-    // Get email and truncate it to first 4 characters + ellipsis
-    const email = user.email;
-    const truncatedEmail = email.length > 4 ? email.substring(0, 4) + "..." : email;
-    
-    userOptionDiv.innerHTML = `
-      <span style="color: white; margin-right: 10px;">Hi, ${truncatedEmail}</span>
-      <a href="#" id="logoutBtn">
-        <i class="fa fa-sign-out" aria-hidden="true"></i>
-        <span style="color: white;">Logout</span>
-      </a>
-    `;
+
+    const uid = user.uid;
+    const userDocRef = doc(db, "users", uid);
+
+    getDoc(userDocRef).then((docSnap) => {
+      let displayName = "User";
+      if (docSnap.exists() && docSnap.data().username) {
+        displayName = docSnap.data().username;
+      }
+
+      userOptionDiv.innerHTML = `
+        <span style="color: white; margin-right: 10px;">Hi, <strong >${displayName}</strong></span>
+        <a href="#" id="logoutBtn">
+          <i class="fa fa-sign-out" aria-hidden="true"></i>
+          <span style="color: white;">Logout</span>
+        </a>
+      `;
+
+      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => {
+          location.reload();
+        }).catch((error) => {
+          alert("Logout failed: " + error.message);
+        });
+      });
+
+    }).catch((error) => {
+      console.error("Failed to fetch username:", error);
+      // fallback to email if username is unavailable
+      const fallbackName = user.email.substring(0, 4) + "...";
+      userOptionDiv.innerHTML = `
+        <span style="color: white; margin-right: 10px;">Hi, ${fallbackName}</span>
+        <a href="#" id="logoutBtn">
+          <i class="fa fa-sign-out" aria-hidden="true"></i>
+          <span style="color: white;">Logout</span>
+        </a>
+      `;
+
+      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => {
+          location.reload();
+        }).catch((error) => {
+          alert("Logout failed: " + error.message);
+        });
+      });
+    });
 
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
       e.preventDefault();
