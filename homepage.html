@@ -29,12 +29,14 @@
     <link href="homepage.css" rel="stylesheet" />
     <!-- responsive style -->
     <link href="responsive.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   </head>
 </head>
 
 <body>
   <div class="hero_area">
-    <!-- header section strats -->
+    <!-- header section starts -->
     <header class="header_section">
       <nav class="navbar navbar-expand-lg custom_nav-container">
         <!-- Logo Section -->
@@ -57,29 +59,33 @@
             <li class="nav-item">
               <a class="nav-link" href="contact.html">Contact Us</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="my_orders.html">My orders</a>
-            </li>
           </ul>
           
           <div class="user_option">
-            <!-- Cart icon -->
-            <a href="cart.html">
-              <i class="fa fa-shopping-cart" aria-hidden="true"></i>
-            </a>
-
-          <div class="user_option">
-            <!-- Login/Register links (replace with logout when logged in) -->
-            <a href="login.html">
-              <i class="fa fa-user" aria-hidden="true"></i>
-              <span style="color: white;">Login</span>
-            </a>
-            <a href="register.html">
-              <i class="fa fa-vcard" aria-hidden="true"></i>
-              <span style="color: white;">Register</span>
-            </a>
+            <!-- Authenticated User Links -->
+            <div id="auth-navbar" style="display: none;">
+              <a href="profile.html">
+                <i class="fa fa-user" aria-hidden="true"></i>
+                <span style="color: white;">Profile</span>
+              </a>
+              <a href="logout.html">
+                <i class="fa fa-sign-out" aria-hidden="true"></i>
+                <span style="color: white;">Logout</span>
+              </a>
+            </div>
+          
+            <!-- Unauthenticated User Links -->
+            <div id="guest-navbar">
+              <a href="login.html">
+                <i class="fa fa-user" aria-hidden="true"></i>
+                <span style="color: white;">Login</span>
+              </a>
+              <a href="register.html">
+                <i class="fa fa-vcard" aria-hidden="true"></i>
+                <span style="color: white;">Register</span>
+              </a>
+            </div>
           </div>
-        </div>
       </nav>
     </header>
     <!-- end header section -->
@@ -132,23 +138,19 @@
       <div class="heading_container heading_center">
         <h2>Latest Products</h2>
       </div>
-      <div class="row">
-        <!-- Sample Product Item -->
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="box">
-            <a href="product_details.html">
-              <div class="img-box">
-                <img src="images/p1.jpg" alt="Product 1">
-              </div>
-              <div class="detail-box">
-                <h6>Gaming Keyboard</h6>
-                <h6>Price: <span>$49.99</span></h6>
-              </div>
-              <div class="new"><span>New</span></div>
-            </a>
-          </div>
+      <div id="latestProductsCarousel" class="carousel slide" data-ride="carousel" data-interval="5000">
+        <div class="carousel-inner" id="latestProducts">
+          <!-- Dynamic product items will be injected here -->
         </div>
-        <!-- Add more product items as needed -->
+        <!-- Carousel controls -->
+        <a class="carousel-control-prev" href="#latestProductsCarousel" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#latestProductsCarousel" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
       </div>
       <div class="btn-box">
         <a href="shop.html">View All Products</a>
@@ -230,6 +232,10 @@
   <script src="js/bootstrap.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
   <script src="js/custom.js"></script>
+  <script type="module" src="homepage.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
     // Set the current year for the footer
     document.getElementById("displayYear").innerHTML = new Date().getFullYear();

@@ -1178,7 +1178,58 @@ img {
   }
 }
 
+/* Custom Carousel */
+.custom-carousel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: 300px;
+}
 
+.carousel-card {
+  position: absolute;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  opacity: 0.5;
+  transform: scale(0.8);
+}
+
+.carousel-card.center-card {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 2;
+}
+
+.carousel-card.left-card {
+  transform: translateX(-150%) scale(0.8);
+  z-index: 1;
+}
+
+.carousel-card.right-card {
+  transform: translateX(150%) scale(0.8);
+  z-index: 1;
+}
+
+.carousel-card .box {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-card .img-box img {
+  width: 100%;
+  height: auto;
+}
+
+.carousel-card .detail-box {
+  text-align: center;
+  padding: 10px;
+}
+
+.carousel-card .detail-box h6 {
+  margin: 5px 0;
+}
 
 /* end footer section*/
 /*# sourceMappingURL=style.css.map */

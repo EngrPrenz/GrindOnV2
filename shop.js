@@ -62,6 +62,10 @@ onAuthStateChanged(auth, (user) => {
       }
 
       userOptionDiv.innerHTML = `
+        <a href="cart.html">
+          <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+        </a>      
+      
         <span style="color: white; margin-right: 10px;">Hi, <strong >${displayName}</strong></span>
         <a href="#" id="logoutBtn">
           <i class="fa fa-sign-out" aria-hidden="true"></i>
