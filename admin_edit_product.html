@@ -1,10 +1,175 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Product | Admin Dashboard</title>
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="add_products.css">
+  <link rel="stylesheet" href="admin_edit_product.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body>
+<body class="light-mode">
+
+  <div class="sidebar">
+    <div class="logo">
+      <img src="images/Wordmark White.png" alt="Woodmark Logo" class="woodmark-logo">
+    </div>
     
+    <div class="menu-items">
+      <a href="admin.html">
+        <i class="fas fa-chart-pie"></i>
+        <span><strong>Dashboard</strong></span>
+      </a>
+      <a href="add_products.html">
+        <i class="fas fa-plus-circle"></i>
+        <span><strong>Add Products</strong></span>
+      </a>
+      <a href="view_orders.html">
+        <i class="fas fa-shopping-bag"></i>
+        <span><strong>View Orders</strong></span>
+      </a>
+      <a href="admin_view_products.html" class="active">
+        <i class="fas fa-box"></i>
+        <span><strong>View Products</strong></span>
+      </a>
+      <a href="logout.html" class="logout">
+        <i class="fas fa-sign-out-alt"></i>
+        <span><strong>Logout</strong></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="top-bar">
+      <h1><strong>Edit Product</strong></h1>
+      <div class="right-elements">
+        <div class="theme-toggle">
+          <label class="theme-switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider">
+              <i class="fas fa-sun light-icon"></i>
+              <i class="fas fa-moon dark-icon"></i>
+            </span>
+          </label>
+        </div>
+        <div class="admin-profile">
+          <div class="admin-info">
+            <span>Hey, <strong id="adminName">Admin</strong></span>
+            <span class="admin-role"><strong>Admin</strong></span>
+          </div>
+          <div class="admin-avatar">
+            <img src="images/marky.jpg" alt="Admin Avatar">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-form-container">
+      <div class="card">
+        <div class="card-header">
+          <div class="back-link">
+            <a href="admin_view_products.html">
+              <i class="fas fa-arrow-left"></i> Back to Products
+            </a>
+          </div>
+          <h2 id="productTitle">Edit Product</h2>
+        </div>
+        <div class="card-body">
+          <div id="loadingIndicator" class="loading-animation">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading product data...</p>
+          </div>
+          
+          <form id="editProductForm" style="display: none;">
+            <input type="hidden" id="productId">
+            
+            <div class="form-row two-columns">
+              <div class="form-group">
+                <label for="name">Product Name:</label>
+                <input type="text" id="name" placeholder="Product Name" required />
+              </div>
+
+              <div class="form-group">
+                <label for="price">Price (₱):</label>
+                <input type="number" id="price" placeholder="Price" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="description">Description:</label>
+              <textarea id="description" placeholder="Detailed product description" rows="3"></textarea>
+            </div>
+
+            <div class="form-section">
+              <h3><strong>Current Images</strong></h3>
+              <div id="currentImagesContainer" class="current-images"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="uploadImage">Upload New Images:</label>
+              <div class="upload-area">
+                <input type="file" id="uploadImage" accept="image/*" multiple />
+                <div class="upload-placeholder">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <span>Drop files here or click to browse</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <div id="imagePreviewContainer"></div>
+            </div>
+
+            <div class="form-row actions-row">
+              <button type="button" id="uploadToImgBB" class="btn btn-secondary">
+                <i class="fas fa-upload"></i> Upload to ImgBB
+              </button>
+              
+              <div class="form-group url-group">
+                <label for="imageUrl">New Image URLs:</label>
+                <input type="text" id="imageUrl" placeholder="New image URLs will appear here" readonly />
+              </div>
+            </div>
+
+            <div class="form-section" id="variationsContainer">
+              <h3><strong>Variations</strong></h3>
+              <div id="colorVariations">
+                <!-- Variations will be populated here dynamically -->
+              </div>
+              
+              <button type="button" id="addVariationBtn" class="btn btn-outline add-variation-btn">
+                <i class="fas fa-plus"></i> Add Color Variation
+              </button>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update Product
+              </button>
+              <button type="button" id="cancelBtn" class="btn btn-outline">
+                <i class="fas fa-times-circle"></i> Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Add this in the head section of both admin.html and add_products.html -->
+  <link rel="stylesheet" href="page_transition.css">
+  <script src="page_transition.js" defer></script>
+  
+  <!-- Add this at the end of the body element in both pages -->
+  <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="loading-animation">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Processing your request...</p>
+      <div class="loading-progress"></div>
+    </div>
+  </div>
+
+  <script type="module" src="admin_edit_product.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
