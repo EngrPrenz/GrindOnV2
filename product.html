@@ -3,12 +3,258 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Product Detail</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Product Detail - GrindOn</title>
+  
+  <!-- Bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="bootstrap.css" />
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+  <!-- Custom styles -->
+  <link href="homepage.css" rel="stylesheet" />
+  <link href="responsive.css" rel="stylesheet" />
+  
+  <style>
+    /* Product Detail Page Specific Styles */
+    .product-container {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .product-image {
+      flex: 1;
+      min-width: 300px;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    
+    .product-info {
+      flex: 1;
+      min-width: 300px;
+      padding: 20px;
+    }
+    
+    .product-price {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin: 15px 0;
+    }
+    
+    .product-description {
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    
+    .product-variations {
+      margin-bottom: 20px;
+    }
+    
+    .variation-selection {
+      margin-bottom: 15px;
+    }
+    
+    .variation-dropdown {
+      padding: 8px;
+      width: 100%;
+      max-width: 300px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    
+    .quantity-selector {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+    }
+    
+    .qty-btn {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #ddd;
+      background-color: #f8f8f8;
+      font-size: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    #quantity {
+      width: 50px;
+      height: 30px;
+      text-align: center;
+      border: 1px solid #ddd;
+      margin: 0 5px;
+    }
+    
+    .add-to-cart-btn {
+      padding: 12px 25px;
+      background-color: #000;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .add-to-cart-btn:hover {
+      background-color: #333;
+    }
+  </style>
 </head>
-<body>
-  <div id="productDetail">Loading...</div>
 
+<body>
+  <div class="hero_area">
+    <!-- header section starts -->
+    <header class="header_section">
+      <nav class="navbar navbar-expand-lg custom_nav-container">
+        <!-- Logo Section -->
+        <a class="navbar-brand" href="homepage.html">
+          <img src="images/Wordmark Black.png" style="height: 50px; width: auto; object-fit: contain;">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class=""></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="homepage.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="shop.html">Shop</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="contact.html">Contact Us</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="my_orders.html">My orders</a>
+            </li>
+          </ul>
+
+          <div class="user_option">
+            <!-- This div will be populated by JavaScript -->
+            <a href="cart.html">
+              <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+            </a>
+            <a href="login.html">
+              <i class="fa fa-user" aria-hidden="true"></i>
+              <span style="color: white;">Login</span>
+            </a>
+            <a href="register.html">
+              <i class="fa fa-vcard" aria-hidden="true"></i>
+              <span style="color: white;">Register</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <!-- end header section -->
+  </div>
+  <!-- end hero area -->
+
+  <!-- Product Detail Section -->
+  <section class="layout_padding">
+    <div class="container">
+      <div id="productDetail">
+        <div class="text-center" style="padding: 50px 0;">
+          <i class="fa fa-spinner fa-spin fa-3x"></i>
+          <p>Loading product details...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- footer section -->
+  <section class="info_section layout_padding2-top">
+    <div class="social_container">
+      <div class="social_box">
+        <a href="https://www.facebook.com/grinditup">
+          <i class="fa fa-facebook" aria-hidden="true"></i>
+        </a>
+        <a href="https://x.com/EZR_Esports">
+          <i class="fa fa-twitter" aria-hidden="true"></i>
+        </a>
+        <a href="https://www.instagram.com/ezrebornesportsph/">
+          <i class="fa fa-instagram" aria-hidden="true"></i>
+        </a>
+        <a href="https://www.tiktok.com/@ezrgearsph">
+          <i class="fa fa-youtube" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
+    <div class="info_container">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6 col-lg-3">
+            <h6>ABOUT US</h6>
+            <p>Formed by passionate group of expert graphic designers who aim to provide quality and affordable Esports gears.</p>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="info_form">
+              <h5>Newsletter</h5>
+              <form action="#">
+                <input type="email" placeholder="Enter your email">
+                <button style="background-color: black; color: white;">Subscribe</button>
+              </form>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <h6>NEED HELP</h6>
+            <p>If you're looking for assistance with your order, sizing, or need help choosing the perfect piece, we're here to make your shopping experience as smooth as possible.</p>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <h6>CONTACT US</h6>
+            <div class="info_link-box">
+              <a href="">
+                <i class="fa fa-map-marker" aria-hidden="true"></i>
+                <span> San Jose del Monte, Philippines </span>
+              </a>
+              <a href="">
+                <i class="fa fa-phone" aria-hidden="true"></i>
+                <span>0976 405 6887</span>
+              </a>
+              <a href="">
+                <i class="fa fa-envelope" aria-hidden="true"></i>
+                <span> grindph.official@gmail.com</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer_section">
+    <div class="container">
+      <p>&copy; <span id="displayYear"></span> All Rights Reserved By <a href="#"><strong>GrindOn</strong></a></p>
+    </div>
+  </footer>
+  <!-- footer section -->
+
+  <!-- JavaScript Files -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    // Set the current year for the footer
+    document.getElementById("displayYear").innerHTML = new Date().getFullYear();
+  </script>
+  
   <script type="module" src="product.js"></script>
 </body>
 </html>
