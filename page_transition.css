@@ -1,0 +1,132 @@
+
+/* Page transition animation styles - add to your CSS files */
+
+/* Hide scrollbar during transitions */
+body.page-transitioning {
+    overflow: hidden;
+  }
+  
+  /* Page transition overlay */
+  .page-transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.85);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.2s ease;
+  }
+  
+  .dark-mode .page-transition-overlay {
+    background-color: rgba(15, 23, 42, 0.85);
+  }
+  
+  /* Page transition animation */
+  .page-transition-animation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  /* Spinner animation */
+  .page-transition-animation i {
+    font-size: 40px;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+    animation: spin 0.8s infinite linear;
+  }
+  
+  .page-transition-animation p {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0;
+  }
+  
+  .dark-mode .page-transition-animation p {
+    color: #e4e6eb;
+  }
+  
+  /* Product grid loading state */
+  .products-grid.loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  
+  .product-card.loading-card {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .product-card.loading-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.4) 50%, 
+      transparent 100%);
+    animation: shimmer 1.5s infinite;
+    background-size: 200% 100%;
+  }
+  
+  .dark-mode .product-card.loading-card::after {
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      transparent 100%);
+  }
+  
+  /* Button loading state */
+  .page-button.loading-btn {
+    position: relative;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  
+  .page-button.loading-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.2) 50%, 
+      transparent 100%);
+    animation: shimmer 1s infinite;
+  }
+  
+  .dark-mode .page-button.loading-btn::before {
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      transparent 100%);
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
