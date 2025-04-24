@@ -129,14 +129,12 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // Function to load user's cart data from Firestore
+// Function to load user's cart data from Firestore
 async function loadUserCart(userId) {
   try {
     console.log("Loading cart for user ID:", userId);
     
-    // Example structure - update according to your database schema
     const cartRef = collection(db, "carts");
-    
-    // Try a simpler query first without orderBy
     const q = query(cartRef, where("userId", "==", userId));
     console.log("Executing Firestore query...");
     
@@ -150,18 +148,11 @@ async function loadUserCart(userId) {
       return;
     }
     
-    // Log the first cart item for debugging
-    console.log("First cart item data:", cartSnapshot.docs[0].data());
-    
-    // Clear existing cart items (except the header and summary)
+    // Clear existing cart items (except the header, summary, and checkout button)
     const cartItemsContainer = document.getElementById('cart-items-container');
-    console.log("Cart container found:", !!cartItemsContainer);
-    
     const cartHeader = cartItemsContainer.querySelector('.cart-header');
-    console.log("Cart header found:", !!cartHeader);
-    
     const cartSummary = cartItemsContainer.querySelector('.cart-summary');
-    console.log("Cart summary found:", !!cartSummary);
+    const checkoutBtn = document.querySelector('.checkout-btn'); // Get the checkout button
     
     cartItemsContainer.innerHTML = '';
     cartItemsContainer.appendChild(cartHeader);
@@ -169,11 +160,8 @@ async function loadUserCart(userId) {
     let subtotal = 0;
     
     // Add each cart item to the display
-    console.log("Beginning to add", cartSnapshot.size, "items to cart display");
-    
     cartSnapshot.forEach((cartDoc) => {
       const cartItem = cartDoc.data();
-      console.log("Processing cart item:", cartItem.name);
       
       // Create cart item element
       const itemElement = document.createElement('div');
@@ -206,11 +194,10 @@ async function loadUserCart(userId) {
       cartItemsContainer.appendChild(itemElement);
     });
     
-    // Add summary section back if it exists
+    // Add summary section back
     if (cartSummary) {
       cartItemsContainer.appendChild(cartSummary);
     } else {
-      console.error("Cart summary element not found in HTML structure");
       // Create summary element if it doesn't exist
       const newSummary = document.createElement('div');
       newSummary.className = 'cart-summary';
@@ -231,8 +218,13 @@ async function loadUserCart(userId) {
       cartItemsContainer.appendChild(newSummary);
     }
     
+    // Add the checkout button back to the container's parent (outside the cart items container)
+    if (checkoutBtn && !cartItemsContainer.parentNode.contains(checkoutBtn)) {
+      cartItemsContainer.parentNode.appendChild(checkoutBtn);
+    }
+    
     // Update the summary amounts
-    const shipping = 150; // Fixed shipping cost
+    const shipping = 150;
     const total = subtotal + shipping;
     
     const subtotalElement = document.querySelector('.summary-row:first-child span:last-child');
@@ -245,11 +237,14 @@ async function loadUserCart(userId) {
       totalElement.innerText = '₱' + total.toFixed(2);
     }
     
-    console.log("Cart loaded successfully. Items:", cartSnapshot.size, "Subtotal:", subtotal);
-    
     // Make sure cart items container is visible
     cartItemsContainer.style.display = 'block';
     document.getElementById('empty-cart').style.display = 'none';
+    
+    // Make sure checkout button is visible
+    if (checkoutBtn) {
+      checkoutBtn.style.display = 'block';
+    }
     
     // Add event listeners for the quantity buttons and remove buttons
     setupCartEventListeners();
