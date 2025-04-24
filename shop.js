@@ -127,134 +127,210 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-function showModal(images, index, event) {
-  // Stop event propagation to prevent navigation when clicking on images
-  if (event) {
-    event.stopPropagation();
-    event.preventDefault();
+// Add these variables at the top of your script after your Firebase setup
+let currentPage = 1;
+const productsPerPage = 4; // 2x2 grid
+let allProducts = [];
+
+// Function to create loading overlay if it doesn't exist
+function createLoadingOverlay() {
+  const productsList = document.getElementById("productsList");
+
+  let loadingOverlay = document.querySelector('.loading-overlay');
+  if (!loadingOverlay) {
+    loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'loading-overlay';
+    loadingOverlay.innerHTML = `
+      <div class="fa-spinner-wrapper">
+        <i class="fa fa-spinner fa-spin fa-3x"></i>
+        <p>Loading products...</p>
+      </div>
+    `;
+    productsList.appendChild(loadingOverlay);
   }
-  
-  currentImages = images;
-  currentIndex = index;
-  modalImage.src = currentImages[currentIndex];
-  
-  // Hide all page sections except the modal
-  if (heroArea) heroArea.style.display = 'none';
-  if (clientSection) clientSection.style.display = 'none';
-  if (infoSection) infoSection.style.display = 'none';
-  if (footerSection) footerSection.style.display = 'none';
-  
-  // Show the modal
-  modal.style.display = "flex";
-  document.body.style.overflow = 'hidden'; // Prevent scrolling
-  document.body.style.margin = '0';
-  document.body.style.padding = '0';
-  document.body.style.backgroundColor = '#000';
+  return loadingOverlay;
 }
 
-function hideModal() {
-  modal.style.display = "none";
-  
-  // Show all page sections again
-  if (heroArea) heroArea.style.display = '';
-  if (clientSection) clientSection.style.display = '';
-  if (infoSection) infoSection.style.display = '';
-  if (footerSection) footerSection.style.display = '';
-  
-  document.body.style.overflow = '';
-  document.body.style.margin = '';
-  document.body.style.padding = '';
-  document.body.style.backgroundColor = '';
+
+// Function to show loading animation
+function showLoading() {
+  const loadingOverlay = createLoadingOverlay();
+  loadingOverlay.classList.add('active');
 }
 
-closeModal.onclick = (e) => {
-  e.stopPropagation();
-  hideModal();
-};
-
-nextBtn.onclick = (e) => {
-  e.stopPropagation(); // Prevent click from bubbling to modal background
-  currentIndex = (currentIndex + 1) % currentImages.length;
-  modalImage.src = currentImages[currentIndex];
-};
-
-prevBtn.onclick = (e) => {
-  e.stopPropagation(); // Prevent click from bubbling to modal background
-  currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
-  modalImage.src = currentImages[currentIndex];
-};
-
-window.onclick = (e) => {
-  if (e.target === modal) {
-    hideModal();
+// Function to hide loading animation
+function hideLoading() {
+  const loadingOverlay = document.querySelector('.loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.classList.remove('active');
   }
-};
-
-// Close modal on escape key
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && modal.style.display === 'flex') {
-    hideModal();
-  }
-});
+}
 
 async function loadProducts() {
   const productsList = document.getElementById("productsList");
-  productsList.innerHTML = "<div class='loading'>Loading products...</div>";
+  
+  // Create loading overlay first
+  createLoadingOverlay();
+  
+  // Show loading animation
+  showLoading();
 
   try {
     const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
     const snapshot = await getDocs(q);
-    productsList.innerHTML = "";
-
+    
     if (snapshot.empty) {
       productsList.innerHTML = "<p class='no-products'>No products found.</p>";
+      const loadingOverlay = createLoadingOverlay();
+      productsList.appendChild(loadingOverlay);
+      hideLoading();
       return;
     }
 
+    // Store all products in memory
+    allProducts = [];
     snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      const id = docSnap.id;
+      allProducts.push({
+        id: docSnap.id,
+        ...docSnap.data()
+      });
+    });
+
+    // Display first page and set up pagination
+    displayProductsPage(1);
+    setupPagination();
     
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    productsList.innerHTML = "<p class='error'>Error loading products.</p>";
+    const loadingOverlay = createLoadingOverlay();
+    productsList.appendChild(loadingOverlay);
+    hideLoading();
+  }
+}
+
+function displayProductsPage(page) {
+  // Show loading animation
+  showLoading();
+  
+  const productsList = document.getElementById("productsList");
+  currentPage = page;
+  
+  // Clear current products but preserve loading overlay
+  const loadingOverlay = document.querySelector('.loading-overlay');
+  productsList.innerHTML = ""; // Clear everything
+  
+  // Re-add the loading overlay
+  if (loadingOverlay) {
+    productsList.appendChild(loadingOverlay);
+  }
+  
+  // Calculate start and end indices for the current page
+  const startIndex = (page - 1) * productsPerPage;
+  const endIndex = Math.min(startIndex + productsPerPage, allProducts.length);
+  
+  // Display products for current page after a small delay to ensure loading is visible
+  setTimeout(() => {
+    for (let i = startIndex; i < endIndex; i++) {
+      const product = allProducts[i];
+      
       let imageArray = [];
-      if (Array.isArray(data.imageUrls)) {
-        imageArray = data.imageUrls;
-      } else if (typeof data.imageUrl === "string") {
-        imageArray = [data.imageUrl];
+      if (Array.isArray(product.imageUrls)) {
+        imageArray = product.imageUrls;
+      } else if (typeof product.imageUrl === "string") {
+        imageArray = [product.imageUrl];
       }
     
       const firstImage = imageArray[0] || "images/default-placeholder.png"; // fallback
     
       const productDiv = document.createElement("div");
       productDiv.className = "product";
-      productDiv.setAttribute("data-product-id", id);
+      productDiv.setAttribute("data-product-id", product.id);
       productDiv.innerHTML = `
         <div class="product-image-container">
-          <img src="${firstImage}" alt="${data.name}" class="product-image" />
+          <img src="${firstImage}" alt="${product.name}" class="product-image" />
         </div>
         <div class="product-info">
-          <div class="product-name">${data.name}</div>
-          <div class="product-price">₱${data.price}</div>
+          <div class="product-name">${product.name}</div>
+          <div class="product-price">₱${product.price}</div>
         </div>
       `;
     
       // Make the whole product box clickable
       productDiv.addEventListener("click", () => {
-        window.location.href = `product.html?id=${id}`;
+        window.location.href = `product.html?id=${product.id}`;
       });
       
-      // Image click handler for modal - stop propagation to prevent navigation
-      const img = productDiv.querySelector(".product-image");
-      img.addEventListener("click", (e) => {
-        showModal(imageArray, 0, e);
-      });
-    
       productsList.appendChild(productDiv);
-    });
+    }
     
-  } catch (err) {
-    console.error("Error fetching products:", err);
-    productsList.innerHTML = "<p class='error'>Error loading products.</p>";
+    // Hide loading animation
+    hideLoading();
+  }, 300);
+}
+
+function setupPagination() {
+  // Create pagination container if it doesn't exist
+  let paginationContainer = document.getElementById("paginationContainer");
+  if (!paginationContainer) {
+    paginationContainer = document.createElement("div");
+    paginationContainer.id = "paginationContainer";
+    paginationContainer.className = "pagination";
+    document.querySelector(".client_section").appendChild(paginationContainer);
   }
+  
+  // Calculate total number of pages
+  const totalPages = Math.ceil(allProducts.length / productsPerPage);
+  
+  // Clear existing pagination
+  paginationContainer.innerHTML = "";
+  
+  // Previous button
+  const prevButton = document.createElement("button");
+  prevButton.className = `pagination-button ${currentPage === 1 ? 'disabled' : ''}`;
+  prevButton.textContent = "Prev";
+  prevButton.disabled = currentPage === 1;
+  prevButton.addEventListener("click", () => {
+    if (currentPage > 1) {
+      displayProductsPage(currentPage - 1);
+      setupPagination();
+    }
+  });
+  paginationContainer.appendChild(prevButton);
+  
+  // Page buttons - show 5 pages at most
+  const startPage = Math.max(1, currentPage - 2);
+  const endPage = Math.min(totalPages, startPage + 4);
+  
+  for (let i = startPage; i <= endPage; i++) {
+    const pageButton = document.createElement("button");
+    pageButton.className = `pagination-button ${i === currentPage ? 'active' : ''}`;
+    pageButton.textContent = i;
+    pageButton.addEventListener("click", () => {
+      displayProductsPage(i);
+      setupPagination();
+    });
+    paginationContainer.appendChild(pageButton);
+  }
+  
+  // Next button
+  const nextButton = document.createElement("button");
+  nextButton.className = `pagination-button ${currentPage === totalPages ? 'disabled' : ''}`;
+  nextButton.textContent = "Next";
+  nextButton.disabled = currentPage === totalPages;
+  nextButton.addEventListener("click", () => {
+    if (currentPage < totalPages) {
+      displayProductsPage(currentPage + 1);
+      setupPagination();
+    }
+  });
+  paginationContainer.appendChild(nextButton);
+  
+  // Page info
+  const pageInfo = document.createElement("span");
+  pageInfo.className = "pagination-info";
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+  paginationContainer.appendChild(pageInfo);
 }
 
 loadProducts();
