@@ -7,7 +7,7 @@ body {
 }
 
 .layout_padding {
-  padding-top: 90px;
+  padding-top: 30px;
   padding-bottom: 90px;
 }
 
@@ -367,14 +367,14 @@ a:focus {
 }
 
 .shop_section .box {
-  background-color: #eeeeee;
+  background-color: #000000;
   position: relative;
   padding: 10px;
   margin-top: 25px;
 }
 
 .shop_section .box a {
-  color: #000000;
+  color: #fff;
 }
 
 .shop_section .box .img-box {
@@ -388,12 +388,12 @@ a:focus {
       -ms-flex-align: center;
           align-items: center;
   padding: 15px 30px;
-  height: 245px;
+  height: 350px;
 }
 
 .shop_section .box .img-box img {
   max-width: 100%;
-  max-height: 145px;
+  max-height: 100%;
 }
 
 .shop_section .box .detail-box {
@@ -406,7 +406,7 @@ a:focus {
 }
 
 .shop_section .box .detail-box h6 span {
-  color: #01610e;
+  color: #fff;
 }
 
 .shop_section .box .new {
@@ -652,6 +652,7 @@ a:focus {
 }
 
 .contact_section .heading_container {
+
   margin-bottom: 30px;
 }
 
@@ -925,7 +926,7 @@ a:focus {
 
 /* Adjust Navbar Brand (Logo) */
 .navbar-brand {
-  margin-left: 70px; /* Prevents logo from overlapping with the user info */
+  margin-left: 70px; 
 }
 
 /* Sidebar Background */
@@ -1045,7 +1046,6 @@ img {
 
 @media (max-width: 1024px) {
   .layout_padding {
-    padding-top: 60px;
     padding-bottom: 60px;
   }
   .slider_section .detail-box h1 {

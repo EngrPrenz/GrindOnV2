@@ -127,8 +127,44 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
     const user = auth.currentUser;
     if (!user) {
       // Redirect to login page or show login modal
-      alert("Please log in to add items to your cart");
-      window.location.href = 'login.html';
+      // Show a modal prompting the user to log in
+      const modal = document.createElement('div');
+      modal.style.position = 'fixed';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.width = '100%';
+      modal.style.height = '100%';
+      modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+      modal.style.display = 'flex';
+      modal.style.justifyContent = 'center';
+      modal.style.alignItems = 'center';
+      modal.style.zIndex = '1000';
+
+      const modalContent = document.createElement('div');
+      modalContent.style.backgroundColor = '#0f0f0f';
+      modalContent.style.padding = '20px';
+      modalContent.style.borderRadius = '8px';
+      modalContent.style.textAlign = 'center';
+      modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+
+      modalContent.innerHTML = `
+        <img src="images/Wordmark White.png" style="height: 100px; width: auto; object-fit: contain;">
+        <h4 style="color: white; padding: 10px;">Login Required!</h4>
+        <p style="color: white; padding: 10px;">Please log in to add items to your cart.</p>
+        <button id="loginModalBtn" style="margin: 10px; padding: 10px 20px; background-color:rgb(0, 0, 0); color: white; border: none; border-radius: 4px; cursor: pointer;">Log In</button>
+        <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+      `;
+
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+
+      document.getElementById('loginModalBtn').addEventListener('click', () => {
+        window.location.href = 'login.html';
+      });
+
+      document.getElementById('closeModalBtn').addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
       return;
     }
     
