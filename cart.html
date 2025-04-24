@@ -14,7 +14,7 @@
   <link rel="shortcut icon" href="images/Logomark White.png" type="image/png">
 
   <title>
-    GrindOn
+    GrindOn - Shopping Cart
   </title>
 
   <!-- slider stylesheet -->
@@ -28,9 +28,14 @@
 
   <!-- Custom styles for this template -->
   <link href="homepage.css" rel="stylesheet" />
-  <link rel="stylesheet" href="shop.css">
   <!-- responsive style -->
   <link href="responsive.css" rel="stylesheet" />
+<!-- css style -->
+  <link href="cart.css" rel="stylesheet" />
+
+  <style>
+
+  </style>
 </head>
 
 <body>
@@ -58,13 +63,16 @@
             <li class="nav-item">
               <a class="nav-link" href="contact.html">Contact Us</a>
             </li>
-            <li class="nav-item active">
+            <li class="nav-item">
               <a class="nav-link" href="my_orders.html">My orders</a>
             </li>
           </ul>
 
           <div class="user_option">
-            <!-- Login/Register links (replace with logout when logged in) -->
+            <!-- This div will be populated by JavaScript -->
+            <a href="cart.html">
+              <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+            </a>
             <a href="login.html">
               <i class="fa fa-user" aria-hidden="true"></i>
               <span style="color: white;">Login</span>
@@ -81,17 +89,59 @@
   </div>
   <!-- end hero area -->
 
-  <!-- client section -->
-  <section class="client_section layout_padding">
+  <!-- cart section -->
+  <section class="cart-section layout_padding">
     <div class="container">
       <div class="heading_container heading_center">
-        <h2>
-          My Orders
-        </h2>
+        <h2>Your Shopping Cart</h2>
+      </div>
+      
+      <div class="cart-container">
+        <!-- If cart has items -->
+        <div id="cart-items-container">
+          <div class="cart-header row">
+            <div class="col-md-6">Product</div>
+            <div class="col-md-2 text-center">Price</div>
+            <div class="col-md-2 text-center">Quantity</div>
+            <div class="col-md-2 text-center">Total</div>
+          </div>
+          <div class="cart-summary">
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span>₱0.00</span>
+            </div>
+            <div class="summary-row">
+              <span>Shipping</span>
+              <span>₱150.00</span>
+            </div>
+            <div class="summary-row total">
+              <span>Total</span>
+              <span>₱150.00</span>
+            </div>
+          </div>
+          
+          
+            <button class="checkout-btn">PROCEED TO CHECKOUT</button>
+          </div>
+        </div>
+        
+        <!-- Empty Cart View (hidden by default, shown when cart is empty) -->
+        <div id="empty-cart" class="empty-cart" style="display: none;">
+          <i class="fa fa-shopping-cart"></i>
+          <h3>Your cart is empty</h3>
+          <p>Looks like you haven't added any items to your cart yet.</p>
+          <a href="shop.html" class="checkout-btn" style="display: inline-block; max-width: 200px; margin-top: 20px;">CONTINUE SHOPPING</a>
+        </div>
+      </div>
+      
+      <div class="continue-shopping">
+        <a href="shop.html">
+          <i class="fa fa-arrow-left" style="margin-right: 10px;"></i> Continue Shopping
+        </a>
       </div>
     </div>
-    <div id="cart">Loading...</div>
   </section>
+  <!-- end cart section -->
 
   <!-- footer section -->
   <section class="info_section layout_padding2-top">
@@ -170,11 +220,87 @@
   <script src="js/bootstrap.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
   <script src="js/custom.js"></script>
+  
   <script>
     // Set the current year for the footer
     document.getElementById("displayYear").innerHTML = new Date().getFullYear();
+    
+    // Basic cart functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Example of how to toggle between empty cart and items view
+      // Uncomment to see empty cart:
+      // document.getElementById('cart-items-container').style.display = 'none';
+      // document.getElementById('empty-cart').style.display = 'block';
+      
+      // Quantity buttons functionality
+      const decreaseButtons = document.querySelectorAll('.decrease');
+      const increaseButtons = document.querySelectorAll('.increase');
+      
+      decreaseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const input = this.nextElementSibling;
+          let value = parseInt(input.value);
+          if (value > 1) {
+            input.value = value - 1;
+            updateCartItemTotal(this);
+          }
+        });
+      });
+      
+      increaseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const input = this.previousElementSibling;
+          let value = parseInt(input.value);
+          input.value = value + 1;
+          updateCartItemTotal(this);
+        });
+      });
+      
+      // Remove item functionality
+      const removeButtons = document.querySelectorAll('.cart-item-remove');
+      removeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const cartItem = this.closest('.cart-item');
+          cartItem.remove();
+          updateCartTotal();
+          
+          // Check if cart is empty
+          if (document.querySelectorAll('.cart-item').length === 0) {
+            document.getElementById('cart-items-container').style.display = 'none';
+            document.getElementById('empty-cart').style.display = 'block';
+          }
+        });
+      });
+      
+      // Functions to update totals
+      function updateCartItemTotal(element) {
+        const cartItem = element.closest('.cart-item');
+        const priceText = cartItem.querySelector('.cart-item-price').innerText;
+        const price = parseFloat(priceText.replace('₱', ''));
+        const quantity = parseInt(cartItem.querySelector('.quantity-input').value);
+        const subtotal = price * quantity;
+        
+        cartItem.querySelector('.cart-item-subtotal').innerText = '₱' + subtotal.toFixed(2);
+        updateCartTotal();
+      }
+      
+      function updateCartTotal() {
+        const subtotals = document.querySelectorAll('.cart-item-subtotal');
+        let total = 0;
+        
+        subtotals.forEach(item => {
+          total += parseFloat(item.innerText.replace('₱', ''));
+        });
+        
+        const shipping = 150; // Fixed shipping cost
+        const finalTotal = total + shipping;
+        
+        document.querySelector('.summary-row:first-child span:last-child').innerText = '₱' + total.toFixed(2);
+        document.querySelector('.summary-row.total span:last-child').innerText = '₱' + finalTotal.toFixed(2);
+      }
+    });
   </script>
-
+  
   <script type="module" src="cart.js"></script>
 </body>
 </html>
