@@ -7,7 +7,7 @@ body {
 }
 
 .layout_padding {
-  padding-top: 90px;
+  padding-top: 30px;
   padding-bottom: 90px;
 }
 
@@ -925,7 +925,7 @@ a:focus {
 
 /* Adjust Navbar Brand (Logo) */
 .navbar-brand {
-  margin-left: 70px; /* Prevents logo from overlapping with the user info */
+  margin-left: 70px; 
 }
 
 /* Sidebar Background */
@@ -1045,7 +1045,6 @@ img {
 
 @media (max-width: 1024px) {
   .layout_padding {
-    padding-top: 60px;
     padding-bottom: 60px;
   }
   .slider_section .detail-box h1 {
