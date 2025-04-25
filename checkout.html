@@ -32,7 +32,7 @@
   <link href="responsive.css" rel="stylesheet" />
   <!-- checkout style -->
   <link href="checkout.css" rel="stylesheet" />
-
+  <link rel="stylesheet" href="homepage_transition.css">
 
  
 </head>
@@ -172,45 +172,104 @@
       </div>
       
       <!-- Payment Information -->
-      <div class="form-section">
-        <h3>Payment Method</h3>
-        
-        <div class="form-group">
-          <div class="radio-group">
-            <div class="radio-option">
-              <input type="radio" id="payment-cod" name="payment-method" value="cash-on-delivery" checked>
-              <label for="payment-cod">Cash on Delivery</label>
-            </div>
-            <div class="radio-option">
-              <input type="radio" id="payment-gcash" name="payment-method" value="gcash">
-              <label for="payment-gcash">GCash</label>
-            </div>
-            <div class="radio-option">
-              <input type="radio" id="payment-bank" name="payment-method" value="bank-transfer">
-              <label for="payment-bank">Bank Transfer</label>
-            </div>
+<div class="form-section payment-method">
+  <h3>Payment Method</h3>
+  
+  <div class="payment-options">
+    <!-- Cash on Delivery Option -->
+    <div class="payment-option">
+      <input type="radio" id="payment-cod" name="payment-method" value="cash-on-delivery" checked>
+      <label for="payment-cod">
+        <div class="payment-logo cod">
+          <i class="fa fa-money" aria-hidden="true"></i>
+        </div>
+        <div class="payment-title">Cash on delivery</div>
+        <div class="payment-selector">
+          <div class="radio-circle"></div>
+        </div>
+      </label>
+    </div>
+    
+  
+   
+    <!-- Card Input Fields (Hidden by Default) -->
+    <div id="card-details" class="card-input-group" style="display: none;">
+      <div class="form-group">
+        <label for="card-number">Card Number</label>
+        <input type="text" id="card-number" class="form-control" placeholder="1234 5678 9012 3456">
+      </div>
+      
+      <div class="card-input-row">
+        <div class="card-input-col">
+          <div class="form-group">
+            <label for="card-expiry">Expiry Date</label>
+            <input type="text" id="card-expiry" class="form-control" placeholder="MM/YY">
           </div>
         </div>
-        
-        <div id="gcash-details" class="payment-details" style="display:none;">
+        <div class="card-input-col">
           <div class="form-group">
-            <label>GCash Number: 0976 405 6887</label>
-            <p>Please send the payment to the GCash number above and upload your payment receipt.</p>
-            <input type="file" class="form-control" accept="image/*">
-          </div>
-        </div>
-        
-        <div id="bank-details" class="payment-details" style="display:none;">
-          <div class="form-group">
-            <label>Bank Details:</label>
-            <p>Bank Name: BDO<br>
-            Account Name: GrindOn Philippines<br>
-            Account Number: 1234-5678-9012<br>
-            Please upload your payment receipt after completing the transfer.</p>
-            <input type="file" class="form-control" accept="image/*">
+            <label for="card-cvv">CVV</label>
+            <input type="text" id="card-cvv" class="form-control" placeholder="123">
           </div>
         </div>
       </div>
+      
+      <div class="form-group">
+        <label for="card-name">Name on Card</label>
+        <input type="text" id="card-name" class="form-control" placeholder="John Doe">
+      </div>
+    </div>
+    
+    <!-- GCash Option -->
+    <div class="payment-option">
+      <input type="radio" id="payment-gcash" name="payment-method" value="gcash">
+      <label for="payment-gcash">
+        <div class="payment-logo gcash">
+          <i class="fa fa-mobile" aria-hidden="true" style="font-size: 28px;"></i>
+        </div>
+        <div class="payment-title">GCash</div>
+        <div class="payment-selector">
+          <div class="radio-circle"></div>
+        </div>
+      </label>
+    </div>
+    
+    <!-- GCash Details (Hidden by Default) -->
+    <div id="gcash-details" class="payment-details" style="display: none;">
+      <div class="form-group">
+        <label>GCash Number: 0976 405 6887</label>
+        <p>Please send the payment to the GCash number above and upload your payment receipt.</p>
+        <input type="file" class="form-control" accept="image/*">
+      </div>
+    </div>
+    
+    <!-- Online Banking Option -->
+    <div class="payment-option">
+      <input type="radio" id="payment-bank" name="payment-method" value="bank-transfer">
+      <label for="payment-bank">
+        <div class="payment-logo bank">
+          <i class="fa fa-university" aria-hidden="true"></i>
+        </div>
+        <div class="payment-title">Online Banking</div>
+        <div class="payment-selector">
+          <div class="radio-circle"></div>
+        </div>
+      </label>
+    </div>
+    
+    <!-- Bank Details (Hidden by Default) -->
+    <div id="bank-details" class="payment-details" style="display: none;">
+      <div class="form-group">
+        <label>Bank Details:</label>
+        <p>Bank Name: BDO<br>
+        Account Name: GrindOn Philippines<br>
+        Account Number: 1234-5678-9012<br>
+        Please upload your payment receipt after completing the transfer.</p>
+        <input type="file" class="form-control" accept="image/*">
+      </div>
+    </div>
+  </div>
+</div>
       
       <!-- Order Summary -->
       <div class="order-summary">
@@ -242,12 +301,7 @@
           </div>
           
           <button type="submit" id="place-order-btn" class="checkout-btn">PLACE ORDER</button>
-          
-          <div class="payment-icons">
-            <i class="fa fa-money" aria-hidden="true"></i>
-            <i class="fa fa-credit-card" aria-hidden="true"></i>
-            <i class="fa fa-university" aria-hidden="true"></i>
-          </div>
+
         </div>
       </div>
     </form>
@@ -328,13 +382,14 @@
         </div>
       </div>
     </div>
-  </section>
+ 
 
   <footer class="footer_section">
     <div class="container">
       <p>&copy; <span id="displayYear"></span> All Rights Reserved By <a href="https://html.design/"><strong>GrindOn</strong></a></p>
     </div>
   </footer>
+</section>
   <!-- footer section -->
 
   <!-- JavaScript Files -->
@@ -431,5 +486,6 @@
     
   </script>
    <script type="module" src="checkout.js"></script>
+   <script type="module" src="homepage_transition.js"></script>
 </body>
 </html>
