@@ -103,7 +103,7 @@ onAuthStateChanged(auth, (user) => {
 
 async function loadLatestProducts() {
   const latestProductsContainer = document.getElementById("latestProducts");
-  latestProductsContainer.innerHTML = "<div class='loading'>Loading products...</div>";
+  latestProductsContainer.innerHTML = "<div class='loading'></div>";
 
   try {
     // Query the 3 latest products
