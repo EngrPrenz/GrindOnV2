@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="light-mode">
+
+  <div class="sidebar">
+    <div class="logo">
+      <!-- Replace text with woodmark logo -->
+      <img src="images/Wordmark White.png" alt="Woodmark Logo" class="woodmark-logo">
+    </div>
+    
+    <div class="menu-items">
+      <a href="admin.html">
+        <i class="fas fa-chart-pie"></i>
+        <span><strong>Dashboard</strong></span>
+      </a>
+      <a href="add_products.html">
+        <i class="fas fa-plus-circle"></i>
+        <span><strong>Add Products</strong></span>
+      </a>
+      <a href="view_orders.html" class="active">
+        <i class="fas fa-shopping-bag"></i>
+        <span><strong>View Orders</strong></span>
+      </a>
+      <a href="admin_view_products.html" >
+        <i class="fas fa-box"></i>
+        <span><strong>View Products</strong></span>
+      </a>
+      <a href="admin_login.html" class="logout">
+        <i class="fas fa-sign-out-alt"></i>
+        <span><strong>Logout</strong></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="top-bar">
+      <h1><strong>View Orders</strong></h1>
+      <div class="right-elements">
+        <div class="theme-toggle">
+          <!-- Replace button with toggle switch -->
+          <label class="theme-switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider">
+              <i class="fas fa-sun light-icon"></i>
+              <i class="fas fa-moon dark-icon"></i>
+            </span>
+          </label>
+        </div>
+        <div class="admin-profile">
+          <div class="admin-info">
+            <span>Hey, <strong id="adminName">KUPAL</strong></span>
+            <span class="admin-role"><strong>Admin</strong></span>
+          </div>
+          <div class="admin-avatar">
+            <img src="images/marky.jpg" alt="Admin Avatar">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="orders-section">
+      <h2>Pending Orders</h2>
+      <table id="ordersTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer Name</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Orders will be dynamically inserted here -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Add these to all your admin pages (admin.html, add_products.html, admin_view_products.html, etc.) -->
+  <link rel="stylesheet" href="page_transition.css">
+  <script src="page_transition.js" defer></script>
+
+  <!-- Add this to the body of each page -->
+  <div id="pageTransitionOverlay" class="page-transition-overlay" style="display: none;">
+    <div class="page-transition-animation">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Loading page...</p>
+    </div>
+  </div>
+
+  <!-- Add Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js" type="module"></script>
+  <script src="admin_view_orders.js" type="module" defer></script>
+
+  <script src="admin.js"></script>
+</body>
+</html>
