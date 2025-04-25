@@ -1,9 +1,11 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import {
   getAuth,
   onAuthStateChanged,
   signInWithPopup,
-  GoogleAuthProvider
+  GoogleAuthProvider,
+  signOut
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 import {
@@ -274,10 +276,10 @@ async function fetchProduct() {
           </div>
           
           <div class="quantity-selector">
-            <label for="quantity">Quantity:</label>
+            <label for="quantity">Quantity: (<span id="max-available">0</span> available)</label>
             <div class="quantity-controls">
               <button id="decrease-qty" class="qty-btn">-</button>
-              <input type="number" id="quantity" value="1" min="1" max="99">
+              <input type="number" id="quantity" value="1" min="1">
               <button id="increase-qty" class="qty-btn">+</button>
             </div>
           </div>
@@ -287,8 +289,55 @@ async function fetchProduct() {
       </div>
     `;
 
-    // Set up quantity controls
+    // Set up controls and event handlers
     const quantityInput = document.getElementById("quantity");
+    const colorSelect = document.getElementById("color-select");
+    const sizeSelect = document.getElementById("size-select");
+    const maxAvailableSpan = document.getElementById("max-available");
+    
+    // Function to get current available stock based on selected color and size
+    function getCurrentStock() {
+      const selectedColor = colorSelect.value;
+      const selectedSize = sizeSelect.value.toLowerCase();
+      
+      if (data.variations && 
+          data.variations[selectedColor] && 
+          data.variations[selectedColor][selectedSize]) {
+        return data.variations[selectedColor][selectedSize];
+      }
+      return 0;
+    }
+    
+    // Function to update max quantity based on stock
+    function updateMaxQuantity() {
+      const availableStock = getCurrentStock();
+      
+      // Update the display of available stock
+      maxAvailableSpan.textContent = availableStock;
+      
+      // If current quantity exceeds stock, adjust it down
+      if (parseInt(quantityInput.value) > availableStock) {
+        quantityInput.value = availableStock;
+      }
+      
+      // Disable add to cart button if no stock
+      const addToCartBtn = document.getElementById("addToCartBtn");
+      if (availableStock <= 0) {
+        addToCartBtn.disabled = true;
+        addToCartBtn.textContent = "OUT OF STOCK";
+        addToCartBtn.style.backgroundColor = "#ccc";
+        quantityInput.value = 0;
+      } else {
+        addToCartBtn.disabled = false;
+        addToCartBtn.textContent = "ADD TO CART";
+        addToCartBtn.style.backgroundColor = "";
+        if (parseInt(quantityInput.value) < 1) {
+          quantityInput.value = 1;
+        }
+      }
+    }
+    
+    // Setup quantity control buttons
     document.getElementById("decrease-qty").addEventListener("click", () => {
       const currentValue = parseInt(quantityInput.value);
       if (currentValue > 1) {
@@ -298,21 +347,42 @@ async function fetchProduct() {
     
     document.getElementById("increase-qty").addEventListener("click", () => {
       const currentValue = parseInt(quantityInput.value);
-      quantityInput.value = currentValue + 1;
+      const maxStock = getCurrentStock();
+      
+      if (currentValue < maxStock) {
+        quantityInput.value = currentValue + 1;
+      }
     });
-
-    // Setup color and size selection
-    const colorSelect = document.getElementById("color-select");
-    const sizeSelect = document.getElementById("size-select");
+    
+    // Add input validation for direct quantity field entry
+    quantityInput.addEventListener("change", () => {
+      let value = parseInt(quantityInput.value);
+      const maxStock = getCurrentStock();
+      
+      if (isNaN(value) || value < 1) {
+        value = 1;
+      } else if (value > maxStock) {
+        value = maxStock;
+      }
+      
+      quantityInput.value = value;
+    });
     
     // Update available sizes when color changes
     colorSelect.addEventListener("change", () => {
       updateSizeOptions(data.variations, colorSelect.value, sizeSelect);
+      updateMaxQuantity();
     });
     
-    // Initial size update based on default color
+    // Update max quantity when size changes
+    sizeSelect.addEventListener("change", () => {
+      updateMaxQuantity();
+    });
+    
+    // Initial setup based on default selections
     if (colorSelect.options.length > 0) {
       updateSizeOptions(data.variations, colorSelect.value, sizeSelect);
+      updateMaxQuantity();
     }
 
     // Setup add to cart button
@@ -320,19 +390,16 @@ async function fetchProduct() {
       const selectedColor = colorSelect.value;
       const selectedSize = sizeSelect.value;
       const selectedQuantity = parseInt(quantityInput.value);
+      const availableStock = getCurrentStock();
       
       if (!selectedColor || !selectedSize) {
         alert("Please select color and size");
         return;
       }
       
-      // Check if the selected variation is in stock
-      if (data.variations && data.variations[selectedColor]) {
-        const stock = data.variations[selectedColor][selectedSize.toLowerCase()];
-        if (!stock || stock < 1) {
-          alert("Selected variation is out of stock");
-          return;
-        }
+      if (selectedQuantity < 1 || selectedQuantity > availableStock) {
+        alert(`Please select a quantity between 1 and ${availableStock}`);
+        return;
       }
       
       // Add to cart using the shared cart function
