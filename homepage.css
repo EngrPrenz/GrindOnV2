@@ -1233,3 +1233,17 @@ img {
 
 /* end footer section*/
 /*# sourceMappingURL=style.css.map */
+.navbar-top-logo {
+  margin-top: 28px; /* Downward spacing */
+  text-align: left;  /* Aligns to the left first */
+  padding-left: 70px; /* Move to the right */
+}
+
+.top-logo-img {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+.header_section {
+  padding-top: 10px;  /* Increase this to move the navbar content down */
+}
