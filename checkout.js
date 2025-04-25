@@ -16,6 +16,12 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
+// Import missing functions
+import {
+  updateDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
 // Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyC5n40vPlIjXQ25X4NJlr8Z2jRGux0C1Y8",
@@ -118,76 +124,245 @@ async function loadUserCart(userId) {
 
 // Load user details to pre-fill checkout form
 async function loadUserDetails(userId) {
-    try {
-      const userDocRef = doc(db, "users", userId);
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        
-        // Fill in the shipping form fields
-        document.getElementById('full-name').value = userData.fullName || '';
-        document.getElementById('phone').value = userData.phone || '';
-        document.getElementById('address').value = userData.address || '';
-        document.getElementById('city').value = userData.city || '';
-        document.getElementById('postal-code').value = userData.postalCode || '';
-      }
-    } catch (error) {
-      console.error("Error loading user details:", error);
+  try {
+    const userDocRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      
+      // Pre-fill user details if available
+      if (userData.firstName) document.getElementById('first-name').value = userData.firstName;
+      if (userData.lastName) document.getElementById('last-name').value = userData.lastName;
+      if (userData.email) document.getElementById('email').value = userData.email;
+      if (userData.phone) document.getElementById('phone').value = userData.phone;
+      if (userData.address) document.getElementById('address').value = userData.address;
+      if (userData.city) document.getElementById('city').value = userData.city;
+      if (userData.province) document.getElementById('province').value = userData.province;
+      if (userData.postalCode) document.getElementById('postal-code').value = userData.postalCode;
     }
+  } catch (error) {
+    console.error("Error loading user details:", error);
+    // Continue checkout process even if user details can't be loaded
+  }
+}
+
+// Handle checkout form submission
+// Add an event listener that runs when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Find the checkout form
+  const checkoutForm = document.getElementById('checkout-form');
+  
+  // Add event listener to the form
+  if (checkoutForm) {
+    checkoutForm.addEventListener('submit', handleCheckout);
+    console.log('Form submit event listener added');
+  } else {
+    console.error('Checkout form not found in the DOM');
   }
   
-  // Handle order submission
-  document.getElementById('checkout-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const user = auth.currentUser;
-    if (!user) {
-      alert("You must be logged in to place an order.");
-      return;
-    }
+  // Payment method toggle - move this code inside DOMContentLoaded
+  const paymentMethods = document.querySelectorAll('input[name="payment-method"]');
+  const gcashDetails = document.getElementById('gcash-details');
+  const bankDetails = document.getElementById('bank-details');
   
-    const fullName = document.getElementById('full-name').value;
-    const phone = document.getElementById('phone').value;
-    const address = document.getElementById('address').value;
-    const city = document.getElementById('city').value;
-    const postalCode = document.getElementById('postal-code').value;
-    
-    if (!fullName || !phone || !address || !city || !postalCode) {
-      alert("Please fill in all the required fields.");
-      return;
-    }
+  paymentMethods.forEach(method => {
+    method.addEventListener('change', function() {
+      if (this.value === 'gcash') {
+        gcashDetails.style.display = 'block';
+        bankDetails.style.display = 'none';
+      } else if (this.value === 'bank-transfer') {
+        gcashDetails.style.display = 'none';
+        bankDetails.style.display = 'block';
+      } else {
+        gcashDetails.style.display = 'none';
+        bankDetails.style.display = 'none';
+      }
+    });
+  });
+});
+
+async function handleCheckout(event) {
+  event.preventDefault();
+  console.log("Checkout process started");
   
+  // Get the current user
+  const user = auth.currentUser;
+  if (!user) {
+    console.log("No authenticated user found");
+    alert("Please log in to complete your order.");
+    window.location.href = 'login.html?redirect=checkout.html';
+    return;
+  }
+  console.log("Authenticated user:", user.uid);
+  
+  // Disable submit button to prevent multiple submissions
+  const submitButton = document.getElementById('place-order-btn');
+  submitButton.disabled = true;
+  submitButton.textContent = 'Processing...';
+  console.log("Submit button disabled");
+  
+  try {
+    // Gather form data
     const orderData = {
       userId: user.uid,
-      fullName,
-      phone,
-      address,
-      city,
-      postalCode,
+      firstName: document.getElementById('first-name').value,
+      lastName: document.getElementById('last-name').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      address: document.getElementById('address').value,
+      city: document.getElementById('city').value,
+      province: document.getElementById('province').value,
+      postalCode: document.getElementById('zip').value,
+      paymentMethod: document.querySelector('input[name="payment-method"]:checked')?.value || 'cod',
       items: window.cartItems || [],
       subtotal: window.orderSubtotal || 0,
-      shipping: 150,
+      shipping: 150, // Fixed shipping cost
       total: window.orderTotal || 0,
-      createdAt: serverTimestamp(),
-      status: "pending"
+      status: 'pending',
+      createdAt: serverTimestamp()
     };
-  
-    try {
-      await addDoc(collection(db, "orders"), orderData);
-  
-      // Optionally: clear user's cart
-      const cartQuery = query(collection(db, "carts"), where("userId", "==", user.uid));
-      const cartSnapshot = await getDocs(cartQuery);
-      cartSnapshot.forEach(async (docSnap) => {
-        await deleteDoc(doc(db, "carts", docSnap.id));
-      });
-  
-      alert("Order placed successfully!");
-      window.location.href = 'order-success.html'; // Redirect to confirmation page
-  
-    } catch (error) {
-      console.error("Error placing order:", error);
-      alert("Failed to place order. Please try again.");
+    console.log("Order data prepared:", orderData);
+    
+    // Validate required fields
+    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'province', 'postalCode'];
+    for (const field of requiredFields) {
+      if (!orderData[field]) {
+        console.log("Validation failed for field:", field);
+        alert(`Please fill in all required fields.`);
+        submitButton.disabled = false;
+        submitButton.textContent = 'Place Order';
+        return;
+      }
     }
+    console.log("All required fields validated");
+    
+    // Create new order in Firestore
+    console.log("Attempting to create order in Firestore collection 'orders'");
+    const orderRef = await addDoc(collection(db, "orders"), orderData);
+    console.log("Order created successfully with ID:", orderRef.id);
+    
+    // Save user details for future checkouts
+    console.log("Updating user details");
+    await updateUserDetails(user.uid, orderData);
+    console.log("User details updated");
+    
+    // Clear user's cart after successful order
+    console.log("Clearing user cart");
+    await clearUserCart(user.uid);
+    console.log("User cart cleared");
+    
+    // Redirect to order confirmation page
+    console.log("Redirecting to order confirmation page");
+    window.location.href = `order-confirmation.html?id=${orderRef.id}`;
+    
+  } catch (error) {
+    console.error("Error processing order:", error);
+    alert("There was an error processing your order. Please try again.");
+    submitButton.disabled = false;
+    submitButton.textContent = 'Place Order';
+  }
+  // Add this validation code inside your existing handleCheckout function
+// Right after checking for authenticated user
+  
+// Validate the form 
+const requiredFields = [
+  { id: 'first-name', errorId: 'first-name-error' },
+  { id: 'last-name', errorId: 'last-name-error' },
+  { id: 'email', errorId: 'email-error' },
+  { id: 'phone', errorId: 'phone-error' },
+  { id: 'address', errorId: 'address-error' },
+  { id: 'city', errorId: 'city-error' },
+  { id: 'zip', errorId: 'zip-error' },
+  { id: 'province', errorId: 'province-error' }
+];
+
+let isValid = true;
+
+requiredFields.forEach(field => {
+  const input = document.getElementById(field.id);
+  const errorElement = document.getElementById(field.errorId);
+  
+  if (!input.value.trim()) {
+    errorElement.style.display = 'block';
+    isValid = false;
+  } else {
+    errorElement.style.display = 'none';
+  }
+});
+
+if (!isValid) {
+  console.log("Form validation failed");
+  return;
+}
+}
+
+// Update user details for future checkouts
+async function updateUserDetails(userId, orderData) {
+  try {
+    const userRef = doc(db, "users", userId);
+    
+    // Extract only the shipping details to save to user profile
+    const userDetails = {
+      firstName: orderData.firstName,
+      lastName: orderData.lastName,
+      email: orderData.email,
+      phone: orderData.phone,
+      address: orderData.address,
+      city: orderData.city,
+      province: orderData.province,
+      postalCode: orderData.postalCode,
+      updatedAt: serverTimestamp()
+    };
+    
+    // Update the user document (merge: true preserves other fields)
+    await updateDoc(userRef, userDetails, { merge: true });
+    
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    // Continue with order process even if user details update fails
+  }
+}
+
+// Clear the user's cart after successful order
+async function clearUserCart(userId) {
+  try {
+    const cartRef = collection(db, "carts");
+    const q = query(cartRef, where("userId", "==", userId));
+    const cartSnapshot = await getDocs(q);
+    
+    // Delete each cart item
+    const deletePromises = cartSnapshot.docs.map(doc => {
+      return deleteDoc(doc.ref);
+    });
+    
+    await Promise.all(deletePromises);
+    
+  } catch (error) {
+    console.error("Error clearing user cart:", error);
+    // Continue with order process even if cart clearing fails
+  }
+}
+
+// Handle payment method selection
+const paymentMethods = document.querySelectorAll('input[name="payment-method"]');
+paymentMethods.forEach(method => {
+  method.addEventListener('change', function() {
+    const paymentDetails = document.querySelectorAll('.payment-details');
+    
+    // Hide all payment details sections
+    paymentDetails.forEach(section => {
+      section.style.display = 'none';
+    });
+    
+    // Show the selected payment method's details section
+    const selectedMethod = this.value;
+    document.getElementById(`${selectedMethod}-details`).style.display = 'block';
   });
+});
+
+// Initialize default payment method
+document.querySelector('input[name="payment-method"]:checked')?.dispatchEvent(new Event('change'));
+
+
   

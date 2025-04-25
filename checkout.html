@@ -88,177 +88,171 @@
   </div>
   <!-- end hero area -->
 
-  <!-- checkout section -->
-  <section class="checkout-section layout_padding">
-    <div class="container">
-      <div class="heading_container heading_center">
-        <h2>Checkout</h2>
-      </div>
-      
-      <div class="checkout-container">
-        <!-- Checkout Form -->
-        <div id="checkout-form-container">
-          <div class="checkout-grid">
-            <div class="checkout-form">
-              <!-- Shipping Information -->
-              <div class="form-section">
-                <h3>Shipping Information</h3>
-                <div class="form-row">
-                  <div class="form-col">
-                    <div class="form-group">
-                      <label for="first-name">First Name *</label>
-                      <input type="text" id="first-name" class="form-control" required>
-                      <div class="error-message" id="first-name-error">First name is required</div>
-                    </div>
-                  </div>
-                  <div class="form-col">
-                    <div class="form-group">
-                      <label for="last-name">Last Name *</label>
-                      <input type="text" id="last-name" class="form-control" required>
-                      <div class="error-message" id="last-name-error">Last name is required</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="form-group">
-                  <label for="email">Email Address *</label>
-                  <input type="email" id="email" class="form-control" required>
-                  <div class="error-message" id="email-error">Please enter a valid email</div>
-                </div>
-                
-                <div class="form-group">
-                  <label for="phone">Phone Number *</label>
-                  <input type="tel" id="phone" class="form-control" required>
-                  <div class="error-message" id="phone-error">Please enter a valid phone number</div>
-                </div>
-                
-                <div class="form-group">
-                  <label for="address">Street Address *</label>
-                  <input type="text" id="address" class="form-control" required>
-                  <div class="error-message" id="address-error">Address is required</div>
-                </div>
-                
-                <div class="form-row">
-                  <div class="form-col">
-                    <div class="form-group">
-                      <label for="city">City *</label>
-                      <input type="text" id="city" class="form-control" required>
-                      <div class="error-message" id="city-error">City is required</div>
-                    </div>
-                  </div>
-                  <div class="form-col">
-                    <div class="form-group">
-                      <label for="zip">Postal Code *</label>
-                      <input type="text" id="zip" class="form-control" required>
-                      <div class="error-message" id="zip-error">Postal code is required</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="form-group">
-                  <label for="province">Province *</label>
-                  <select id="province" class="form-control" required>
-                    <option value="">Select Province</option>
-                    <option value="metro-manila">Metro Manila</option>
-                    <option value="cavite">Cavite</option>
-                    <option value="laguna">Laguna</option>
-                    <option value="batangas">Batangas</option>
-                    <option value="rizal">Rizal</option>
-                    <option value="bulacan">Bulacan</option>
-                    <option value="pampanga">Pampanga</option>
-                    <option value="other">Other</option>
-                  </select>
-                  <div class="error-message" id="province-error">Province is required</div>
-                </div>
-                
-                <div class="form-group">
-                  <label>Special Instructions (Optional)</label>
-                  <textarea class="form-control" rows="3" placeholder="Delivery instructions, landmarks, etc."></textarea>
-                </div>
-              </div>
-              
-              <!-- Payment Information -->
-              <div class="form-section">
-                <h3>Payment Method</h3>
-                
-                <div class="form-group">
-                  <div class="radio-group">
-                    <div class="radio-option">
-                      <input type="radio" id="payment-cod" name="payment-method" value="cash-on-delivery" checked>
-                      <label for="payment-cod">Cash on Delivery</label>
-                    </div>
-                    <div class="radio-option">
-                      <input type="radio" id="payment-gcash" name="payment-method" value="gcash">
-                      <label for="payment-gcash">GCash</label>
-                    </div>
-                    <div class="radio-option">
-                      <input type="radio" id="payment-bank" name="payment-method" value="bank-transfer">
-                      <label for="payment-bank">Bank Transfer</label>
-                    </div>
-                  </div>
-                </div>
-                
-                <div id="gcash-details" style="display:none;">
-                  <div class="form-group">
-                    <label>GCash Number: 0976 405 6887</label>
-                    <p>Please send the payment to the GCash number above and upload your payment receipt.</p>
-                    <input type="file" class="form-control" accept="image/*">
-                  </div>
-                </div>
-                
-                <div id="bank-details" style="display:none;">
-                  <div class="form-group">
-                    <label>Bank Details:</label>
-                    <p>Bank Name: BDO<br>
-                    Account Name: GrindOn Philippines<br>
-                    Account Number: 1234-5678-9012<br>
-                    Please upload your payment receipt after completing the transfer.</p>
-                    <input type="file" class="form-control" accept="image/*">
-                  </div>
-                </div>
-              </div>
+<!-- In your checkout.html file, find and replace the checkout form structure with this: -->
+
+<div class="checkout-container">
+  <!-- Checkout Form -->
+  <div id="checkout-form-container">
+    <form id="checkout-form" class="checkout-grid">
+      <!-- Shipping Information -->
+      <div class="form-section">
+        <h3>Shipping Information</h3>
+        <div class="form-row">
+          <div class="form-col">
+            <div class="form-group">
+              <label for="first-name">First Name *</label>
+              <input type="text" id="first-name" class="form-control" required>
+              <div class="error-message" id="first-name-error">First name is required</div>
             </div>
-            
-            <!-- Order Summary -->
-            <div class="order-summary">
-              <div class="form-section">
-                <h3>Order Summary</h3>
-                <div id="order-items">
-                  <!-- Order items will be loaded dynamically -->
-                  <div class="order-item">
-                    <img src="/api/placeholder/80/80" alt="Product" class="order-item-image">
-                    <div class="order-item-details">
-                      <div class="order-item-name">Loading your cart...</div>
-                      <div class="order-item-variant"></div>
-                      <div class="order-item-price"></div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="order-summary-row">
-                  <span>Subtotal</span>
-                  <span id="order-subtotal">₱0.00</span>
-                </div>
-                <div class="order-summary-row">
-                  <span>Shipping</span>
-                  <span id="order-shipping">₱150.00</span>
-                </div>
-                <div class="order-summary-row total">
-                  <span>Total</span>
-                  <span id="order-total">₱150.00</span>
-                </div>
-                
-                <button id="place-order-btn" class="checkout-btn">PLACE ORDER</button>
-                
-                <div class="payment-icons">
-                  <i class="fa fa-money" aria-hidden="true"></i>
-                  <i class="fa fa-credit-card" aria-hidden="true"></i>
-                  <i class="fa fa-university" aria-hidden="true"></i>
-                </div>
-              </div>
+          </div>
+          <div class="form-col">
+            <div class="form-group">
+              <label for="last-name">Last Name *</label>
+              <input type="text" id="last-name" class="form-control" required>
+              <div class="error-message" id="last-name-error">Last name is required</div>
             </div>
           </div>
         </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" class="form-control" required>
+          <div class="error-message" id="email-error">Please enter a valid email</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="phone">Phone Number *</label>
+          <input type="tel" id="phone" class="form-control" required>
+          <div class="error-message" id="phone-error">Please enter a valid phone number</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="address">Street Address *</label>
+          <input type="text" id="address" class="form-control" required>
+          <div class="error-message" id="address-error">Address is required</div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-col">
+            <div class="form-group">
+              <label for="city">City *</label>
+              <input type="text" id="city" class="form-control" required>
+              <div class="error-message" id="city-error">City is required</div>
+            </div>
+          </div>
+          <div class="form-col">
+            <div class="form-group">
+              <label for="zip">Postal Code *</label>
+              <input type="text" id="zip" class="form-control" required>
+              <div class="error-message" id="zip-error">Postal code is required</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="province">Province *</label>
+          <select id="province" class="form-control" required>
+            <option value="">Select Province</option>
+            <option value="metro-manila">Metro Manila</option>
+            <option value="cavite">Cavite</option>
+            <option value="laguna">Laguna</option>
+            <option value="batangas">Batangas</option>
+            <option value="rizal">Rizal</option>
+            <option value="bulacan">Bulacan</option>
+            <option value="pampanga">Pampanga</option>
+            <option value="other">Other</option>
+          </select>
+          <div class="error-message" id="province-error">Province is required</div>
+        </div>
+        
+        <div class="form-group">
+          <label>Special Instructions (Optional)</label>
+          <textarea class="form-control" rows="3" placeholder="Delivery instructions, landmarks, etc."></textarea>
+        </div>
+      </div>
+      
+      <!-- Payment Information -->
+      <div class="form-section">
+        <h3>Payment Method</h3>
+        
+        <div class="form-group">
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" id="payment-cod" name="payment-method" value="cash-on-delivery" checked>
+              <label for="payment-cod">Cash on Delivery</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="payment-gcash" name="payment-method" value="gcash">
+              <label for="payment-gcash">GCash</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="payment-bank" name="payment-method" value="bank-transfer">
+              <label for="payment-bank">Bank Transfer</label>
+            </div>
+          </div>
+        </div>
+        
+        <div id="gcash-details" class="payment-details" style="display:none;">
+          <div class="form-group">
+            <label>GCash Number: 0976 405 6887</label>
+            <p>Please send the payment to the GCash number above and upload your payment receipt.</p>
+            <input type="file" class="form-control" accept="image/*">
+          </div>
+        </div>
+        
+        <div id="bank-details" class="payment-details" style="display:none;">
+          <div class="form-group">
+            <label>Bank Details:</label>
+            <p>Bank Name: BDO<br>
+            Account Name: GrindOn Philippines<br>
+            Account Number: 1234-5678-9012<br>
+            Please upload your payment receipt after completing the transfer.</p>
+            <input type="file" class="form-control" accept="image/*">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <div class="form-section">
+          <h3>Order Summary</h3>
+          <div id="order-items">
+            <!-- Order items will be loaded dynamically -->
+            <div class="order-item">
+              <img src="/api/placeholder/80/80" alt="Product" class="order-item-image">
+              <div class="order-item-details">
+                <div class="order-item-name">Loading your cart...</div>
+                <div class="order-item-variant"></div>
+                <div class="order-item-price"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="order-summary-row">
+            <span>Subtotal</span>
+            <span id="order-subtotal">₱0.00</span>
+          </div>
+          <div class="order-summary-row">
+            <span>Shipping</span>
+            <span id="order-shipping">₱150.00</span>
+          </div>
+          <div class="order-summary-row total">
+            <span>Total</span>
+            <span id="order-total">₱150.00</span>
+          </div>
+          
+          <button type="submit" id="place-order-btn" class="checkout-btn">PLACE ORDER</button>
+          
+          <div class="payment-icons">
+            <i class="fa fa-money" aria-hidden="true"></i>
+            <i class="fa fa-credit-card" aria-hidden="true"></i>
+            <i class="fa fa-university" aria-hidden="true"></i>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
         
         <!-- Order Success Message (Hidden by default) -->
         <div class="order-success" id="order-success">
@@ -381,28 +375,7 @@
           }
         });
       });
-      
-      // Form validation
-      const placeOrderBtn = document.getElementById('place-order-btn');
-      if (placeOrderBtn) {
-        placeOrderBtn.addEventListener('click', function() {
-          const isValid = validateCheckoutForm();
-          
-          if (isValid) {
-            // Show order success message
-            document.getElementById('checkout-form-container').style.display = 'none';
-            document.getElementById('order-success').style.display = 'block';
-            
-            // Generate a random order number
-            const orderNumber = 'GRD-' + Math.floor(100000 + Math.random() * 900000);
-            document.getElementById('success-order-number').innerText = orderNumber;
-            
-            // You would typically process the order here
-            // and redirect to a success page
-          }
-        });
-      }
-      
+  
       function validateCheckoutForm() {
         let isValid = true;
         
