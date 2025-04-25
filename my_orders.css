@@ -206,3 +206,15 @@
       margin-top: 10px;
     }
   }
+  .navbar-top-logo {
+    margin-top: 25px;       /* Space above the logo */
+    padding-left: 890px;     /* Slight right shift */
+    margin-bottom: 10px;    /* Space below logo, before navbar */
+    text-align: left;
+  }
+  
+  .top-logo-img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+  }
