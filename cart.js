@@ -36,6 +36,7 @@ const auth = getAuth(app);
 // Get reference to the user option div in navbar
 const userOptionDiv = document.querySelector('.user_option');
 
+
 // Authentication state observer
 onAuthStateChanged(auth, (user) => {
   if (!userOptionDiv) return; // if navbar not present, do nothing
@@ -98,6 +99,12 @@ onAuthStateChanged(auth, (user) => {
         });
       });
     });
+    
+    // Make sure the continue shopping link is visible for logged-in users
+    const continueShoppingLink = document.querySelector('.continue-shopping');
+    if (continueShoppingLink) {
+      continueShoppingLink.style.display = 'block';
+    }
   } else {
     // User is signed out - show login message or redirect
     userOptionDiv.innerHTML = `
@@ -115,21 +122,28 @@ onAuthStateChanged(auth, (user) => {
     `;
     
     // Display message that user needs to log in to view cart
-    // Or redirect to login page
     document.getElementById('cart-items-container').style.display = 'none';
     document.getElementById('empty-cart').style.display = 'block';
     document.querySelector('#empty-cart h3').innerText = 'Please log in to view your cart';
     document.querySelector('#empty-cart p').innerText = 'You need to be logged in to manage your shopping cart';
+    
+    // Hide the login button inside empty cart for non-logged-in users
     const emptyCartButton = document.querySelector('#empty-cart .checkout-btn');
-    emptyCartButton.innerText = 'LOGIN';
-    emptyCartButton.addEventListener('click', function() {
-      window.location.href = 'login.html';
-    });
+    if (emptyCartButton) {
+      emptyCartButton.style.display = 'none';
+    }
+    
     // Hide the proceed to checkout button for logged-out users
-const checkoutBtn = document.querySelector('.checkout-btn');
-if (checkoutBtn) {
-  checkoutBtn.style.display = 'none';
-}
+    const checkoutBtn = document.querySelector('.checkout-btn');
+    if (checkoutBtn) {
+      checkoutBtn.style.display = 'none';
+    }
+    
+    // Hide the continue shopping link for non-logged-in users
+    const continueShoppingLink = document.querySelector('.continue-shopping');
+    if (continueShoppingLink) {
+      continueShoppingLink.style.display = 'none';
+    }
   }
 });
 
