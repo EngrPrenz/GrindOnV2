@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { 
   getAuth, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { 
   getFirestore, 
@@ -74,6 +75,41 @@ onAuthStateChanged(auth, (user) => {
     window.location.href = 'login.html';
   }
 });
+
+// Add this after your existing DOM ready handler
+document.addEventListener('DOMContentLoaded', function() {
+  // Add logout functionality
+  const logoutBtn = document.querySelector('.logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      handleLogout();
+    });
+  }
+});
+
+// Add this function to handle logout
+function handleLogout() {
+  const auth = getAuth();
+  signOut(auth).then(() => {
+    // Sign-out successful
+    console.log("User signed out");
+    localStorage.removeItem('adminName');
+    
+    // Disable any page transition effects
+    const pageTransitionOverlay = document.getElementById('pageTransitionOverlay');
+    if (pageTransitionOverlay) {
+      pageTransitionOverlay.style.display = 'none';
+    }
+    
+    // Direct redirect without transition
+    window.location.href = "admin_login.html";
+  }).catch((error) => {
+    // An error happened
+    console.error("Error signing out:", error);
+    alert("Error signing out: " + error.message);
+  });
+}
 
 // Load product data from Firestore
 async function loadProductData(id) {
