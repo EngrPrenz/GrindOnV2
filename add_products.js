@@ -1,5 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { checkAdminAuth, initAdminName } from "./admin_auth.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -14,8 +16,118 @@ const firebaseConfig = {
 // Init Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 let uploadedImageUrls = []; // Store uploaded image URLs here
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', async function() {
+  try {
+    // Check authentication first
+    const isAdmin = await checkAdminAuth();
+    if (!isAdmin) return; // Don't initialize if not admin
+    
+    // Initialize admin name
+    initAdminName();
+    
+    // Initialize theme
+    initTheme();
+    
+    // Set up logout button
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    
+    // Initialize drag and drop for the upload area
+    initDragAndDrop();
+  } catch (error) {
+    console.error("Error initializing page:", error);
+  }
+});
+
+// Handle logout
+function handleLogout(e) {
+  e.preventDefault();
+  
+  signOut(auth).then(() => {
+    // Sign-out successful
+    console.log("User signed out");
+    localStorage.removeItem('adminName');
+    window.location.href = "admin_login.html";
+  }).catch((error) => {
+    // An error happened
+    console.error("Error signing out:", error);
+    alert("Error signing out: " + error.message);
+  });
+}
+
+// Initialize theme based on user preference or localStorage
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  const themeToggle = document.getElementById('themeToggle');
+  
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeToggle.checked = true;
+  } else {
+    document.body.classList.remove('dark-mode');
+    themeToggle.checked = false;
+  }
+  
+  // Theme toggle event
+  themeToggle.addEventListener('change', function() {
+    if (this.checked) {
+      document.body.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+    }
+  });
+}
+
+// Initialize drag and drop functionality
+function initDragAndDrop() {
+  const uploadImage = document.getElementById('uploadImage');
+  if (uploadImage) {
+    uploadImage.addEventListener('change', function(e) {
+      const files = this.files;
+      const previewContainer = document.getElementById('imagePreviewContainer');
+      
+      if (previewContainer) {
+        previewContainer.innerHTML = '';
+        
+        if (files.length > 0) {
+          for (let file of files) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+    });
+    
+    // Make the upload area highlight on drag
+    const uploadArea = document.querySelector('.upload-area');
+    if (uploadArea) {
+      ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, function(e) {
+          e.preventDefault();
+          this.classList.add('active');
+        });
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, function(e) {
+          e.preventDefault();
+          this.classList.remove('active');
+        });
+      });
+    }
+  }
+}
 
 // Form submit handler
 document.getElementById("addProductForm").addEventListener("submit", async (e) => {
@@ -133,86 +245,3 @@ function fileToBase64(file) {
     reader.readAsDataURL(file);
   });
 }
-
-// Theme toggle functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const themeToggle = document.getElementById('themeToggle');
-  const body = document.body;
-  
-  // Check if user previously set a theme preference
-  const currentTheme = localStorage.getItem('theme');
-  if (currentTheme === 'dark') {
-    body.classList.add('dark-mode');
-    themeToggle.checked = true;
-  }
-  
-  // Theme toggle event listener
-  themeToggle.addEventListener('change', function() {
-    if (this.checked) {
-      body.classList.add('dark-mode');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      body.classList.remove('dark-mode');
-      localStorage.setItem('theme', 'light');
-    }
-  });
-  
-  // Initialize progress circles in stats cards (if they exist)
-  const progressCircles = document.querySelectorAll('.progress-circle');
-  progressCircles.forEach(circle => {
-    const value = circle.getAttribute('data-value');
-    circle.style.setProperty('--value', value + '%');
-  });
-  
-  // Load admin info from localStorage if available
-  const adminName = document.getElementById('adminName');
-  if (adminName) {
-    const savedAdminName = localStorage.getItem('adminName');
-    if (savedAdminName) {
-      adminName.textContent = savedAdminName;
-    }
-  }
-  
-  // Handle file upload display for add products page
-  const uploadImage = document.getElementById('uploadImage');
-  if (uploadImage) {
-    uploadImage.addEventListener('change', function(e) {
-      const files = this.files;
-      const previewContainer = document.getElementById('imagePreviewContainer');
-      
-      if (previewContainer) {
-        previewContainer.innerHTML = '';
-        
-        if (files.length > 0) {
-          for (let file of files) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              const img = document.createElement('img');
-              img.src = e.target.result;
-              previewContainer.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-          }
-        }
-      }
-    });
-    
-    // Make the upload area highlight on drag
-    const uploadArea = document.querySelector('.upload-area');
-    if (uploadArea) {
-      ['dragenter', 'dragover'].forEach(eventName => {
-        uploadArea.addEventListener(eventName, function(e) {
-          e.preventDefault();
-          this.classList.add('active');
-        });
-      });
-      
-      ['dragleave', 'drop'].forEach(eventName => {
-        uploadArea.addEventListener(eventName, function(e) {
-          e.preventDefault();
-          this.classList.remove('active');
-        });
-      });
-    }
-  }
-});

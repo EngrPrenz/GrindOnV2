@@ -9,11 +9,7 @@ import {
   getDocs,
   deleteDoc,
   doc,
-  query,
-  orderBy,
-  startAfter,
-  limit,
-  where
+  getDoc
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 // Firebase Config
@@ -28,8 +24,22 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Debug flag - set to true to see detailed logging
+const DEBUG = true;
+
+// Log function that only outputs when debug is enabled
+function logDebug(message, data = null) {
+  if (DEBUG) {
+    if (data) {
+      console.log(`[DEBUG] ${message}:`, data);
+    } else {
+      console.log(`[DEBUG] ${message}`);
+    }
+  }
+}
 
 // Elements
 const productsGrid = document.getElementById('productsGrid');
@@ -46,79 +56,154 @@ let allProducts = [];
 let filteredProducts = [];
 let isLoading = false;
 
-// Check authentication state
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in
-    adminNameElement.textContent = user.displayName || user.email.split('@')[0];
-    loadProducts();
-  } else {
-    // User is signed out, redirect to login
-    window.location.href = 'admin_login.html';
-  }
+// Initialize the page when DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+  logDebug('DOM fully loaded');
+  displayAdminName();
+  checkAuth();
 });
 
-// Show loading animation
-function showLoading() {
-  isLoading = true;
-  productsGrid.innerHTML = `
-    <div class="loading-animation">
-      <i class="fas fa-spinner fa-spin"></i>
-      <p>Loading products...</p>
-    </div>
-  `;
+// Display admin name from localStorage if available
+function displayAdminName() {
+  const storedName = localStorage.getItem('adminName');
+  logDebug('Stored admin name', storedName);
   
-  // Disable all pagination buttons during loading
-  const buttons = pagination.querySelectorAll('.page-button');
-  buttons.forEach(button => {
-    button.disabled = true;
-    button.classList.add('loading');
-    if (!button.querySelector('.fa-spinner')) {
-      button.insertAdjacentHTML('beforeend', '<i class="fas fa-spinner fa-spin"></i>');
+  if (adminNameElement && storedName) {
+    adminNameElement.textContent = storedName;
+    logDebug('Admin name set in UI');
+  } else if (adminNameElement) {
+    adminNameElement.textContent = 'Admin'; // Default fallback
+    logDebug('Default admin name set');
+  }
+}
+
+// Check authentication status
+function checkAuth() {
+  logDebug('Checking authentication');
+  showLoading('Verifying authentication...');
+  
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      logDebug('User is authenticated', user.uid);
+      
+      try {
+        // Check if user has admin role
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          logDebug('User data retrieved', userData);
+          
+          if (userData.role === "admin") {
+            logDebug('User confirmed as admin');
+            
+            // Store admin name
+            if (userData.name) {
+              localStorage.setItem('adminName', userData.name);
+              if (adminNameElement) {
+                adminNameElement.textContent = userData.name;
+              }
+              logDebug('Admin name stored and displayed', userData.name);
+            }
+            
+            // Load products
+            loadProducts();
+          } else {
+            logDebug('User is not an admin', userData.role);
+            alert("Access denied: You do not have admin privileges");
+            window.location.href = "admin_login.html";
+          }
+        } else {
+          logDebug('No user document found');
+          alert("User data not found");
+          window.location.href = "admin_login.html";
+        }
+      } catch (error) {
+        logDebug('Error checking admin status', error);
+        console.error("Error checking admin status:", error);
+        alert(`Error verifying admin status: ${error.message}`);
+        hideLoading();
+      }
+    } else {
+      logDebug('No user is signed in');
+      window.location.href = "admin_login.html";
     }
   });
+}
+
+// Show loading animation with optional message
+function showLoading(message = 'Loading products...') {
+  isLoading = true;
+  logDebug('Showing loading animation', message);
+  
+  if (productsGrid) {
+    productsGrid.innerHTML = `
+      <div class="loading-animation">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>${message}</p>
+      </div>
+    `;
+  }
+  
+  // Disable pagination buttons
+  if (pagination) {
+    const buttons = pagination.querySelectorAll('.page-button');
+    buttons.forEach(button => {
+      button.disabled = true;
+      button.classList.add('loading');
+    });
+  }
 }
 
 // Hide loading animation
 function hideLoading() {
   isLoading = false;
+  logDebug('Hiding loading animation');
   
   // Re-enable pagination buttons
-  const buttons = pagination.querySelectorAll('.page-button');
-  buttons.forEach(button => {
-    button.disabled = false;
-    button.classList.remove('loading');
-    const spinner = button.querySelector('.fa-spinner');
-    if (spinner) {
-      spinner.remove();
-    }
-  });
+  if (pagination) {
+    const buttons = pagination.querySelectorAll('.page-button');
+    buttons.forEach(button => {
+      button.disabled = false;
+      button.classList.remove('loading');
+    });
+  }
 }
 
 // Load products from Firestore
 async function loadProducts() {
+  logDebug('Loading products');
+  showLoading('Fetching products from database...');
+  
   try {
-    showLoading();
-    
     const productsRef = collection(db, "products");
+    logDebug('Products collection reference created');
+    
     const querySnapshot = await getDocs(productsRef);
+    logDebug('Products query executed', `Retrieved ${querySnapshot.size} products`);
     
     // Clear products array
     allProducts = [];
     
     // Populate products array
     querySnapshot.forEach((doc) => {
+      const productData = doc.data();
       allProducts.push({
         id: doc.id,
-        ...doc.data()
+        ...productData
       });
+      logDebug('Added product', { id: doc.id, name: productData.name });
     });
+    
+    logDebug('All products loaded', allProducts.length);
     
     // Set initial filtered products
     filteredProducts = [...allProducts];
     
     // Set total pages
     totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+    logDebug('Pagination calculated', { total: totalPages, perPage: PRODUCTS_PER_PAGE });
     
     // Render products and pagination
     renderProducts();
@@ -127,47 +212,55 @@ async function loadProducts() {
     hideLoading();
     
   } catch (error) {
-    console.error("Error loading products: ", error);
-    productsGrid.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-exclamation-circle"></i>
-        <p>Error loading products. Please try again later.</p>
-      </div>
-    `;
+    logDebug('Error loading products', error);
+    console.error("Error loading products:", error);
+    
+    if (productsGrid) {
+      productsGrid.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-exclamation-circle"></i>
+          <p>Error loading products</p>
+          <p class="error-details">${error.message}</p>
+          <button id="retryButton" class="retry-button">
+            <i class="fas fa-sync"></i> Retry
+          </button>
+        </div>
+      `;
+      
+      // Add retry button functionality
+      const retryButton = document.getElementById('retryButton');
+      if (retryButton) {
+        retryButton.addEventListener('click', loadProducts);
+      }
+    }
+    
     hideLoading();
   }
 }
 
-// Navigate to a specific page
-function goToPage(page) {
-  if (page < 1 || page > totalPages || page === currentPage || isLoading) return;
-  
-  showLoading();
-  
-  // Use setTimeout to show the loading animation
-  setTimeout(() => {
-    currentPage = page;
-    renderProducts();
-    renderPagination();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    hideLoading();
-  }, 300);
-}
-
 // Render products for current page
 function renderProducts() {
+  if (!productsGrid) {
+    logDebug('Products grid element not found');
+    return;
+  }
+  
+  logDebug('Rendering products for page', currentPage);
+  
   // Start and end index for current page
   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
   const endIndex = startIndex + PRODUCTS_PER_PAGE;
   
   // Get products for current page
   const productsToShow = filteredProducts.slice(startIndex, endIndex);
+  logDebug('Products to display', productsToShow.length);
   
   // Clear products grid
   productsGrid.innerHTML = '';
   
   // Check if there are products
   if (productsToShow.length === 0) {
+    logDebug('No products to display');
     productsGrid.innerHTML = `
       <div class="empty-state">
         <i class="fas fa-box-open"></i>
@@ -182,6 +275,8 @@ function renderProducts() {
   
   // Loop through products and create cards
   productsToShow.forEach(product => {
+    logDebug('Creating card for product', { id: product.id, name: product.name });
+    
     // Determine stock status
     let stockStatus = '';
     let stockClass = '';
@@ -209,13 +304,13 @@ function renderProducts() {
     productCard.className = 'product-card';
     productCard.innerHTML = `
       <div class="product-image">
-        <img src="${imageUrl}" alt="${product.name}">
+        <img src="${imageUrl}" alt="${product.name}" onerror="this.src='images/placeholder-product.jpg';">
         <div class="product-status ${stockClass}">${stockStatus}</div>
       </div>
       <div class="product-details">
         <h3 class="product-title">${product.name}</h3>
         <div class="product-category">${product.category || ''}</div>
-        <div class="product-price">₱${product.price.toFixed(2)}</div>
+        <div class="product-price">₱${(parseFloat(product.price) || 0).toFixed(2)}</div>
         <div class="product-actions">
           <button class="action-button edit-btn" data-id="${product.id}">
             <i class="fas fa-edit"></i> Edit
@@ -227,21 +322,23 @@ function renderProducts() {
       </div>
     `;
     
-    // Add event listeners for buttons only
+    // Add event listeners for buttons
     productCard.querySelector('.edit-btn').addEventListener('click', (e) => {
       e.stopPropagation();
+      logDebug('Edit button clicked for product', product.id);
       window.location.href = `admin_edit_product.html?id=${product.id}`;
     });
     
     productCard.querySelector('.delete-btn').addEventListener('click', (e) => {
       e.stopPropagation();
+      logDebug('Delete button clicked for product', product.id);
       confirmDeleteProduct(product.id, product.name);
     });
     
-    // Note: Removed the click event for the entire card
-    
     productsGrid.appendChild(productCard);
   });
+  
+  logDebug('Products rendered successfully');
 }
 
 // Calculate total stock from variations
@@ -259,13 +356,22 @@ function calculateTotalStock(variations) {
 }
 
 // Render pagination buttons
-// Render pagination buttons
 function renderPagination() {
+  if (!pagination) {
+    logDebug('Pagination element not found');
+    return;
+  }
+  
+  logDebug('Rendering pagination', { currentPage, totalPages });
+  
   // Clear pagination
   pagination.innerHTML = '';
   
   // Don't show pagination if there's only one page
-  if (totalPages <= 1) return;
+  if (totalPages <= 1) {
+    logDebug('No pagination needed (only one page)');
+    return;
+  }
   
   // Create previous button
   const prevButton = document.createElement('button');
@@ -274,14 +380,8 @@ function renderPagination() {
   prevButton.disabled = currentPage === 1;
   prevButton.addEventListener('click', () => {
     if (currentPage > 1 && !isLoading) {
-      showLoading();
-      setTimeout(() => {
-        currentPage--;
-        renderProducts();
-        renderPagination();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        hideLoading();
-      }, 300);
+      logDebug('Previous page button clicked');
+      goToPage(currentPage - 1);
     }
   });
   pagination.appendChild(prevButton);
@@ -297,14 +397,8 @@ function renderPagination() {
     pageButton.textContent = i;
     pageButton.addEventListener('click', () => {
       if (i !== currentPage && !isLoading) {
-        showLoading();
-        setTimeout(() => {
-          currentPage = i;
-          renderProducts();
-          renderPagination();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          hideLoading();
-        }, 300);
+        logDebug('Page button clicked', i);
+        goToPage(i);
       }
     });
     pagination.appendChild(pageButton);
@@ -317,36 +411,51 @@ function renderPagination() {
   nextButton.disabled = currentPage === totalPages;
   nextButton.addEventListener('click', () => {
     if (currentPage < totalPages && !isLoading) {
-      showLoading();
-      setTimeout(() => {
-        currentPage++;
-        renderProducts();
-        renderPagination();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        hideLoading();
-      }, 300);
+      logDebug('Next page button clicked');
+      goToPage(currentPage + 1);
     }
   });
   pagination.appendChild(nextButton);
+  
+  logDebug('Pagination rendered successfully');
 }
 
+// Navigate to a specific page
+function goToPage(page) {
+  if (page < 1 || page > totalPages || page === currentPage || isLoading) return;
   
+  logDebug('Navigating to page', page);
+  showLoading(`Loading page ${page}...`);
+  
+  // Use setTimeout to show the loading animation
+  setTimeout(() => {
+    currentPage = page;
+    renderProducts();
+    renderPagination();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    hideLoading();
+  }, 300);
+}
 
 // Filter and search products
 function filterProducts() {
   if (isLoading) return;
   
-  showLoading();
+  logDebug('Filtering products');
+  showLoading('Filtering products...');
   
   // Use setTimeout to show the loading animation
   setTimeout(() => {
     const searchTerm = searchInput.value.toLowerCase();
+    logDebug('Search term', searchTerm);
     
     filteredProducts = allProducts.filter(product => {
       // Search term filter
       return product.name.toLowerCase().includes(searchTerm) || 
              (product.description && product.description.toLowerCase().includes(searchTerm));
     });
+    
+    logDebug('Filtered products count', filteredProducts.length);
     
     // Apply sorting
     sortProducts();
@@ -357,51 +466,68 @@ function filterProducts() {
     renderProducts();
     renderPagination();
     hideLoading();
-  }, 500); // Slight delay to show loading animation
+  }, 300);
 }
 
 // Sort products based on selected option
 function sortProducts() {
-  const sortOption = sortOptions.value;
+  const sortOption = sortOptions ? sortOptions.value : 'all';
+  logDebug('Sorting products by', sortOption);
   
   switch (sortOption) {
     case 'all':
       // Default sorting or no specific sort for "All Products"
-      // You can choose to maintain the original order or use a default sort
       filteredProducts = [...allProducts]; // Reset to original order
       break;
     case 'newest':
-      filteredProducts.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+      filteredProducts.sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : 0;
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : 0;
+        return dateB - dateA;
+      });
       break;
     case 'price-low':
-      filteredProducts.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+      filteredProducts.sort((a, b) => parseFloat(a.price || 0) - parseFloat(b.price || 0));
       break;
     case 'price-high':
-      filteredProducts.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+      filteredProducts.sort((a, b) => parseFloat(b.price || 0) - parseFloat(a.price || 0));
       break;
     case 'name-asc':
       filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
       break;
     default:
       // Default sorting (newest first)
-      filteredProducts.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+      filteredProducts.sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : 0;
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : 0;
+        return dateB - dateA;
+      });
   }
+  
+  logDebug('Products sorted');
 }
+
 // Confirm and delete product
 function confirmDeleteProduct(productId, productName) {
   if (isLoading) return;
   
+  logDebug('Confirming product deletion', { id: productId, name: productName });
+  
   if (confirm(`Are you sure you want to delete "${productName}"?`)) {
     deleteProduct(productId);
+  } else {
+    logDebug('Product deletion cancelled');
   }
 }
 
 // Delete product from Firestore
 async function deleteProduct(productId) {
-  showLoading();
+  logDebug('Deleting product', productId);
+  showLoading('Deleting product...');
   
   try {
     await deleteDoc(doc(db, "products", productId));
+    logDebug('Product deleted from Firestore');
     
     // Remove from local arrays
     allProducts = allProducts.filter(p => p.id !== productId);
@@ -413,6 +539,7 @@ async function deleteProduct(productId) {
     // If current page is now empty and not the first page, go to previous page
     if (currentPage > 1 && (currentPage - 1) * PRODUCTS_PER_PAGE >= filteredProducts.length) {
       currentPage--;
+      logDebug('Moved to previous page after deletion', currentPage);
     }
     
     // Re-render UI
@@ -423,15 +550,23 @@ async function deleteProduct(productId) {
     // Show success message
     alert('Product deleted successfully');
   } catch (error) {
-    console.error("Error deleting product: ", error);
-    alert('Error deleting product. Please try again.');
+    logDebug('Error deleting product', error);
+    console.error("Error deleting product:", error);
+    alert('Error deleting product: ' + error.message);
     hideLoading();
   }
 }
 
 // Add event listeners for search and filters
-searchInput.addEventListener('input', debounce(filterProducts, 300));
-sortOptions.addEventListener('change', filterProducts);
+if (searchInput) {
+  searchInput.addEventListener('input', debounce(filterProducts, 300));
+  logDebug('Search input event listener added');
+}
+
+if (sortOptions) {
+  sortOptions.addEventListener('change', filterProducts);
+  logDebug('Sort options event listener added');
+}
 
 // Debounce function to limit how often a function can be called
 function debounce(func, delay) {
@@ -445,3 +580,6 @@ function debounce(func, delay) {
     }, delay);
   };
 }
+
+// Log initial script load
+logDebug('admin_view_products.js loaded');
