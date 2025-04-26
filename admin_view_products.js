@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import {
   getAuth,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import {
   getFirestore,
@@ -62,6 +63,45 @@ document.addEventListener('DOMContentLoaded', function() {
   displayAdminName();
   checkAuth();
 });
+
+
+// Add this near the top of your event listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Add logout functionality
+  const logoutBtn = document.querySelector('.logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      handleLogout();
+    });
+  }
+});
+
+// Add this function to handle logout
+function handleLogout() {
+  logDebug('Logout initiated');
+  
+  const auth = getAuth();
+  signOut(auth).then(() => {
+    // Sign-out successful
+    logDebug("User signed out");
+    localStorage.removeItem('adminName');
+    
+    // Disable any page transition effects
+    const pageTransitionOverlay = document.getElementById('pageTransitionOverlay');
+    if (pageTransitionOverlay) {
+      pageTransitionOverlay.style.display = 'none';
+    }
+    
+    // Direct redirect without transition
+    window.location.href = "admin_login.html";
+  }).catch((error) => {
+    // An error happened
+    logDebug("Error signing out:", error);
+    console.error("Error signing out:", error);
+    alert("Error signing out: " + error.message);
+  });
+}
 
 // Display admin name from localStorage if available
 function displayAdminName() {
