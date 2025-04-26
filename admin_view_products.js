@@ -54,7 +54,7 @@ onAuthStateChanged(auth, (user) => {
     loadProducts();
   } else {
     // User is signed out, redirect to login
-    window.location.href = 'login.html';
+    window.location.href = 'admin_login.html';
   }
 });
 
