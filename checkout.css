@@ -1,16 +1,17 @@
-/* Enhanced Checkout Page Styles */
+/* Enhanced Checkout Page Styles with More Black Accents */
 .checkout-section {
   padding: 60px 0;
   background-color: #f8f9fa;
 }
 
 .checkout-container {
-  max-width: 1000px; /* Reduced from 1200px for better centralization */
+  max-width: 1000px;
   margin: 40px auto;
   padding: 30px;
   background-color: #fff;
   border-radius: 12px;
-  box-shadow: 0 5px 30px rgba(0,0,0,0.08);
+  box-shadow: 0 5px 30px rgba(0,0,0,0.15);
+  border-top: 5px solid #000; /* Added black border at the top */
 }
 
 /* Modified to a single column layout with all sections in one column */
@@ -18,48 +19,50 @@
   display: flex;
   flex-direction: column;
   gap: 30px;
-  max-width: 800px; /* Narrower width for better centralization */
-  margin: 0 auto; /* Center within the container */
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-/* Form Sections Styling */
+/* Form Sections Styling - Added black accents */
 .form-section {
   margin-bottom: 35px;
   background-color: #fff;
   border-radius: 10px;
   padding: 25px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  width: 100%; /* Ensure full width */
+  width: 100%;
+  border-left: 4px solid #000; /* Added black border on the left */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .form-section:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.12);
 }
 
 .form-section h3 {
-  border-bottom: 2px solid #f2f2f2;
+  border-bottom: 2px solid #000; /* Consistent black border */
   padding-bottom: 15px;
   margin-bottom: 25px;
   font-size: 20px;
   font-weight: 600;
-  color: #333;
+  color: #000;
   position: relative;
-  text-align: center; /* Center section headings */
+  text-align: center;
 }
 
 .form-section h3::after {
   content: '';
   position: absolute;
   bottom: -2px;
-  left: 50%; /* Center the underline */
-  transform: translateX(-50%); /* Center the underline */
-  width: 60px;
-  height: 2px;
-  background-color: #000;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: #000; /* Consistent black underline accent */
 }
 
-/* Form Controls */
+/* Form Controls - Enhanced with black accents */
 .form-group {
   margin-bottom: 22px;
 }
@@ -67,15 +70,15 @@
 .form-group label {
   display: block;
   margin-bottom: 10px;
-  font-weight: 500;
-  color: #444;
+  font-weight: 600; /* Made bolder */
+  color: #000; /* Changed to black */
   font-size: 15px;
 }
 
 .form-control {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #e0e0e0;
+  border: 2px solid #e0e0e0; /* Thicker border */
   border-radius: 8px;
   transition: all 0.3s ease;
   font-size: 15px;
@@ -106,13 +109,13 @@
   min-width: 200px;
 }
 
-/* Radio Buttons Styling */
+/* Radio Buttons Styling - Enhanced with black accents */
 .radio-group {
   display: flex;
   gap: 25px;
   flex-wrap: wrap;
   margin-top: 5px;
-  justify-content: center; /* Center radio options */
+  justify-content: center;
 }
 
 .radio-option {
@@ -120,7 +123,7 @@
   align-items: center;
   gap: 10px;
   padding: 12px 20px;
-  border: 1px solid #e0e0e0;
+  border: 2px solid #e0e0e0; /* Thicker border */
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -128,6 +131,12 @@
 
 .radio-option:hover {
   background-color: #f9f9f9;
+  border-color: #000; /* Change border to black on hover */
+}
+
+.radio-option.selected {
+  border-color: #000;
+  background-color: #f0f0f0;
 }
 
 input[type="radio"] {
@@ -136,30 +145,34 @@ input[type="radio"] {
   height: 18px;
 }
 
-/* Payment Details */
+/* Payment Details - Enhanced with black accents */
 .payment-details {
   margin-top: 15px;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
-  border-left: 3px solid #000;
+  border-left: 4px solid #000; /* Thicker black border */
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Order Summary Styling - Centralized */
+/* Order Summary Styling - Enhanced with black styling */
 .order-summary {
   width: 100%;
-  max-width: 600px; /* Narrower width for better centralization */
-  margin: 0 auto; /* Center within the container */
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .order-summary .form-section {
-  background-color: #f9f9f9;
+  background-color: #fff; /* Changed from dark to white */
   border-radius: 10px;
   padding: 25px;
   text-align: center;
-  border: 3px solid #000;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  border-left: 4px solid #000; /* Added left border for consistency */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
   width: 100%;
+  color: #000; /* Changed text color to black for white background */
 }
 
 /* Order summary title alignment */
@@ -169,6 +182,7 @@ input[type="radio"] {
   font-weight: 700;
   font-size: 22px;
   margin-bottom: 20px;
+  border-bottom: 2px solid #000; /* Changed to black for consistency */
 }
 
 .order-summary .form-section h3::after {
@@ -176,13 +190,14 @@ input[type="radio"] {
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
+  background-color: #000; /* Changed to black for consistency */
 }
 
-/* Order Items - Modified for better spacing */
+/* Order Items - Enhanced for better contrast on dark background */
 .order-item {
   display: flex;
   padding: 15px 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e0e0e0; /* Changed to lighter border */
   align-items: center;
   justify-content: space-between;
   text-align: left;
@@ -194,7 +209,7 @@ input[type="radio"] {
   object-fit: cover;
   margin-right: 12px;
   border-radius: 8px;
-  border: 1px solid #f0f0f0;
+  border: 2px solid #e0e0e0; /* Changed to lighter border */
 }
 
 .order-item-details {
@@ -204,64 +219,66 @@ input[type="radio"] {
 .order-item-name {
   font-weight: 600;
   margin-bottom: 5px;
-  color: #333;
+  color: #000; /* Changed to black */
   font-size: 16px;
 }
 
 .order-item-variant {
   font-size: 14px;
-  color: #666;
+  color: #666; /* Changed to darker gray for white background */
 }
 
 .order-item-price {
   font-weight: 600;
   margin-top: 8px;
-  color: #000;
+  color: #000; /* Changed to black */
   text-align: right;
   min-width: 90px;
 }
 
-/* Order Summary Rows - Improved spacing */
+/* Order Summary Rows - Adjusted for white background */
 .order-summary-row {
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e0e0e0; /* Changed to lighter border */
+  color: #333; /* Changed to dark gray */
 }
 
 .order-summary-row.total {
   font-weight: 700;
   font-size: 20px;
-  border-top: 2px solid #000;
+  border-top: 2px solid #000; /* Changed to black */
   border-bottom: none;
   padding-top: 15px;
   margin-top: 8px;
-  color: #000;
+  color: #000; /* Changed to black */
 }
 
 /* Checkout Button - Enhanced */
 .checkout-btn {
   display: block;
   width: 100%;
-  max-width: 400px; /* Limit width for visual appeal */
-  padding: 15px;
+  max-width: 400px;
+  padding: 16px; /* Slightly taller */
   background-color: #000;
   color: #fff;
-  border: none;
+  border: 2px solid #fff; /* Added white border for contrast */
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
-  margin: 25px auto 0; /* Center the button */
+  margin: 25px auto 0;
   transition: all 0.3s ease;
 }
 
 .checkout-btn:hover {
-  background-color: #333;
+  background-color: grey;
+  color: #000; /* Invert colors on hover */
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 5px 15px rgba(255,255,255,0.2);
 }
 
 .checkout-btn:active {
@@ -278,17 +295,17 @@ input[type="radio"] {
 
 .payment-icons i {
   font-size: 22px;
-  color: #666;
+  color: #aaa; /* Light gray for contrast */
   transition: color 0.2s ease;
 }
 
 .payment-icons i:hover {
-  color: #000;
+  color: #fff; /* White on hover */
 }
 
 /* Error Messages */
 .error-message {
-  color: #dc3545;
+  color: #ff6b6b; /* More vibrant red for dark backgrounds */
   font-size: 13px;
   margin-top: 8px;
   display: none;
@@ -306,23 +323,24 @@ input[type="radio"] {
   max-width: 800px;
   margin: 40px auto;
   display: none;
+  border-top: 5px solid #000; /* Added black border at the top */
 }
 
 .order-success i {
   font-size: 80px;
-  color: #28a745;
+  color: #000; /* Changed to black */
   margin-bottom: 25px;
 }
 
 .order-success h2 {
   font-size: 32px;
   margin-bottom: 20px;
-  color: #333;
+  color: #000; /* Changed to black */
 }
 
 .order-success p {
   font-size: 17px;
-  color: #666;
+  color: #333;
   margin-bottom: 30px;
   line-height: 1.6;
 }
@@ -350,7 +368,7 @@ input[type="radio"] {
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
-/* Responsive Adjustments - Updated for better mobile experience */
+/* Responsive Adjustments */
 @media (max-width: 768px) {
   .checkout-container {
     padding: 20px;
@@ -374,14 +392,14 @@ input[type="radio"] {
 /* Focus styles for accessibility */
 input:focus, select:focus, textarea:focus {
   border-color: #000;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.15);
   outline: none;
 }
 
 /* Custom select styling */
 select.form-control {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1em;
@@ -399,10 +417,9 @@ textarea.form-control {
   resize: vertical;
 }
 
-/* Payment Method Section Styling - Modified to match other form sections */
+/* Payment Method Section Styling */
 .form-section.payment-method {
   padding: 25px;
-  box-shadow: none;
   background-color: #fff;
 }
 
@@ -415,15 +432,15 @@ textarea.form-control {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-width: 600px; /* Limit width for visual appeal */
-  margin: 0 auto; /* Center within the container */
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 /* Individual Payment Option */
 .payment-option {
   display: flex;
   align-items: center;
-  border: 1px solid #e0e0e0;
+  border: 2px solid #e0e0e0; /* Thicker border */
   border-radius: 12px;
   padding: 0;
   overflow: hidden;
@@ -434,6 +451,13 @@ textarea.form-control {
 
 .payment-option:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-color: #000; /* Change to black on hover */
+}
+
+/* Selected payment option */
+.payment-option.selected {
+  border-color: #000;
+  background-color: #f8f8f8;
 }
 
 /* Radio Input Styling */
@@ -461,9 +485,10 @@ textarea.form-control {
   justify-content: center;
   width: 80px;
   height: 60px;
-  background-color: #f5f5f5;
+  background-color: #000; /* Changed to black */
   margin-right: 15px;
   padding: 12px;
+  color: #fff; /* White text for contrast */
 }
 
 /* Logo Image */
@@ -476,31 +501,28 @@ textarea.form-control {
 /* Payment Icon (Font Awesome) */
 .payment-logo i {
   font-size: 24px;
+  color: #fff; /* White color for icons */
 }
 
 /* COD Logo Background */
 .payment-logo.cod {
-  background-color: #41b883;
-  color: white;
+  background-color: #FF9800; /* Changed to orange for Cash on Delivery */
 }
 
 /* GCash Logo Background */
 .payment-logo.gcash {
-  background-color: #007EF4;
-  color: white;
+  background-color: #007EFF; /* Changed to blue for GCash */
 }
 
 /* Bank Transfer Logo Background */
 .payment-logo.bank {
-  background-color: #0085FF;
-  color: white;
+  background-color: #4CAF50; /* Changed to green for Online Banking */
 }
 
-/* Credit Card Logo Background */
+/* Credit Card Logo Background - keeping black for contrast */
 .payment-logo.credit-card {
-  background-color: #f5f5f5;
+  background-color: #000;
 }
-
 /* Payment Title */
 .payment-title {
   flex: 1;
@@ -523,7 +545,7 @@ textarea.form-control {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 2px solid #ccc;
+  border: 2px solid #000; /* Changed to black */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -536,13 +558,13 @@ textarea.form-control {
   width: 0;
   height: 0;
   border-radius: 50%;
-  background-color: #E91E63;
+  background-color: #000; /* Changed to black */
   transition: all 0.2s ease;
 }
 
 /* Selected Payment Option Styling */
 .payment-option input[type="radio"]:checked + label .payment-selector .radio-circle {
-  border-color: #E91E63;
+  border-color: #000;
 }
 
 .payment-option input[type="radio"]:checked + label .payment-selector .radio-circle::after {
@@ -563,27 +585,14 @@ textarea.form-control {
   width: auto;
 }
 
-/* Payment Details Styling */
-.payment-details {
-  margin-top: 15px;
-  margin-left: 0px;
-  padding: 15px 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  border-left: 3px solid #007EF4;
-  max-width: 600px; /* Limit width for visual appeal */
-  margin-left: auto;
-  margin-right: auto;
-}
-
 /* Card Input Styling */
 .card-input-group {
   margin-top: 15px;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
-  border-left: 3px solid #717171;
-  max-width: 600px; /* Limit width for visual appeal */
+  border-left: 4px solid #000; /* Changed to black */
+  max-width: 600px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -596,6 +605,26 @@ textarea.form-control {
 
 .card-input-col {
   flex: 1;
+}
+
+/* Section separators */
+.section-divider {
+  height: 3px;
+  background-color: #000;
+  margin: 30px auto;
+  max-width: 600px;
+  width: 60%;
+}
+
+/* Page title */
+.checkout-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* Mobile Responsiveness */

@@ -45,29 +45,48 @@ async function fetchPendingOrders() {
 
     querySnapshot.forEach((doc) => {
       const order = doc.data();
+      const totalQuantity = order.items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      
+      // Get status badge class
+      let statusClass = '';
+      switch(order.status.toLowerCase()) {
+        case 'pending':
+          statusClass = 'status-pending';
+          break;
+        case 'declined':
+          statusClass = 'status-declined';
+          break;
+        case 'delivered':
+        case 'shipped':
+          statusClass = 'status-delivered';
+          break;
+        default:
+          statusClass = '';
+      }
+      
       const row = `
         <tr>
           <td>${doc.id}</td>
+          <td>${order.items.map(item => item.name).join(", ")}</td>
           <td>${order.firstName || ''} ${order.lastName || ''}</td>
-          <td>${order.items.map(item => `${item.name} (${item.color}, ${item.size})`).join(", ")}</td>
-          <td>${order.items.reduce((sum, item) => sum + (item.quantity || 1), 0)}</td>
+          <td>${totalQuantity}</td>
           <td>₱${order.total ? order.total.toFixed(2) : '0.00'}</td>
-          <td>${order.status}</td>
+          <td><span class="status-badge ${statusClass}">${order.status}</span></td>
           <td>
-            <button class="fulfill-btn" data-id="${doc.id}">Ship Order</button>
-            <button class="delete-btn" data-id="${doc.id}">Decline Order</button>
+            <button class="action-btn ship-btn" data-id="${doc.id}"><i class="fas fa-shipping-fast"></i> Ship Order</button>
+            <button class="action-btn decline-btn" data-id="${doc.id}"><i class="fas fa-times-circle"></i> Decline</button>
           </td>
         </tr>
       `;
       ordersTableBody.innerHTML += row;
     });
 
-    // Add event listeners for fulfill and delete buttons
-    document.querySelectorAll(".fulfill-btn").forEach((button) => {
+    // Add event listeners for ship and decline buttons
+    document.querySelectorAll(".ship-btn").forEach((button) => {
       button.addEventListener("click", () => fulfillOrder(button.dataset.id));
     });
 
-    document.querySelectorAll(".delete-btn").forEach((button) => {
+    document.querySelectorAll(".decline-btn").forEach((button) => {
       button.addEventListener("click", () => declineOrder(button.dataset.id));
     });
   } catch (error) {
