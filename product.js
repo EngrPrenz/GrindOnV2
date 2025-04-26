@@ -1,10 +1,7 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import {
   getAuth,
   onAuthStateChanged,
-  signInWithPopup,
-  GoogleAuthProvider,
   signOut
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
@@ -25,7 +22,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyC5n40vPlIjXQ25X4NJlr8Z2jRGux0C1Y8",
   authDomain: "grindon-da126.firebaseapp.com",
   projectId: "grindon-da126",
-  storageBucket: "grindon-da126.appspot.com",
+  storageBucket: "grindon-da126.firebasestorage.app",
   messagingSenderId: "606558901364",
   appId: "1:606558901364:web:e39156bea8d403f191ed21"
 };
@@ -128,7 +125,6 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
     // Check if user is logged in
     const user = auth.currentUser;
     if (!user) {
-      // Redirect to login page or show login modal
       // Show a modal prompting the user to log in
       const modal = document.createElement('div');
       modal.style.position = 'fixed';
@@ -245,13 +241,25 @@ async function fetchProduct() {
     }
 
     const data = productSnap.data();
-    const images = data.imageUrls || [data.imageUrl] || [];
+    
+    // Handle both the old single imageUrl format and the new imageUrls array format
+    const images = data.imageUrls || [data.imageUrl];
 
-    // Render product details with better variation handling
+    // Render product details with image gallery
     productDetail.innerHTML = `
       <div class="product-container">
         <div class="product-image">
-          <img src="${images[0]}" alt="${data.name}" style="max-width:100%; max-height:400px" />
+          <div class="product-gallery">
+            <div class="main-image-container">
+              <img src="${images[0]}" class="main-image" id="mainImage" alt="${data.name}">
+            </div>
+            <div class="thumbnails-container">
+              ${images.map((img, index) => `
+                <img src="${img}" class="thumbnail ${index === 0 ? 'active' : ''}" 
+                     onclick="changeMainImage('${img}', this)" alt="Thumbnail ${index+1}">
+              `).join('')}
+            </div>
+          </div>
         </div>
         <div class="product-info">
           <h2>${data.name}</h2>
@@ -260,18 +268,10 @@ async function fetchProduct() {
             <p>${data.description}</p>
           </div>
           
-          <div class="product-variations">
-            <div class="variation-selection">
-              <label for="color-select">Color:</label>
-              <select id="color-select" class="variation-dropdown">
-                ${renderColorOptions(data.variations)}
-              </select>
-            </div>
-            <div class="variation-selection">
-              <label for="size-select">Size:</label>
-              <select id="size-select" class="variation-dropdown">
-                ${renderSizeOptions(data.variations)}
-              </select>
+          <div class="size-selector">
+            <h5>Size</h5>
+            <div class="size-options" id="size-options">
+              ${renderSizeOptions(data.variations)}
             </div>
           </div>
           
@@ -289,55 +289,47 @@ async function fetchProduct() {
       </div>
     `;
 
-    // Set up controls and event handlers
+    // Add global functions for image changing
+    window.changeMainImage = function(imgSrc, clickedThumb) {
+      document.getElementById("mainImage").src = imgSrc;
+      
+      // Update active thumbnail
+      const thumbnails = document.querySelectorAll(".thumbnail");
+      thumbnails.forEach(thumb => {
+        thumb.classList.remove("active");
+      });
+      clickedThumb.classList.add("active");
+    };
+
+    // Get all color options from variations
+    const colorOptions = Object.keys(data.variations || {});
+    
+    // If there are variations, set up the size options
+    if (colorOptions.length > 0) {
+      const selectedColor = colorOptions[0]; // Default to first color
+      
+      // Set up size options
+      const sizeOptions = document.querySelectorAll(".size-option");
+      sizeOptions.forEach(option => {
+        option.addEventListener("click", function() {
+          // Remove selected class from all options
+          sizeOptions.forEach(opt => opt.classList.remove("selected"));
+          // Add selected class to clicked option
+          this.classList.add("selected");
+          updateAvailableQuantity(data.variations, selectedColor);
+        });
+      });
+      
+      // Initialize with first size option selected
+      if (sizeOptions.length > 0) {
+        sizeOptions[0].classList.add("selected");
+        updateAvailableQuantity(data.variations, selectedColor);
+      }
+    }
+
+    // Set up quantity controls
     const quantityInput = document.getElementById("quantity");
-    const colorSelect = document.getElementById("color-select");
-    const sizeSelect = document.getElementById("size-select");
-    const maxAvailableSpan = document.getElementById("max-available");
     
-    // Function to get current available stock based on selected color and size
-    function getCurrentStock() {
-      const selectedColor = colorSelect.value;
-      const selectedSize = sizeSelect.value.toLowerCase();
-      
-      if (data.variations && 
-          data.variations[selectedColor] && 
-          data.variations[selectedColor][selectedSize]) {
-        return data.variations[selectedColor][selectedSize];
-      }
-      return 0;
-    }
-    
-    // Function to update max quantity based on stock
-    function updateMaxQuantity() {
-      const availableStock = getCurrentStock();
-      
-      // Update the display of available stock
-      maxAvailableSpan.textContent = availableStock;
-      
-      // If current quantity exceeds stock, adjust it down
-      if (parseInt(quantityInput.value) > availableStock) {
-        quantityInput.value = availableStock;
-      }
-      
-      // Disable add to cart button if no stock
-      const addToCartBtn = document.getElementById("addToCartBtn");
-      if (availableStock <= 0) {
-        addToCartBtn.disabled = true;
-        addToCartBtn.textContent = "OUT OF STOCK";
-        addToCartBtn.style.backgroundColor = "#ccc";
-        quantityInput.value = 0;
-      } else {
-        addToCartBtn.disabled = false;
-        addToCartBtn.textContent = "ADD TO CART";
-        addToCartBtn.style.backgroundColor = "";
-        if (parseInt(quantityInput.value) < 1) {
-          quantityInput.value = 1;
-        }
-      }
-    }
-    
-    // Setup quantity control buttons
     document.getElementById("decrease-qty").addEventListener("click", () => {
       const currentValue = parseInt(quantityInput.value);
       if (currentValue > 1) {
@@ -347,63 +339,26 @@ async function fetchProduct() {
     
     document.getElementById("increase-qty").addEventListener("click", () => {
       const currentValue = parseInt(quantityInput.value);
-      const maxStock = getCurrentStock();
+      const maxAvailable = parseInt(document.getElementById("max-available").textContent);
       
-      if (currentValue < maxStock) {
+      if (currentValue < maxAvailable) {
         quantityInput.value = currentValue + 1;
       }
     });
     
-    // Add input validation for direct quantity field entry
-    quantityInput.addEventListener("change", () => {
-      let value = parseInt(quantityInput.value);
-      const maxStock = getCurrentStock();
-      
-      if (isNaN(value) || value < 1) {
-        value = 1;
-      } else if (value > maxStock) {
-        value = maxStock;
-      }
-      
-      quantityInput.value = value;
-    });
-    
-    // Update available sizes when color changes
-    colorSelect.addEventListener("change", () => {
-      updateSizeOptions(data.variations, colorSelect.value, sizeSelect);
-      updateMaxQuantity();
-    });
-    
-    // Update max quantity when size changes
-    sizeSelect.addEventListener("change", () => {
-      updateMaxQuantity();
-    });
-    
-    // Initial setup based on default selections
-    if (colorSelect.options.length > 0) {
-      updateSizeOptions(data.variations, colorSelect.value, sizeSelect);
-      updateMaxQuantity();
-    }
-
-    // Setup add to cart button
+    // Add to cart button
     document.getElementById("addToCartBtn").addEventListener("click", async () => {
-      const selectedColor = colorSelect.value;
-      const selectedSize = sizeSelect.value;
-      const selectedQuantity = parseInt(quantityInput.value);
-      const availableStock = getCurrentStock();
-      
-      if (!selectedColor || !selectedSize) {
-        alert("Please select color and size");
+      const selectedSizeElement = document.querySelector(".size-option.selected");
+      if (!selectedSizeElement) {
+        alert("Please select a size");
         return;
       }
       
-      if (selectedQuantity < 1 || selectedQuantity > availableStock) {
-        alert(`Please select a quantity between 1 and ${availableStock}`);
-        return;
-      }
+      const size = selectedSizeElement.textContent;
+      const color = colorOptions.length > 0 ? colorOptions[0] : null;
+      const quantity = parseInt(quantityInput.value);
       
-      // Add to cart using the shared cart function
-      await addToCart(productId, selectedQuantity, selectedSize, selectedColor);
+      await addToCart(productId, quantity, size, color);
     });
 
   } catch (err) {
@@ -412,53 +367,61 @@ async function fetchProduct() {
   }
 }
 
-// Helper function to render color options
-function renderColorOptions(variations) {
-  if (!variations) return '<option value="">No options available</option>';
-  
-  return Object.keys(variations).map(color => 
-    `<option value="${color}">${color.toUpperCase()}</option>`
-  ).join('');
-}
-
 // Helper function to render size options
 function renderSizeOptions(variations) {
-  if (!variations) return '<option value="">No options available</option>';
+  if (!variations) return '<p>No sizes available</p>';
   
-  // Just return default options, will be updated by updateSizeOptions
-  return `
-    <option value="Small">Small</option>
-    <option value="Medium">Medium</option>
-    <option value="Large">Large</option>
-  `;
+  // Get the first color variation (we're only showing one color at a time)
+  const firstColorKey = Object.keys(variations)[0];
+  const sizes = variations[firstColorKey];
+  
+  let sizeButtons = '';
+  
+  // Only add size buttons for sizes with stock > 0
+  if (sizes.small > 0) {
+    sizeButtons += `<button class="size-option" data-size="small">Small</button>`;
+  }
+  
+  if (sizes.medium > 0) {
+    sizeButtons += `<button class="size-option" data-size="medium">Medium</button>`;
+  }
+  
+  if (sizes.large > 0) {
+    sizeButtons += `<button class="size-option" data-size="large">Large</button>`;
+  }
+  
+  return sizeButtons || '<p>Out of stock</p>';
 }
 
-// Helper function to update size options based on selected color
-function updateSizeOptions(variations, selectedColor, sizeSelect) {
-  if (!variations || !variations[selectedColor]) {
-    sizeSelect.innerHTML = '<option value="">No sizes available</option>';
-    return;
-  }
+// Function to update available quantity based on selected size and color
+function updateAvailableQuantity(variations, color) {
+  const selectedSizeElement = document.querySelector(".size-option.selected");
+  if (!selectedSizeElement) return;
   
-  const colorVariation = variations[selectedColor];
-  sizeSelect.innerHTML = '';
+  const size = selectedSizeElement.getAttribute("data-size");
+  const quantityInput = document.getElementById("quantity");
+  const maxAvailableSpan = document.getElementById("max-available");
   
-  // Add size options with stock information
-  if (colorVariation.small > 0) {
-    sizeSelect.innerHTML += `<option value="Small">Small (${colorVariation.small} in stock)</option>`;
-  }
+  // Get available stock for selected color and size
+  const availableStock = variations[color][size];
+  maxAvailableSpan.textContent = availableStock;
   
-  if (colorVariation.medium > 0) {
-    sizeSelect.innerHTML += `<option value="Medium">Medium (${colorVariation.medium} in stock)</option>`;
-  }
+  // Reset quantity to 1 or 0 depending on stock
+  quantityInput.value = availableStock > 0 ? 1 : 0;
+  quantityInput.max = availableStock;
   
-  if (colorVariation.large > 0) {
-    sizeSelect.innerHTML += `<option value="Large">Large (${colorVariation.large} in stock)</option>`;
-  }
-  
-  if (sizeSelect.innerHTML === '') {
-    sizeSelect.innerHTML = '<option value="">Out of stock</option>';
+  // Enable/disable add to cart button based on stock
+  const addToCartBtn = document.getElementById("addToCartBtn");
+  if (availableStock <= 0) {
+    addToCartBtn.disabled = true;
+    addToCartBtn.textContent = "OUT OF STOCK";
+    addToCartBtn.style.backgroundColor = "#ccc";
+  } else {
+    addToCartBtn.disabled = false;
+    addToCartBtn.textContent = "ADD TO CART";
+    addToCartBtn.style.backgroundColor = "";
   }
 }
 
+// Initialize the page
 fetchProduct();
