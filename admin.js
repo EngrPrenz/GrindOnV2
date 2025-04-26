@@ -1,5 +1,5 @@
 // Import authentication functions
-import { checkAdminAuth, initAdminName } from './auth_check.js';
+import { checkAdminAuth, initAdminName } from './admin_auth.js';
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 // Wait for DOM to load
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         initTheme();
         
         // Initialize circle progress bars
-        initCircleProgress();
+        // initCircleProgress();
         
         // Add event listener for theme toggle
         document.getElementById('themeToggle').addEventListener('change', toggleTheme);
@@ -37,6 +37,14 @@ function handleLogout(e) {
         // Sign-out successful
         console.log("User signed out");
         localStorage.removeItem('adminName');
+        
+        // Disable the page transition overlay for logout
+        const pageTransitionOverlay = document.getElementById('pageTransitionOverlay');
+        if (pageTransitionOverlay) {
+            pageTransitionOverlay.style.display = 'none';
+        }
+        
+        // Direct redirect without transition
         window.location.href = "admin_login.html";
     }).catch((error) => {
         // An error happened
@@ -78,15 +86,15 @@ function toggleTheme() {
     updateProgressCircles();
 }
   
-// Initialize circle progress bars
-function initCircleProgress() {
-    const progressCircles = document.querySelectorAll('.progress-circle');
+// // Initialize circle progress bars
+// function initCircleProgress() {
+//     const progressCircles = document.querySelectorAll('.progress-circle');
     
-    progressCircles.forEach(circle => {
-        const value = circle.getAttribute('data-value');
-        circle.style.setProperty('--value', value + '%');
-    });
-}
+//     progressCircles.forEach(circle => {
+//         const value = circle.getAttribute('data-value');
+//         circle.style.setProperty('--value', value + '%');
+//     });
+// }
   
 // Update progress circles based on theme
 function updateProgressCircles() {
