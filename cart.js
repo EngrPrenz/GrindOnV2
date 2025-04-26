@@ -125,11 +125,14 @@ onAuthStateChanged(auth, (user) => {
     emptyCartButton.addEventListener('click', function() {
       window.location.href = 'login.html';
     });
+    // Hide the proceed to checkout button for logged-out users
+const checkoutBtn = document.querySelector('.checkout-btn');
+if (checkoutBtn) {
+  checkoutBtn.style.display = 'none';
+}
   }
 });
 
-// Function to load user's cart data from Firestore
-// Function to load user's cart data from Firestore
 async function loadUserCart(userId) {
   try {
     console.log("Loading cart for user ID:", userId);
@@ -145,6 +148,11 @@ async function loadUserCart(userId) {
       console.log("Cart is empty, showing empty cart message");
       document.getElementById('cart-items-container').style.display = 'none';
       document.getElementById('empty-cart').style.display = 'block';
+      // Hide checkout button when cart is empty
+      const checkoutBtn = document.querySelector('.checkout-btn');
+      if (checkoutBtn) {
+        checkoutBtn.style.display = 'none';
+      }
       return;
     }
     
@@ -160,17 +168,41 @@ async function loadUserCart(userId) {
     let subtotal = 0;
     
     // Add each cart item to the display
-    cartSnapshot.forEach((cartDoc) => {
+    for (const cartDoc of cartSnapshot.docs) {
       const cartItem = cartDoc.data();
+      
+      // Get product details to check available stock
+      const productRef = doc(db, "products", cartItem.productId);
+      const productSnap = await getDoc(productRef);
+      let availableStock = 0;
+      
+      if (productSnap.exists()) {
+        const productData = productSnap.data();
+        const size = cartItem.size?.toLowerCase(); // Convert to lowercase to match database
+        const color = cartItem.color?.toLowerCase(); // Convert to lowercase to match database
+        
+        // Determine available stock based on your product structure
+        if (productData.variations && color && size) {
+          // Access variations.color.size for the stock value
+          if (productData.variations[color] && productData.variations[color][size] !== undefined) {
+            availableStock = productData.variations[color][size];
+          }
+        } else if (productData.stock !== undefined) {
+          availableStock = productData.stock;
+        }
+        
+        console.log(`Loaded product ${productData.name}, Color: ${color}, Size: ${size}, Available: ${availableStock}`);
+      }
+      
+      // Calculate item subtotal
+      const itemSubtotal = cartItem.price * cartItem.quantity;
+      subtotal += itemSubtotal;
       
       // Create cart item element
       const itemElement = document.createElement('div');
       itemElement.className = 'cart-item';
       itemElement.setAttribute('data-id', cartDoc.id);
-      
-      // Calculate item subtotal
-      const itemSubtotal = cartItem.price * cartItem.quantity;
-      subtotal += itemSubtotal;
+      itemElement.setAttribute('data-max-stock', availableStock);
       
       // Populate the cart item HTML
       itemElement.innerHTML = `
@@ -179,10 +211,11 @@ async function loadUserCart(userId) {
           <div class="cart-item-title">${cartItem.name}</div>
           <div class="cart-item-variant">Size: ${cartItem.size || 'N/A'}, Color: ${cartItem.color || 'N/A'}</div>
           <div class="cart-item-price">₱${cartItem.price.toFixed(2)}</div>
+          <div class="cart-item-stock">Available: ${availableStock} items</div>
         </div>
         <div class="cart-item-quantity">
           <button class="quantity-btn decrease">-</button>
-          <input type="number" min="1" value="${cartItem.quantity}" class="quantity-input" data-price="${cartItem.price}">
+          <input type="number" min="1" max="${availableStock}" value="${cartItem.quantity}" class="quantity-input" data-price="${cartItem.price}">
           <button class="quantity-btn increase">+</button>
         </div>
         <div class="cart-item-subtotal">₱${itemSubtotal.toFixed(2)}</div>
@@ -192,8 +225,9 @@ async function loadUserCart(userId) {
       `;
       
       cartItemsContainer.appendChild(itemElement);
-    });
+    }
     
+    // Rest of the function remains the same...
     // Add summary section back
     if (cartSummary) {
       cartItemsContainer.appendChild(cartSummary);
@@ -223,6 +257,11 @@ async function loadUserCart(userId) {
       cartItemsContainer.parentNode.appendChild(checkoutBtn);
     }
     
+    // Make sure checkout button is visible
+    if (checkoutBtn) {
+      checkoutBtn.style.display = 'block';
+    }
+    
     // Update the summary amounts
     const shipping = 150;
     const total = subtotal + shipping;
@@ -240,11 +279,6 @@ async function loadUserCart(userId) {
     // Make sure cart items container is visible
     cartItemsContainer.style.display = 'block';
     document.getElementById('empty-cart').style.display = 'none';
-    
-    // Make sure checkout button is visible
-    if (checkoutBtn) {
-      checkoutBtn.style.display = 'block';
-    }
     
     // Add event listeners for the quantity buttons and remove buttons
     setupCartEventListeners();
@@ -272,13 +306,47 @@ function setupCartEventListeners() {
     });
   });
   
-  // Quantity increase buttons
+  // Quantity increase buttons - modified to check stock limit
   const increaseButtons = document.querySelectorAll('.increase');
   increaseButtons.forEach(button => {
     button.addEventListener('click', function() {
       const input = this.previousElementSibling;
+      const cartItem = this.closest('.cart-item');
+      const maxStock = parseInt(cartItem.getAttribute('data-max-stock'));
       let value = parseInt(input.value);
-      input.value = value + 1;
+      
+      // Check if increasing would exceed available stock
+      if (value < maxStock) {
+        input.value = value + 1;
+        updateCartItemTotal(this);
+        updateCartItemInDatabase(this);
+      } else {
+        alert(`Sorry, only ${maxStock} items available in stock.`);
+      }
+    });
+  });
+  
+  // Direct input for quantity - add validation
+  const quantityInputs = document.querySelectorAll('.quantity-input');
+  quantityInputs.forEach(input => {
+    input.addEventListener('change', function() {
+      const cartItem = this.closest('.cart-item');
+      const maxStock = parseInt(cartItem.getAttribute('data-max-stock'));
+      let value = parseInt(this.value);
+      
+      // Enforce minimum of 1
+      if (isNaN(value) || value < 1) {
+        this.value = 1;
+        value = 1;
+      }
+      
+      // Enforce maximum stock limit
+      if (value > maxStock) {
+        alert(`Sorry, only ${maxStock} items available in stock.`);
+        this.value = maxStock;
+        value = maxStock;
+      }
+      
       updateCartItemTotal(this);
       updateCartItemInDatabase(this);
     });
@@ -300,20 +368,131 @@ function setupCartEventListeners() {
         if (document.querySelectorAll('.cart-item').length === 0) {
           document.getElementById('cart-items-container').style.display = 'none';
           document.getElementById('empty-cart').style.display = 'block';
+          const checkoutBtn = document.querySelector('.checkout-btn');
+          if (checkoutBtn) {
+            checkoutBtn.style.display = 'none';
+          }
         }
       }
     });
   });
   
-  // Checkout button
+  // Checkout button - add stock validation
   const checkoutBtn = document.querySelector('.checkout-btn');
   if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', function() {
-      // Redirect to checkout page or initiate checkout process
-      window.location.href = 'checkout.html';
+    checkoutBtn.addEventListener('click', async function() {
+      // First validate stock levels
+      const stockValid = await validateCartStock();
+      
+      // Only proceed if stock is valid
+      if (stockValid) {
+        // Redirect to checkout page or initiate checkout process
+        window.location.href = 'checkout.html';
+      }
     });
   }
+  
+  // Improved validateCartStock function
+
+  async function validateCartStock() {
+    try {
+      // Get the current user
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please log in to checkout");
+        return false;
+      }
+      
+      // Get all cart items for this user
+      const cartRef = collection(db, "carts");
+      const q = query(cartRef, where("userId", "==", user.uid));
+      const cartSnapshot = await getDocs(q);
+      
+      if (cartSnapshot.empty) {
+        alert("Your cart is empty");
+        return false;
+      }
+      
+      let invalidItems = [];
+      
+      // Check each cart item against product stock
+      for (const cartDoc of cartSnapshot.docs) {
+        const cartItem = cartDoc.data();
+        const productId = cartItem.productId;
+        const requestedQuantity = cartItem.quantity;
+        const size = cartItem.size?.toLowerCase(); // Convert to lowercase to match database
+        const color = cartItem.color?.toLowerCase(); // Convert to lowercase to match database
+        
+        // Get product from database
+        const productRef = doc(db, "products", productId);
+        const productSnap = await getDoc(productRef);
+        
+        if (!productSnap.exists()) {
+          invalidItems.push({
+            name: cartItem.name,
+            reason: "Product no longer exists"
+          });
+          continue;
+        }
+        
+        const productData = productSnap.data();
+        let availableStock = 0;
+        
+        // Check for stock based on your actual database structure
+        if (productData.variations && color && size) {
+          // Get stock from variations.color.size
+          if (productData.variations[color] && productData.variations[color][size] !== undefined) {
+            availableStock = productData.variations[color][size];
+          }
+        } 
+        // If only has stock as a simple number
+        else if (productData.stock !== undefined) {
+          availableStock = productData.stock;
+        }
+        
+        console.log(`Product ${productData.name}, Color: ${color}, Size: ${size}, Available: ${availableStock}`);
+        
+        // Check if requested quantity exceeds available stock
+        if (requestedQuantity > availableStock) {
+          invalidItems.push({
+            name: cartItem.name,
+            size: size,
+            color: color,
+            requestedQuantity: requestedQuantity,
+            availableStock: availableStock,
+            reason: `Only ${availableStock} item(s) in stock`
+          });
+        }
+      }
+      
+      // If there are invalid items, alert user and prevent checkout
+      if (invalidItems.length > 0) {
+        let errorMessage = "Some items in your cart have insufficient stock:\n\n";
+        
+        invalidItems.forEach(item => {
+          let itemDesc = item.name;
+          if (item.size) itemDesc += ` (Size: ${item.size})`;
+          if (item.color) itemDesc += ` (Color: ${item.color})`;
+          
+          errorMessage += `- ${itemDesc}: ${item.reason}\n`;
+        });
+        
+        errorMessage += "\nPlease update your cart before proceeding.";
+        alert(errorMessage);
+        return false;
+      }
+      
+      // All items have valid stock
+      return true;
+    } catch (error) {
+      console.error("Error validating cart stock:", error);
+      alert("Failed to validate stock availability. Please try again later.");
+      return false;
+    }
+  }
 }
+  
+
 
 // Update the cart item total when quantity changes
 function updateCartItemTotal(element) {
