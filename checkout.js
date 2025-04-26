@@ -139,7 +139,7 @@ async function loadUserDetails(userId) {
       if (userData.address) document.getElementById('address').value = userData.address;
       if (userData.city) document.getElementById('city').value = userData.city;
       if (userData.province) document.getElementById('province').value = userData.province;
-      if (userData.postalCode) document.getElementById('postal-code').value = userData.postalCode;
+      if (userData.postalCode) document.getElementById('zip').value = userData.postalCode;
     }
   } catch (error) {
     console.error("Error loading user details:", error);
@@ -196,6 +196,64 @@ async function handleCheckout(event) {
   }
   console.log("Authenticated user:", user.uid);
   
+  // Validate the form 
+  const requiredFields = [
+    { id: 'first-name', errorId: 'first-name-error' },
+    { id: 'last-name', errorId: 'last-name-error' },
+    { id: 'email', errorId: 'email-error' },
+    { id: 'phone', errorId: 'phone-error' },
+    { id: 'address', errorId: 'address-error' },
+    { id: 'city', errorId: 'city-error' },
+    { id: 'zip', errorId: 'zip-error' },
+    { id: 'province', errorId: 'province-error' }
+  ];
+
+  let isValid = true;
+
+  requiredFields.forEach(field => {
+    const input = document.getElementById(field.id);
+    const errorElement = document.getElementById(field.errorId);
+    
+    if (!input.value.trim()) {
+      errorElement.style.display = 'block';
+      isValid = false;
+    } else {
+      errorElement.style.display = 'none';
+    }
+  });
+
+  if (!isValid) {
+    console.log("Form validation failed");
+    return;
+  }
+  
+  // Show loading overlay
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.style.display = 'flex';
+  } else {
+    // Create loading overlay if it doesn't exist
+    const overlay = document.createElement('div');
+    overlay.id = 'loading-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '1000';
+    
+    const spinner = document.createElement('div');
+    spinner.classList.add('loading-spinner');
+    spinner.innerHTML = '<div class="spinner"></div><p>Processing your order...</p>';
+    overlay.appendChild(spinner);
+    
+    document.body.appendChild(overlay);
+  }
+  
   // Disable submit button to prevent multiple submissions
   const submitButton = document.getElementById('place-order-btn');
   submitButton.disabled = true;
@@ -224,19 +282,6 @@ async function handleCheckout(event) {
     };
     console.log("Order data prepared:", orderData);
     
-    // Validate required fields
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'province', 'postalCode'];
-    for (const field of requiredFields) {
-      if (!orderData[field]) {
-        console.log("Validation failed for field:", field);
-        alert(`Please fill in all required fields.`);
-        submitButton.disabled = false;
-        submitButton.textContent = 'Place Order';
-        return;
-      }
-    }
-    console.log("All required fields validated");
-    
     // Create new order in Firestore
     console.log("Attempting to create order in Firestore collection 'orders'");
     const orderRef = await addDoc(collection(db, "orders"), orderData);
@@ -252,49 +297,48 @@ async function handleCheckout(event) {
     await clearUserCart(user.uid);
     console.log("User cart cleared");
     
-    // Redirect to order confirmation page
-    console.log("Redirecting to order confirmation page");
-    window.location.href = `order-confirmation.html?id=${orderRef.id}`;
+    // Hide loading overlay before showing success message
+    const loadingElem = document.getElementById('loading-overlay');
+    if (loadingElem) {
+      loadingElem.style.display = 'none';
+    }
     
+    // Show success message with order number
+    const orderSuccess = document.getElementById('order-success');
+    if (orderSuccess) {
+      // Set the order number in the success message
+      const orderNumberElement = document.getElementById('success-order-number');
+      if (orderNumberElement) {
+        orderNumberElement.textContent = `GRD-${orderRef.id.substr(0, 5).toUpperCase()}`;
+      }
+      
+      // Show the success message
+      orderSuccess.style.display = 'block';
+      
+      // Scroll to the success message
+      orderSuccess.scrollIntoView({ behavior: 'smooth' });
+      
+      // After 8 seconds, redirect to homepage (increased from 3 seconds)
+      setTimeout(() => {
+        window.location.href = 'homepage.html';
+      }, 8000); // 8 seconds is a good middle ground between 6-10 seconds
+    } else {
+      // If success element not found, redirect immediately
+      window.location.href = 'homepage.html';
+    }
   } catch (error) {
     console.error("Error processing order:", error);
+    
+    // Hide loading overlay
+    const loadingElem = document.getElementById('loading-overlay');
+    if (loadingElem) {
+      loadingElem.style.display = 'none';
+    }
+    
     alert("There was an error processing your order. Please try again.");
     submitButton.disabled = false;
     submitButton.textContent = 'Place Order';
   }
-  // Add this validation code inside your existing handleCheckout function
-// Right after checking for authenticated user
-  
-// Validate the form 
-const requiredFields = [
-  { id: 'first-name', errorId: 'first-name-error' },
-  { id: 'last-name', errorId: 'last-name-error' },
-  { id: 'email', errorId: 'email-error' },
-  { id: 'phone', errorId: 'phone-error' },
-  { id: 'address', errorId: 'address-error' },
-  { id: 'city', errorId: 'city-error' },
-  { id: 'zip', errorId: 'zip-error' },
-  { id: 'province', errorId: 'province-error' }
-];
-
-let isValid = true;
-
-requiredFields.forEach(field => {
-  const input = document.getElementById(field.id);
-  const errorElement = document.getElementById(field.errorId);
-  
-  if (!input.value.trim()) {
-    errorElement.style.display = 'block';
-    isValid = false;
-  } else {
-    errorElement.style.display = 'none';
-  }
-});
-
-if (!isValid) {
-  console.log("Form validation failed");
-  return;
-}
 }
 
 // Update user details for future checkouts
@@ -357,12 +401,12 @@ paymentMethods.forEach(method => {
     
     // Show the selected payment method's details section
     const selectedMethod = this.value;
-    document.getElementById(`${selectedMethod}-details`).style.display = 'block';
+    const detailsElement = document.getElementById(`${selectedMethod}-details`);
+    if (detailsElement) {
+      detailsElement.style.display = 'block';
+    }
   });
 });
 
 // Initialize default payment method
 document.querySelector('input[name="payment-method"]:checked')?.dispatchEvent(new Event('change'));
-
-
-  
