@@ -1,90 +1,93 @@
 .order-container {
     padding: 50px 0;
     min-height: 70vh;
-  }
+    max-width: 1140px;
+    margin: 0 auto;
+}
   
-  .heading_container {
+.heading_container {
     margin-bottom: 30px;
-  }
+}
   
-  .card {
+.card {
     background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     padding: 25px;
     margin-bottom: 30px;
-  }
+    border: 1px solid #f0f0f0;
+}
   
-  .order-summary {
+.order-summary {
     display: flex;
     justify-content: space-between;
     padding: 15px 20px;
     background-color: #f9f9f9;
     border-radius: 8px;
     margin-bottom: 25px;
-  }
+}
   
-  .order-item {
-    border: 1px solid #e0e0e0;
+.order-item {
+    border: 1px solid #f0f0f0;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 25px;
     transition: box-shadow 0.3s ease;
-  }
+}
   
-  .order-item:hover {
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  }
+.order-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
   
-  .order-header {
+.order-header {
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid #eee;
     padding-bottom: 15px;
     margin-bottom: 15px;
-  }
+}
   
-  .order-id {
+.order-id {
     font-weight: bold;
     color: #333;
     font-size: 1.1rem;
-  }
+}
   
-  .order-date {
-    color: #777;
+.order-date {
+    color: black;
     font-size: 0.9rem;
     margin-top: 5px;
-  }
+}
   
-  .status-pending {
+.status-pending {
     color: #ff9800;
     font-weight: bold;
-  }
+}
   
-  .status-shipped {
+.status-shipped {
     color: #2196f3;
     font-weight: bold;
-  }
+}
   
-  .status-delivered {
+.status-delivered {
     color: #4caf50;
     font-weight: bold;
-  }
+}
   
-  .status-cancelled {
+.status-cancelled {
     color: #f44336;
     font-weight: bold;
-  }
+}
   
-  .product-info {
+.product-info {
     display: flex;
     margin-bottom: 15px;
     padding: 10px;
     background-color: #f9f9f9;
     border-radius: 5px;
-  }
+}
   
-  .product-image {
+.product-image {
     width: 80px;
     height: 80px;
     background-color: #eee;
@@ -94,60 +97,123 @@
     margin-right: 15px;
     border-radius: 5px;
     overflow: hidden;
-  }
+}
   
-  .order-product-image {
+.order-product-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
+}
   
-  .product-details {
+.product-details {
     flex: 1;
-  }
+}
   
-  .product-name {
+.product-name {
     font-weight: bold;
     margin-bottom: 5px;
-  }
+}
   
-  .product-variant {
+.product-variant {
     font-size: 0.9rem;
-    color: #555;
+    color: black;
     margin-bottom: 5px;
-  }
+}
   
-  .quantity, .product-price {
+.quantity, .product-price {
     font-size: 0.9rem;
-    color: #555;
-  }
+    color: black;
+}
   
-  .order-footer {
+.order-footer {
     display: flex;
     justify-content: space-between;
     padding-top: 15px;
     margin-top: 15px;
     border-top: 1px solid #eee;
-  }
+}
   
-  .price-summary {
+.price-summary {
     font-size: 0.95rem;
-  }
+}
   
-  .total-price {
+.total-price {
     font-weight: bold;
     font-size: 1.1rem;
     margin-top: 5px;
     color: #333;
-  }
+}
   
-  .shipping-details {
+.shipping-details {
     font-size: 0.9rem;
     text-align: right;
-    color: #555;
-  }
+    color: black;
+}
+
+/* Styling for both No Orders and Login Required messages */
+.no-orders-card,
+.login-required-card {
+  text-align: center;
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.order-icon {
+  font-size: 64px;
+  color: #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.no-orders-card h3,
+.login-required-card h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.no-orders-card p,
+.login-required-card p {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.shop-now-button,
+.login-button {
+  display: inline-block;
+  background-color: #000;
+  color: white;
+  padding: 12px 40px;
+  border-radius: 5px;
+  margin-top: 15px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.shop-now-button:hover,
+.login-button:hover {
+  background-color: #333;
+  text-decoration: none;
+  color: white;
+}
+
+/* Update heading style to match image */
+.heading_container.heading_center h2 {
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* We can remove this since we've integrated it above */
+.no-orders-message {
+  text-align: center;
+  padding: 40px 20px;
+}
   
-  .track-button {
+.track-button {
     background-color: #000;
     color: white;
     border: none;
@@ -158,18 +224,18 @@
     font-weight: bold;
     transition: background-color 0.3s;
     width: 100%;
-  }
+}
   
-  .track-button:hover {
+.track-button:hover {
     background-color: #333;
-  }
+}
   
-  .no-orders-message, .login-required, .error-message {
+.no-orders-message, .login-required, .error-message {
     text-align: center;
     padding: 40px 20px;
-  }
+}
   
-  .shop-now-button, .login-button, .retry-button {
+.shop-now-button, .login-button, .retry-button {
     display: inline-block;
     background-color: #000;
     color: white;
@@ -179,42 +245,49 @@
     text-decoration: none;
     font-weight: bold;
     transition: background-color 0.3s;
-  }
+}
   
-  .shop-now-button:hover, .login-button:hover, .retry-button:hover {
+.shop-now-button:hover, .login-button:hover, .retry-button:hover {
     background-color: #333;
     text-decoration: none;
     color: white;
-  }
+}
+
+/* Label text styling */
+.label-text {
+    font-weight: bold;
+    color: #000 !important;
+}
   
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
+/* Responsive adjustments */
+@media (max-width: 768px) {
     .order-header, .order-footer {
-      flex-direction: column;
+        flex-direction: column;
     }
     
     .order-header > div:nth-child(2), .shipping-details {
-      margin-top: 10px;
-      text-align: left;
+        margin-top: 10px;
+        text-align: left;
     }
     
     .order-summary {
-      flex-direction: column;
+        flex-direction: column;
     }
     
     .order-summary > div:nth-child(2) {
-      margin-top: 10px;
+        margin-top: 10px;
     }
-  }
-  .navbar-top-logo {
-    margin-top: 25px;       /* Space above the logo */
-    padding-left: 890px;     /* Slight right shift */
-    margin-bottom: 10px;    /* Space below logo, before navbar */
+}
+
+.navbar-top-logo {
+    margin-top: 25px;
+    padding-left: 892px;
+    margin-bottom: 10px;
     text-align: left;
-  }
+}
   
-  .top-logo-img {
+.top-logo-img {
     height: 50px;
     width: auto;
     object-fit: contain;
-  }
+}
