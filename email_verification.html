@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify Email - GrindOn</title>
+  <link rel="stylesheet" href="register.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="module" src="email_verification.js" defer></script>
+  <style>
+    .verification-container {
+      text-align: center;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    .verification-icon {
+      font-size: 64px;
+      color: #2e2e2e;
+      margin-bottom: 20px;
+    }
+    
+    .verification-title {
+      font-size: 24px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    
+    .verification-text {
+      margin-bottom: 24px;
+      line-height: 1.5;
+      color: #555;
+    }
+    
+    .verification-timer {
+      margin: 24px 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    #resend-email {
+      background-color: transparent;
+      color: #2e2e2e;
+      border: 1px solid #2e2e2e;
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: auto;
+      display: inline-block;
+    }
+    
+    #resend-email:hover {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Left side with background image or message -->
+    <div class="left-side">
+      
+    </div>
+
+    <!-- Right side with verification message -->
+    <div class="right-side">
+      <div class="verification-container">
+        <div class="verification-icon">
+          <i class="fas fa-envelope"></i>
+        </div>
+        
+        <h1 class="verification-title">Check your email</h1>
+        
+        <p class="verification-text">
+          We've sent a verification link to <span id="user-email">your email address</span>. Please check your inbox and click the verification link to continue the registration process.
+        </p>
+        
+        <div class="verification-timer">
+          Link expires in: <span id="timer">5:00</span>
+        </div>
+        
+        <p class="verification-text">
+          If you don't see the email, check your spam folder or try resending the verification email.
+        </p>
+        
+        <button id="resend-email">Resend Verification Email</button>
+        
+        <div class="signin-link" style="margin-top: 30px;">
+          <a href="register.html">Start over</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
