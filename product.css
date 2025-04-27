@@ -223,6 +223,11 @@
   /* Border removed as it's not needed with the black background */
 }
 
+#addToCartBtn:hover {
+  background-color: grey;
+  color: #000;
+}
+
 /* Container for product specs and description - matching main container border */
 .product-details-container {
   max-width: 1150px;
