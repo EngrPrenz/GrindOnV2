@@ -17,6 +17,21 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Utility function to show modal
+function showModal(message) {
+    console.log("Modal message:", message); // Debugging
+    const modal = document.getElementById('modal');
+    const modalMessage = document.getElementById('modal-message');
+    modalMessage.textContent = message;
+    modal.style.display = 'block';
+}
+
+// Utility function to hide modal
+function hideModal() {
+    const modal = document.getElementById('modal');
+    modal.style.display = 'none';
+}
+
 // Button event listener for login
 const submit = document.getElementById('submit');
 submit.addEventListener("click", function (event) {
@@ -28,7 +43,7 @@ submit.addEventListener("click", function (event) {
 
     // Simple validation
     if (!usernameOrEmail || !password) {
-        alert("Please enter both email/username and password");
+        showModal("Please enter both email/username and password");
         return;
     }
 
@@ -42,12 +57,11 @@ submit.addEventListener("click", function (event) {
             .then((userCredential) => {
                 // Signed in 
                 const user = userCredential.user;
-                alert("Welcome, you have logged in successfully!");
                 window.location.href = "homepage.html"; // Or another page you want
             })
             .catch((error) => {
                 const errorMessage = error.message;
-                alert(errorMessage); // Display error message if login fails
+                showModal(errorMessage); // Display error message if login fails
             })
             .finally(() => {
                 // Reset button state
@@ -62,7 +76,7 @@ submit.addEventListener("click", function (event) {
         getDocs(q)
             .then((querySnapshot) => {
                 if (querySnapshot.empty) {
-                    alert("Username not found.");
+                    showModal("Username not found.");
                     return;
                 }
 
@@ -75,17 +89,17 @@ submit.addEventListener("click", function (event) {
                     .then((userCredential) => {
                         // Signed in 
                         const user = userCredential.user;
-                        alert("Welcome, you have logged in successfully!");
+                        showModal("Welcome, you have logged in successfully!");
                         window.location.href = "home.html"; // Or another page you want
                     })
                     .catch((error) => {
                         const errorMessage = error.message;
-                        alert(errorMessage); // Display error message if login fails
+                        showModal(errorMessage); // Display error message if login fails
                     });
             })
             .catch((error) => {
                 console.error("Error fetching user by username: ", error);
-                alert("Error fetching user details.");
+                showModal("Error fetching user details.");
             })
             .finally(() => {
                 // Reset button state
