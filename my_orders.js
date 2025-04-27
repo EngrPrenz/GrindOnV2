@@ -84,24 +84,20 @@ async function loadUserOrders(userId) {
   }
 }
 
-// Display no orders message
+// Also need to modify displayNoOrdersMessage to use peso sign
 function displayNoOrdersMessage() {
   const orderContent = `
     <div class="heading_container heading_center">
-      <h2>Your Orders</h2>
+      <h2>YOUR ORDERS</h2>
     </div>
     
-    <div class="card">
-      <div class="order-summary">
-        <div>
-          <strong>Total Orders:</strong> 0
-        </div>
+    <div class="card no-orders-card">
+      <div class="order-icon">
+        <i class="fa fa-file-text" aria-hidden="true"></i>
       </div>
-      
-      <div class="no-orders-message">
-        <p>You don't have any orders yet.</p>
-        <a href="shop.html" class="shop-now-button">Shop Now</a>
-      </div>
+      <h3>You don't have any orders yet</h3>
+      <p>Browse our collection and place your first order today</p>
+      <a href="shop.html" class="shop-now-button">Shop Now</a>
     </div>
   `;
   
@@ -126,7 +122,7 @@ function displayErrorMessage(message) {
   orderContainer.innerHTML = errorContent;
 }
 
-// Display orders summary
+// Modified displayOrdersSummary function for consistent styling and peso currency
 function displayOrdersSummary(orders) {
   const pendingOrders = orders.filter(order => 
     order.status === "Pending" || order.status === "Processing" || order.status === "Shipped"
@@ -140,10 +136,10 @@ function displayOrdersSummary(orders) {
     <div class="card">
       <div class="order-summary">
         <div>
-          <strong>Total Orders:</strong> ${orders.length}
+          <strong>TOTAL ORDERS:</strong> ${orders.length}
         </div>
         <div>
-          <strong>Active Orders:</strong> ${pendingOrders}
+          <strong>ACTIVE ORDERS:</strong> ${pendingOrders}
         </div>
       </div>
   `;
@@ -152,9 +148,20 @@ function displayOrdersSummary(orders) {
   orderContainer.innerHTML = summaryHTML;
 }
 
-// Display orders
+
+// Modified displayOrders function with peso currency and fixed text styling
 function displayOrders(orders) {
   let ordersHTML = '';
+  
+  // Add a style tag to ensure our label styling overrides any existing styles
+  const styleTag = document.createElement('style');
+  styleTag.innerHTML = `
+    .label-text {
+      font-weight: bold !important;
+      color: #000000 !important;
+    }
+  `;
+  document.head.appendChild(styleTag);
   
   orders.forEach(order => {
     // Determine status class
@@ -190,9 +197,9 @@ function displayOrders(orders) {
           </div>
           <div class="product-details">
             <div class="product-name">${item.name}</div>
-            <div class="product-variant">Size: ${item.size} | Color: ${item.color}</div>
-            <div class="quantity">Quantity: ${item.quantity}</div>
-            <div class="product-price">$${item.price.toFixed(2)} each</div>
+            <div class="product-variant"><span class="label-text">Size:</span> ${item.size} | <span class="label-text">Color:</span> ${item.color}</div>
+            <div class="quantity"><span class="label-text">Quantity:</span> ${item.quantity}</div>
+            <div class="product-price">₱${item.price.toFixed(2)} each</div>
           </div>
         </div>
       `;
@@ -204,12 +211,12 @@ function displayOrders(orders) {
       // For delivered orders, show actual delivery date (for demo we're adding 3 days)
       const deliveryDate = new Date(order.createdAt.toDate());
       deliveryDate.setDate(deliveryDate.getDate() + 3);
-      deliveryInfo = `Delivered on: ${formatDate({ toDate: () => deliveryDate })}`;
+      deliveryInfo = `<span class="label-text">Delivered on:</span> ${formatDate({ toDate: () => deliveryDate })}`;
     } else {
       // For pending/shipped orders, show estimated delivery (for demo adding 5 days)
       const estimatedDate = new Date(order.createdAt.toDate());
       estimatedDate.setDate(estimatedDate.getDate() + 5);
-      deliveryInfo = `Estimated Delivery: ${formatDate({ toDate: () => estimatedDate })}`;
+      deliveryInfo = `<span class="label-text">Estimated Delivery:</span> ${formatDate({ toDate: () => estimatedDate })}`;
     }
     
     // Create order HTML
@@ -218,10 +225,10 @@ function displayOrders(orders) {
         <div class="order-header">
           <div>
             <div class="order-id">Order #${order.id.substring(0, 8)}</div>
-            <div class="order-date">Placed on: ${orderDate}</div>
+            <div class="order-date"><span class="label-text">Placed on:</span> ${orderDate}</div>
           </div>
           <div>
-            <div>Status: <span class="${statusClass}">${order.status}</span></div>
+            <div><span class="label-text">Status:</span> <span class="${statusClass}">${order.status}</span></div>
             <div>${deliveryInfo}</div>
           </div>
         </div>
@@ -230,16 +237,16 @@ function displayOrders(orders) {
         
         <div class="order-footer">
           <div class="price-summary">
-            <div>Subtotal: $${order.subtotal.toFixed(2)}</div>
-            <div>Shipping: $${order.shipping.toFixed(2)}</div>
-            <div class="total-price">Total: $${order.total.toFixed(2)}</div>
+            <div><span class="label-text">Subtotal:</span> ₱${order.subtotal.toFixed(2)}</div>
+            <div><span class="label-text">Shipping:</span> ₱${order.shipping.toFixed(2)}</div>
+            <div class="total-price"><span class="label-text">Total:</span> ₱${order.total.toFixed(2)}</div>
           </div>
           <div class="shipping-details">
-            <div><strong>Shipping Address:</strong></div>
+            <div><span class="label-text">Shipping Address:</span></div>
             <div>${order.firstName} ${order.lastName}</div>
             <div>${order.address}, ${order.city}</div>
             <div>${order.province}, ${order.postalCode}</div>
-            <div>Payment Method: ${order.paymentMethod === 'cash-on-delivery' ? 'Cash on Delivery' : order.paymentMethod}</div>
+            <div><span class="label-text">Payment Method:</span> ${order.paymentMethod === 'cash-on-delivery' ? 'Cash on Delivery' : order.paymentMethod}</div>
           </div>
         </div>
         
@@ -345,20 +352,22 @@ onAuthStateChanged(auth, (user) => {
       </a>
     `;
     
-    // Display login required message
-    const loginRequiredHTML = `
-      <div class="heading_container heading_center">
-        <h2>Your Orders</h2>
+    // Display login required message with shopping cart style UI
+  const loginRequiredHTML = `
+  <div class="heading_container heading_center">
+    <h2>YOUR ORDERS</h2>
+  </div>
+  
+  <div class="card login-required-card">
+     <div class="order-icon">
+        <i class="fa fa-file-text" aria-hidden="true"></i>
       </div>
-      
-      <div class="card">
-        <div class="login-required">
-          <p>Please login to view your orders.</p>
-          <a href="login.html" class="login-button">Login</a>
-        </div>
-      </div>
-    `;
+    <h3>Please log in to view your orders</h3>
+    <p>You need to be logged in to tracked your orders</p>
     
-    orderContainer.innerHTML = loginRequiredHTML;
-  }
+  </div>
+`;
+
+orderContainer.innerHTML = loginRequiredHTML;
+}
 });

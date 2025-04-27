@@ -1,5 +1,6 @@
 .cart-section {
-    padding: 60px 0;
+    padding: 50px 0;
+    margin-bottom: 50px;
   }
   
   .cart-container {
@@ -7,6 +8,7 @@
     border-radius: 8px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    margin-top: 30px;
   }
   
   .cart-header {
@@ -132,7 +134,7 @@
 }
   
   .checkout-btn:hover {
-    background-color: white;
+    background-color: grey;
     color: black;
   }
   
