@@ -109,3 +109,148 @@
   button:hover {
     background-color: #3a3a3a;
   }
+
+  .validation-message {
+    font-size: 12px;
+    margin-top: 4px;
+    color: red; /* Default color for invalid messages */
+}
+
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-container input {
+    flex: 1;
+    padding-right: 30px; /* Add space for the toggle icon */
+}
+
+.password-toggle-icon {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #888;
+    user-select: none;
+}
+
+.password-toggle-icon:hover {
+    color: #555;
+}
+
+  #google-signup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #757575; /* Google gray text */
+    background-color: #ffffff; /* White background */
+    border: 1px solid #ddd; /* Light gray border */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 16px;
+}
+
+#google-signup img {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
+
+#google-signup:hover {
+    background-color: #f7f7f7; /* Slightly darker background on hover */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+#google-signup:active {
+    background-color: #eeeeee; /* Even darker background on click */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Slightly deeper shadow */
+}
+
+/* Add these styles to your existing register.css file */
+
+.input-group {
+  margin-bottom: 10px;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.verification-message {
+  font-size: 0.85rem;
+  margin-top: 4px;
+  transition: all 0.3s ease;
+}
+
+.verification-message.valid {
+  color: #4CAF50;
+}
+
+.verification-message.invalid {
+  color: #F44336;
+}
+
+/* Remove the wrapper for cleaner positioning */
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Position the toggle button directly on the input */
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 35%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #777;
+  padding: 0;
+  margin: 0;
+  height: 20px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.toggle-password:hover {
+  color: #333;
+}
+
+.toggle-password:focus {
+  outline: none;
+}
+
+/* Ensure inputs have consistent styling */
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  padding-right: 35px; /* Make room for the icon */
+  box-sizing: border-box;
+}
+
+/* Make the help text follow the same pattern for all fields */
+.help-text {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 4px;
+}
+
+/* Ensure consistent spacing between form elements */
+label {
+  display: block;
+  margin-bottom: 5px;
+}
