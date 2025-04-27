@@ -263,6 +263,7 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
   }
 }
 
+// Modified fetchProduct function to set up zoom functionality
 async function fetchProduct() {
   if (!productId) {
     productDetail.innerHTML = "No product ID provided.";
@@ -327,18 +328,6 @@ async function fetchProduct() {
       </div>
     `;
 
-    // Add global functions for image changing
-    window.changeMainImage = function(imgSrc, clickedThumb) {
-      document.getElementById("mainImage").src = imgSrc;
-      
-      // Update active thumbnail
-      const thumbnails = document.querySelectorAll(".thumbnail");
-      thumbnails.forEach(thumb => {
-        thumb.classList.remove("active");
-      });
-      clickedThumb.classList.add("active");
-    };
-
     // Get all color options from variations
     const colorOptions = Object.keys(data.variations || {});
     
@@ -399,8 +388,16 @@ async function fetchProduct() {
       await addToCart(productId, quantity, size, color);
     });
 
+    // Wait for the main image to be properly loaded before setting up zoom
+    console.log("Setting up image load detection");
+    
+    setTimeout(() => {
+      console.log("Initializing zoom functionality");
+      setupPopupZoom();
+    }, 500);
+
   } catch (err) {
-    console.error(err);
+    console.error("Error loading product:", err);
     productDetail.innerHTML = "Error loading product.";
   }
 }
@@ -461,5 +458,297 @@ function updateAvailableQuantity(variations, color) {
   }
 }
 
+// Add this JavaScript to your product.js file
+
+// Function to set up popup image zoom effect
+function setupPopupZoom() {
+  console.log("Setting up zoom functionality");
+  const mainImageContainer = document.querySelector('.main-image-container');
+  const mainImage = document.getElementById('mainImage');
+  
+  if (!mainImageContainer || !mainImage) {
+    console.log("Main image or container not found");
+    return;
+  }
+  
+  // Create zoom lens element - now bigger
+  const lens = document.createElement('div');
+  lens.setAttribute('class', 'img-zoom-lens');
+  lens.style.display = 'none';
+  lens.style.width = '150px'; // Increased from 100px
+  lens.style.height = '150px'; // Increased from 100px
+  
+  // Create zoom popup container - now bigger
+  const zoomPopup = document.createElement('div');
+  zoomPopup.setAttribute('class', 'img-zoom-popup');
+  zoomPopup.style.display = 'none';
+  zoomPopup.style.width = '500px'; // Increased from 400px
+  zoomPopup.style.height = '500px'; // Increased from 400px
+  
+  // Add elements to the DOM
+  mainImageContainer.style.position = 'relative';
+  mainImageContainer.appendChild(lens);
+  document.body.appendChild(zoomPopup); // Add popup to body for absolute positioning
+  
+  // Variables for zoom calculation
+  const zoomLevel = 1.5; // Zoom magnification level
+  
+  // Set up event listeners
+  mainImageContainer.addEventListener('mouseenter', function() {
+    console.log("Mouse entered image container");
+    lens.style.display = 'block';
+    zoomPopup.style.display = 'block';
+    updateZoomView(mainImage, lens, zoomPopup, zoomLevel);
+    
+    // Position the popup on page entry
+    positionPopupFixed(mainImage, zoomPopup);
+  });
+  
+  mainImageContainer.addEventListener('mouseleave', function() {
+    console.log("Mouse left image container");
+    lens.style.display = 'none';
+    zoomPopup.style.display = 'none';
+  });
+  
+  mainImageContainer.addEventListener('mousemove', function(e) {
+    moveLens(e, mainImage, lens, zoomPopup, zoomLevel);
+    // We don't call positionPopup here anymore since we want fixed position
+  });
+  
+  // Handle window resize to reposition the popup
+  window.addEventListener('resize', function() {
+    updateZoomView(mainImage, lens, zoomPopup, zoomLevel);
+    positionPopupFixed(mainImage, zoomPopup);
+  });
+  
+  // Load initial image into zoom view
+  if (mainImage.complete) {
+    console.log("Image already loaded, updating zoom view");
+    updateZoomView(mainImage, lens, zoomPopup, zoomLevel);
+  } else {
+    console.log("Setting up load event listener for image");
+    mainImage.addEventListener('load', function() {
+      console.log("Image loaded, updating zoom view");
+      updateZoomView(mainImage, lens, zoomPopup, zoomLevel);
+    });
+  }
+}
+
+// Function to position popup near cursor
+function positionPopupFixed(img, popup) {
+  const imgRect = img.getBoundingClientRect();
+  const imgContainer = img.closest('.main-image-container');
+  const imgContainerRect = imgContainer.getBoundingClientRect();
+  
+  // Position the popup to the right of the image
+  const popupLeft = imgContainerRect.right + 20; // 20px margin
+  const popupTop = imgContainerRect.top;
+  
+  // Check if enough space on right side, if not place it on left
+  const windowWidth = window.innerWidth;
+  const popupWidth = popup.offsetWidth;
+  
+  if (popupLeft + popupWidth > windowWidth - 20) {
+    // Not enough space on right, try left side
+    popup.style.left = (imgContainerRect.left - popupWidth - 20) + 'px';
+  } else {
+    // Enough space on right side
+    popup.style.left = popupLeft + 'px';
+  }
+  
+  popup.style.top = popupTop + 'px';
+}
+
+// Function to move the lens and update zoom view
+function moveLens(e, img, lens, popup, zoomLevel) {
+  // Prevent any default action
+  e.preventDefault();
+  
+  // Get cursor position
+  const pos = getCursorPos(e, img);
+  let x = pos.x;
+  let y = pos.y;
+  
+  // Get the image dimensions as displayed
+  const rect = img.getBoundingClientRect();
+  const imgWidth = rect.width;
+  const imgHeight = rect.height;
+  
+  // Calculate the ratio between natural and displayed dimensions
+  const ratioX = img.naturalWidth / imgWidth;
+  const ratioY = img.naturalHeight / imgHeight;
+  
+  // Adjust lens position for center of lens
+  const lensWidth = lens.offsetWidth;
+  const lensHeight = lens.offsetHeight;
+  
+  // Calculate position in the natural image space
+  const naturalX = x - (lensWidth / 2) / ratioX;
+  const naturalY = y - (lensHeight / 2) / ratioY;
+  
+  // Convert back to display coordinates
+  let lensX = naturalX / ratioX;
+  let lensY = naturalY / ratioY;
+  
+  // Set boundaries in display coordinates
+  if (lensX > imgWidth - lensWidth) lensX = imgWidth - lensWidth;
+  if (lensX < 0) lensX = 0;
+  if (lensY > imgHeight - lensHeight) lensY = imgHeight - lensHeight;
+  if (lensY < 0) lensY = 0;
+  
+  // Set lens position on display
+  lens.style.left = lensX + "px";
+  lens.style.top = lensY + "px";
+  
+  // Calculate the position for the background image in the popup
+  // We need to convert lens position back to natural image coordinates
+  const bgX = lensX * ratioX;
+  const bgY = lensY * ratioY;
+  
+  // Set the background position for the popup
+  popup.style.backgroundPosition = `-${bgX * zoomLevel}px -${bgY * zoomLevel}px`;
+}
+
+// Function to get cursor position
+function getCursorPos(e, img) {
+  // Get the bounding rectangle of the image
+  const rect = img.getBoundingClientRect();
+  
+  // Get displayed image dimensions
+  const displayWidth = rect.width;
+  const displayHeight = rect.height;
+  
+  // Calculate position of cursor relative to the image
+  let x = e.clientX - rect.left;
+  let y = e.clientY - rect.top;
+  
+  // Convert to position within the actual image (accounting for scaling/letterboxing)
+  // Get the actual dimensions of the image as rendered (may be different than naturalWidth/Height due to object-fit)
+  const imgComputedStyle = window.getComputedStyle(img);
+  const imgWidth = img.width || img.clientWidth;
+  const imgHeight = img.height || img.clientHeight;
+  
+  // Calculate the scaling factor between natural image size and displayed size
+  const scaleX = img.naturalWidth / imgWidth;
+  const scaleY = img.naturalHeight / imgHeight;
+  
+  // Adjust x and y by scale factor
+  x = Math.max(0, Math.min(x * scaleX, img.naturalWidth));
+  y = Math.max(0, Math.min(y * scaleY, img.naturalHeight));
+  
+  return { x, y };
+}
+
+// Function to update zoom view dimensions
+function updateZoomView(img, lens, popup, zoomLevel) {
+  console.log("Updating zoom view");
+  
+  // Set popup dimensions
+  const popupWidth = 500; // Bigger size (was 400)
+  const popupHeight = 500; // Bigger size (was 400)
+  
+  // Apply dimensions to popup
+  popup.style.width = popupWidth + 'px';
+  popup.style.height = popupHeight + 'px';
+  
+  // Set background properties for the popup
+  popup.style.backgroundImage = `url('${img.src}')`;
+  popup.style.backgroundSize = (img.naturalWidth * zoomLevel) + 'px ' + (img.naturalHeight * zoomLevel) + 'px';
+  popup.style.backgroundRepeat = 'no-repeat';
+  
+  // Position the popup fixed to the right of the image
+  positionPopupFixed(img, popup);
+  
+  console.log("Zoom view updated with image:", img.src);
+  console.log("Natural dimensions:", img.naturalWidth, "x", img.naturalHeight);
+  console.log("Zoom size:", img.naturalWidth * zoomLevel, "x", img.naturalHeight * zoomLevel);
+}
+
+// Override the original changeMainImage function to maintain zoom functionality
+window.changeMainImage = function(imgSrc, clickedThumb) {
+  console.log("Changing main image to:", imgSrc);
+  const mainImage = document.getElementById("mainImage");
+  
+  // Update active thumbnail
+  const thumbnails = document.querySelectorAll(".thumbnail");
+  thumbnails.forEach(thumb => {
+    thumb.classList.remove("active");
+  });
+  clickedThumb.classList.add("active");
+  
+  // Reset zoom view when changing images
+  const zoomLens = document.querySelector('.img-zoom-lens');
+  const zoomPopup = document.querySelector('.img-zoom-popup');
+  
+  if (zoomLens && zoomPopup) {
+    zoomLens.style.display = 'none';
+    zoomPopup.style.display = 'none';
+  }
+  
+  // Set new image source
+  mainImage.src = imgSrc;
+  
+  // Update zoom view when new image loads
+  mainImage.onload = function() {
+    console.log("New image loaded, updating zoom view");
+    if (zoomLens && zoomPopup) {
+      updateZoomView(mainImage, zoomLens, zoomPopup, 2.5);
+    }
+  };
+};
+// Function to set up image zoom after product loads
+function addPopupZoomFunctionality() {
+  // Wait for image to load before setting up the zoom
+  document.addEventListener('DOMContentLoaded', function() {
+    // Override changeMainImage function to maintain zoom functionality when changing images
+    window.changeMainImage = function(imgSrc, clickedThumb) {
+      const mainImage = document.getElementById("mainImage");
+      mainImage.src = imgSrc;
+      
+      // Update active thumbnail
+      const thumbnails = document.querySelectorAll(".thumbnail");
+      thumbnails.forEach(thumb => {
+        thumb.classList.remove("active");
+      });
+      clickedThumb.classList.add("active");
+      
+      // Reset zoom view when changing images
+      const zoomLens = document.querySelector('.img-zoom-lens');
+      const zoomPopup = document.querySelector('.img-zoom-popup');
+      
+      if (zoomLens && zoomPopup) {
+        zoomLens.style.display = 'none';
+        zoomPopup.style.display = 'none';
+        
+        // Update zoom view when new image loads
+        mainImage.onload = function() {
+          updateZoomView(mainImage, zoomLens, zoomPopup, 2.5);
+        };
+      }
+    };
+    
+    // Check and setup zoom after product loads
+    const checkImageLoaded = setInterval(function() {
+      const mainImage = document.getElementById('mainImage');
+      if (mainImage) {
+        clearInterval(checkImageLoaded);
+        // Add slight delay to ensure image is fully rendered
+        setTimeout(setupPopupZoom, 500);
+      }
+    }, 100);
+  });
+}
+
+// Add this to the end of your fetchProduct function
+function modifyFetchProduct() {
+  const originalFetchProduct = fetchProduct;
+  
+  fetchProduct = async function() {
+    await originalFetchProduct();
+    addPopupZoomFunctionality();
+  };
+}
+
+modifyFetchProduct();
 // Initialize the page
 fetchProduct();
