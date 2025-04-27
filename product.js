@@ -31,6 +31,44 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Helper function to create and show modals
+function showModal(title, message, isError = false) {
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed';
+  modal.style.top = '0';
+  modal.style.left = '0';
+  modal.style.width = '100%';
+  modal.style.height = '100%';
+  modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+  modal.style.display = 'flex';
+  modal.style.justifyContent = 'center';
+  modal.style.alignItems = 'center';
+  modal.style.zIndex = '1000';
+
+  const modalContent = document.createElement('div');
+  modalContent.style.backgroundColor = '#0f0f0f';
+  modalContent.style.padding = '20px';
+  modalContent.style.borderRadius = '8px';
+  modalContent.style.textAlign = 'center';
+  modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+  modalContent.style.maxWidth = '400px';
+  modalContent.style.width = '90%';
+
+  modalContent.innerHTML = `
+    <img src="images/Wordmark White.png" style="height: 70px; width: auto; object-fit: contain;">
+    <h4 style="color: white; padding: 10px;">${title}</h4>
+    <p style="color: white; padding: 10px;">${message}</p>
+    <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color:${isError ? '#dc3545' : 'rgb(0, 0, 0)'}; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+  `;
+
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+
+  document.getElementById('closeModalBtn').addEventListener('click', () => {
+    document.body.removeChild(modal);
+  });
+}
+
 // Get reference to the user option div in navbar (if it exists)
 const userOptionDiv = document.querySelector('.user_option');
 
@@ -66,7 +104,7 @@ if (userOptionDiv) {
           signOut(auth).then(() => {
             location.reload();
           }).catch((error) => {
-            alert("Logout failed: " + error.message);
+            showModal("Logout Failed", error.message, true);
           });
         });
 
@@ -90,7 +128,7 @@ if (userOptionDiv) {
           signOut(auth).then(() => {
             location.reload();
           }).catch((error) => {
-            alert("Logout failed: " + error.message);
+            showModal("Logout Failed", error.message, true);
           });
         });
       });
@@ -171,7 +209,7 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
     const productSnap = await getDoc(productRef);
     
     if (!productSnap.exists()) {
-      alert("Product not found");
+      showModal("Error", "Product not found", true);
       return;
     }
     
@@ -200,7 +238,7 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
         updatedAt: new Date()
       });
       
-      alert(`Item quantity updated in cart (${newQuantity})`);
+      showModal("Cart Updated", `Item quantity updated in cart (${newQuantity})`);
     } else {
       // Product doesn't exist in cart, add new item
       const cartItem = {
@@ -216,12 +254,12 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
       };
       
       await addDoc(collection(db, "carts"), cartItem);
-      alert("Item added to cart");
+      showModal("Item added to cart!", "Keep Grinding!");
     }
     
   } catch (error) {
     console.error("Error adding to cart:", error);
-    alert("Failed to add item to cart. Please try again.");
+    showModal("Error", "Failed to add item to cart. Please try again.", true);
   }
 }
 
@@ -350,7 +388,7 @@ async function fetchProduct() {
     document.getElementById("addToCartBtn").addEventListener("click", async () => {
       const selectedSizeElement = document.querySelector(".size-option.selected");
       if (!selectedSizeElement) {
-        alert("Please select a size");
+        showModal("Selection Required", "Please select a size");
         return;
       }
       
