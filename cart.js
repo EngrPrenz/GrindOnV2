@@ -36,6 +36,41 @@ const auth = getAuth(app);
 // Get reference to the user option div in navbar
 const userOptionDiv = document.querySelector('.user_option');
 
+function showModal(title, message, isError = false) {
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed';
+  modal.style.top = '0';
+  modal.style.left = '0';
+  modal.style.width = '100%';
+  modal.style.height = '100%';
+  modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+  modal.style.display = 'flex';
+  modal.style.justifyContent = 'center';
+  modal.style.alignItems = 'center';
+  modal.style.zIndex = '1000';
+
+  const modalContent = document.createElement('div');
+  modalContent.style.backgroundColor = '#0f0f0f';
+  modalContent.style.padding = '20px';
+  modalContent.style.borderRadius = '8px';
+  modalContent.style.textAlign = 'center';
+  modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+  modalContent.style.maxWidth = '400px';
+  modalContent.style.width = '90%';
+
+  modalContent.innerHTML = `
+    <img src="images/Wordmark White.png" style="height: 70px; width: auto; object-fit: contain;">
+    <h5 style="color: white; padding: 10px;">${title}</h5>
+    <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color:${isError ? '#dc3545' : 'rgb(0, 0, 0)'}; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+  `;
+
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+
+  document.getElementById('closeModalBtn').addEventListener('click', () => {
+    document.body.removeChild(modal);
+  });
+}
 
 // Authentication state observer
 onAuthStateChanged(auth, (user) => {
@@ -71,7 +106,7 @@ onAuthStateChanged(auth, (user) => {
         signOut(auth).then(() => {
           location.reload();
         }).catch((error) => {
-          alert("Logout failed: " + error.message);
+          showModal("Logout failed: " + error.message);
         });
       });
 
@@ -95,7 +130,7 @@ onAuthStateChanged(auth, (user) => {
         signOut(auth).then(() => {
           location.reload();
         }).catch((error) => {
-          alert("Logout failed: " + error.message);
+          showModal("Logout failed: " + error.message);
         });
       });
     });
@@ -241,7 +276,6 @@ async function loadUserCart(userId) {
       cartItemsContainer.appendChild(itemElement);
     }
     
-    // Rest of the function remains the same...
     // Add summary section back
     if (cartSummary) {
       cartItemsContainer.appendChild(cartSummary);
@@ -300,7 +334,7 @@ async function loadUserCart(userId) {
   } catch (error) {
     console.error("Detailed error loading cart:", error);
     console.error("Error stack:", error.stack);
-    alert("Failed to load your cart items. Please try again later.");
+    showModal("Failed to load your cart items. Please try again later.");
   }
 }
 
@@ -335,7 +369,7 @@ function setupCartEventListeners() {
         updateCartItemTotal(this);
         updateCartItemInDatabase(this);
       } else {
-        alert(`Sorry, only ${maxStock} items available in stock.`);
+        showModal(`Sorry, only ${maxStock} items available in stock.`);
       }
     });
   });
@@ -356,7 +390,7 @@ function setupCartEventListeners() {
       
       // Enforce maximum stock limit
       if (value > maxStock) {
-        alert(`Sorry, only ${maxStock} items available in stock.`);
+        showModal(`Sorry, only ${maxStock} items available in stock.`);
         this.value = maxStock;
         value = maxStock;
       }
@@ -413,7 +447,7 @@ function setupCartEventListeners() {
       // Get the current user
       const user = auth.currentUser;
       if (!user) {
-        alert("Please log in to checkout");
+        showModal("Please log in to checkout");
         return false;
       }
       
@@ -423,7 +457,7 @@ function setupCartEventListeners() {
       const cartSnapshot = await getDocs(q);
       
       if (cartSnapshot.empty) {
-        alert("Your cart is empty");
+        showModal("Your cart is empty");
         return false;
       }
       
@@ -492,7 +526,7 @@ function setupCartEventListeners() {
         });
         
         errorMessage += "\nPlease update your cart before proceeding.";
-        alert(errorMessage);
+        showModal(errorMessage);
         return false;
       }
       
@@ -500,13 +534,11 @@ function setupCartEventListeners() {
       return true;
     } catch (error) {
       console.error("Error validating cart stock:", error);
-      alert("Failed to validate stock availability. Please try again later.");
+      showModal("Failed to validate stock availability. Please try again later.");
       return false;
     }
   }
 }
-  
-
 
 // Update the cart item total when quantity changes
 function updateCartItemTotal(element) {
@@ -560,7 +592,7 @@ async function updateCartItemInDatabase(element) {
     console.log("Cart item updated successfully");
   } catch (error) {
     console.error("Error updating cart item:", error);
-    alert("Failed to update cart. Please try again.");
+    showModal("Failed to update cart. Please try again.");
   }
 }
 
@@ -581,7 +613,7 @@ async function removeCartItemFromDatabase(itemId) {
     console.log("Cart item removed successfully");
   } catch (error) {
     console.error("Error removing cart item:", error);
-    alert("Failed to remove item from cart. Please try again.");
+    showModal("Failed to remove item from cart. Please try again.");
   }
 }
 
@@ -616,7 +648,7 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
     const user = auth.currentUser;
     if (!user) {
       // Redirect to login page or show login modal
-      alert("Please log in to add items to your cart");
+      showModal("Please log in to add items to your cart");
       window.location.href = 'login.html';
       return;
     }
@@ -626,7 +658,7 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
     const productSnap = await getDoc(productRef);
     
     if (!productSnap.exists()) {
-      alert("Product not found");
+      showModal("Product not found");
       return;
     }
     
@@ -655,7 +687,7 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
         updatedAt: new Date()
       });
       
-      alert(`Item quantity updated in cart (${newQuantity})`);
+      showModal(`Item quantity updated in cart (${newQuantity})`);
     } else {
       // Product doesn't exist in cart, add new item
       const cartItem = {
@@ -671,12 +703,12 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
       };
       
       await addDoc(collection(db, "carts"), cartItem);
-      alert("Item added to cart");
+      showModal("Item added to cart");
     }
     
   } catch (error) {
     console.error("Error adding to cart:", error);
-    alert("Failed to add item to cart. Please try again.");
+    showModal("Failed to add item to cart. Please try again.");
   }
 }
 
