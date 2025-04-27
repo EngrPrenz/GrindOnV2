@@ -26,6 +26,16 @@ submit.addEventListener("click", function (event) {
     const usernameOrEmail = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
+    // Simple validation
+    if (!usernameOrEmail || !password) {
+        alert("Please enter both email/username and password");
+        return;
+    }
+
+    // Show loading state
+    submit.disabled = true;
+    submit.textContent = "Signing in...";
+
     // If the input is an email
     if (usernameOrEmail.includes('@')) {
         signInWithEmailAndPassword(auth, usernameOrEmail, password)
@@ -36,9 +46,13 @@ submit.addEventListener("click", function (event) {
                 window.location.href = "homepage.html"; // Or another page you want
             })
             .catch((error) => {
-                const errorCode = error.code;
                 const errorMessage = error.message;
                 alert(errorMessage); // Display error message if login fails
+            })
+            .finally(() => {
+                // Reset button state
+                submit.disabled = false;
+                submit.textContent = "Sign In";
             });
     } else {
         // If the input is a username, query Firestore to find the email
@@ -65,7 +79,6 @@ submit.addEventListener("click", function (event) {
                         window.location.href = "home.html"; // Or another page you want
                     })
                     .catch((error) => {
-                        const errorCode = error.code;
                         const errorMessage = error.message;
                         alert(errorMessage); // Display error message if login fails
                     });
@@ -73,6 +86,11 @@ submit.addEventListener("click", function (event) {
             .catch((error) => {
                 console.error("Error fetching user by username: ", error);
                 alert("Error fetching user details.");
+            })
+            .finally(() => {
+                // Reset button state
+                submit.disabled = false;
+                submit.textContent = "Sign In";
             });
     }
 });
