@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signOut, isSignInWithEmailLink, signInWithEmailLink } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
@@ -18,20 +18,59 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Check if user has verified email
-document.addEventListener('DOMContentLoaded', () => {
-    // Get the verified email from localStorage
-    const verifiedEmail = localStorage.getItem('verifiedEmail');
-    
-    if (!verifiedEmail) {
-        // If no verified email, redirect to the email verification page
-        alert("Please verify your email before completing registration.");
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Check if the URL is a sign-in link from Firebase
+        if (isSignInWithEmailLink(auth, window.location.href)) {
+            // Get the email from localStorage that we saved in email_verification.js
+            let email = localStorage.getItem('emailForSignIn');
+            
+            if (!email) {
+                // If the email isn't found in localStorage, prompt the user
+                email = window.prompt('Please provide your email for confirmation');
+            }
+            
+            if (email) {
+                // Sign in the user with the email link
+                await signInWithEmailLink(auth, email, window.location.href);
+                
+                // Clear the URL query parameters for cleaner URL and to prevent reusing the link
+                window.history.replaceState(null, null, window.location.pathname);
+                
+                // Store the verified email in localStorage for use in the registration process
+                localStorage.setItem('verifiedEmail', email);
+                
+                // Populate the email field
+                const emailInput = document.getElementById('email');
+                emailInput.value = email;
+                
+                // No need for alert or redirect as the user is already verified
+                console.log("Email verified successfully");
+            } else {
+                // If email is still not available, redirect to registration page
+                alert("Could not verify email. Please start over.");
+                window.location.href = "register.html";
+            }
+        } else {
+            // Check if we have a verified email from a previous verification
+            const verifiedEmail = localStorage.getItem('verifiedEmail');
+            
+            if (!verifiedEmail) {
+                // If no verified email, redirect to the email verification page
+                alert("Please verify your email before completing registration.");
+                window.location.href = "register.html";
+                return;
+            }
+            
+            // Populate the email field
+            const emailInput = document.getElementById('email');
+            emailInput.value = verifiedEmail;
+        }
+    } catch (error) {
+        console.error("Error during email verification:", error);
+        alert("Error verifying email: " + error.message);
         window.location.href = "register.html";
-        return;
     }
-    
-    // Populate the email field
-    const emailInput = document.getElementById('email');
-    emailInput.value = verifiedEmail;
 });
 
 // Password visibility toggle
@@ -135,8 +174,9 @@ submit.addEventListener("click", async function (event) {
             createdAt: new Date().toISOString()
         });
 
-        // Clear the stored email
+        // Clear the stored emails
         localStorage.removeItem('verifiedEmail');
+        localStorage.removeItem('emailForSignIn');
 
         alert("Registration completed successfully!");
         window.location.href = "homepage.html";

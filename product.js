@@ -58,7 +58,7 @@ function showModal(title, message, isError = false) {
     <img src="images/Wordmark White.png" style="height: 70px; width: auto; object-fit: contain;">
     <h4 style="color: white; padding: 10px;">${title}</h4>
     <p style="color: white; padding: 10px;">${message}</p>
-    <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color:${isError ? '#dc3545' : 'rgb(0, 0, 0)'}; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+    <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color:${isError ? '#dc3545' : 'rgb(0, 0, 0)'}; color: white; border: none; border-radius: 4px; cursor: pointer;">Continue Shopping</button>
   `;
 
   modal.appendChild(modalContent);
