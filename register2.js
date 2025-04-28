@@ -1,5 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signOut, isSignInWithEmailLink, signInWithEmailLink } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { 
+    getAuth, 
+    isSignInWithEmailLink, 
+    signInWithEmailLink, 
+    updatePassword, 
+    EmailAuthProvider,
+    reauthenticateWithCredential
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
@@ -17,6 +24,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Variable to track if user is properly authenticated via email link
+let userAuthenticated = false;
+
 // Check if user has verified email
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -32,7 +42,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (email) {
                 // Sign in the user with the email link
-                await signInWithEmailLink(auth, email, window.location.href);
+                const result = await signInWithEmailLink(auth, email, window.location.href);
+                
+                // Set flag that user is authenticated via email link
+                userAuthenticated = true;
                 
                 // Clear the URL query parameters for cleaner URL and to prevent reusing the link
                 window.history.replaceState(null, null, window.location.pathname);
@@ -44,7 +57,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const emailInput = document.getElementById('email');
                 emailInput.value = email;
                 
-                // No need for alert or redirect as the user is already verified
                 console.log("Email verified successfully");
             } else {
                 // If email is still not available, redirect to registration page
@@ -58,6 +70,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!verifiedEmail) {
                 // If no verified email, redirect to the email verification page
                 alert("Please verify your email before completing registration.");
+                window.location.href = "register.html";
+                return;
+            }
+            
+            // Check if user is currently signed in
+            const currentUser = auth.currentUser;
+            if (currentUser && currentUser.email === verifiedEmail) {
+                userAuthenticated = true;
+            } else {
+                // If not authenticated but has verifiedEmail
+                // Redirect to the verification page to re-authenticate
+                alert("Your session has expired. Please verify your email again.");
                 window.location.href = "register.html";
                 return;
             }
@@ -156,21 +180,27 @@ submit.addEventListener("click", async function (event) {
         return;
     }
 
+    // Make sure user is authenticated
+    if (!auth.currentUser) {
+        alert("Authentication session expired. Please verify your email again.");
+        window.location.href = "register.html";
+        return;
+    }
+
     // Disable button to prevent multiple submissions
     submit.disabled = true;
     submit.textContent = "Processing...";
 
     try {
-        // Create user with email and password
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
+        // Update the password for the current user
+        await updatePassword(auth.currentUser, password);
+        
         // Store user data in Firestore
-        await setDoc(doc(db, "users", user.uid), {
+        await setDoc(doc(db, "users", auth.currentUser.uid), {
             email: email,
             username: username,
             role: "user",
-            emailVerified: true, // Email is already verified
+            emailVerified: true,
             createdAt: new Date().toISOString()
         });
 
