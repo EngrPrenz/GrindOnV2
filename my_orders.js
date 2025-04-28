@@ -7,7 +7,9 @@ import {
   query,
   where,
   getDocs,
-  orderBy
+  orderBy,
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 import {
@@ -15,6 +17,7 @@ import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
 
 // Firebase config
 const firebaseConfig = {
@@ -84,7 +87,6 @@ async function loadUserOrders(userId) {
   }
 }
 
-// Also need to modify displayNoOrdersMessage to use peso sign
 function displayNoOrdersMessage() {
   const orderContent = `
     <div class="heading_container heading_center">
@@ -122,7 +124,6 @@ function displayErrorMessage(message) {
   orderContainer.innerHTML = errorContent;
 }
 
-// Modified displayOrdersSummary function for consistent styling and peso currency
 function displayOrdersSummary(orders) {
   const pendingOrders = orders.filter(order => 
     order.status === "Pending" || order.status === "Processing" || order.status === "Shipped"
@@ -148,8 +149,6 @@ function displayOrdersSummary(orders) {
   orderContainer.innerHTML = summaryHTML;
 }
 
-
-// Modified displayOrders function with peso currency and fixed text styling
 function displayOrders(orders) {
   let ordersHTML = '';
   
@@ -175,9 +174,11 @@ function displayOrders(orders) {
         statusClass = 'status-shipped';
         break;
       case 'Delivered':
+      case 'Claimed':
         statusClass = 'status-delivered';
         break;
       case 'Cancelled':
+      case 'Declined':
         statusClass = 'status-cancelled';
         break;
       default:
@@ -205,9 +206,9 @@ function displayOrders(orders) {
       `;
     });
     
-    // Estimated delivery or delivery date (for demonstration, add 5 days to created date for pending/shipped)
+    // Estimated delivery or delivery date
     let deliveryInfo = '';
-    if (order.status === 'Delivered') {
+    if (order.status === 'Delivered' || order.status === 'Claimed') {
       // For delivered orders, show actual delivery date (for demo we're adding 3 days)
       const deliveryDate = new Date(order.createdAt.toDate());
       deliveryDate.setDate(deliveryDate.getDate() + 3);
@@ -219,16 +220,22 @@ function displayOrders(orders) {
       deliveryInfo = `<span class="label-text">Estimated Delivery:</span> ${formatDate({ toDate: () => estimatedDate })}`;
     }
     
-    // Create order HTML
+    // Create order HTML - Hide track button if status is Claimed
+    const trackButtonHtml = order.status === 'Claimed' ? '' : `
+      <button class="track-button" data-order-id="${order.id}">
+        ${order.status === 'Delivered' || order.status === 'Claimed' ? 'View Details' : 'Track Order'}
+      </button>
+    `;
+    
     const orderHTML = `
-      <div class="order-item">
+      <div class="order-item" id="order-${order.id}">
         <div class="order-header">
           <div>
             <div class="order-id">Order #${order.id.substring(0, 8)}</div>
             <div class="order-date"><span class="label-text">Placed on:</span> ${orderDate}</div>
           </div>
           <div>
-            <div><span class="label-text">Status:</span> <span class="${statusClass}">${order.status}</span></div>
+            <div><span class="label-text">Status:</span> <span class="${statusClass}" id="status-${order.id}">${order.status}</span></div>
             <div>${deliveryInfo}</div>
           </div>
         </div>
@@ -250,9 +257,7 @@ function displayOrders(orders) {
           </div>
         </div>
         
-        <button class="track-button" data-order-id="${order.id}">
-          ${order.status === 'Delivered' ? 'View Details' : 'Track Order'}
-        </button>
+        ${trackButtonHtml}
       </div>
     `;
     
@@ -263,14 +268,237 @@ function displayOrders(orders) {
   const orderCard = document.querySelector('.card');
   orderCard.innerHTML += ordersHTML;
   
-  // Add event listeners to the track buttons
+  // Set up event listeners for track buttons
   document.querySelectorAll('.track-button').forEach(button => {
     button.addEventListener('click', function() {
       const orderId = this.getAttribute('data-order-id');
-      alert(`Tracking information for order #${orderId.substring(0, 8)} will be displayed here.`);
-      // In a real application, this would navigate to a tracking page or open a modal
+      const orderElement = document.getElementById(`order-${orderId}`);
+      const statusElement = document.getElementById(`status-${orderId}`);
+      const status = statusElement.textContent;
+      
+      openTrackingModal(orderId, status);
     });
   });
+
+  // Set up modal close event listeners
+  setupModalCloseListeners();
+}
+
+// Set up event listeners for modal close button and outside click
+function setupModalCloseListeners() {
+  const modal = document.getElementById('tracking-modal');
+  const closeButton = document.querySelector('.close-modal');
+  
+  if (closeButton) {
+    closeButton.addEventListener('click', closeModal);
+  }
+  
+  // Close modal when clicking outside
+  window.addEventListener('click', function(event) {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+}
+
+// Function to open tracking modal with appropriate message
+function openTrackingModal(orderId, status) {
+  const modal = document.getElementById('tracking-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalMessage = document.getElementById('modal-message');
+  const modalActions = document.getElementById('modal-actions');
+  
+  if (!modal) {
+    console.error("Modal element not found");
+    return;
+  }
+  
+  modalTitle.textContent = `Order #${orderId.substring(0, 8)} Status`;
+  
+  // Clear previous content
+  modalMessage.innerHTML = '';
+  modalActions.innerHTML = '';
+  
+  // Set content based on status
+  switch(status) {
+    case 'pending':
+    case 'Processing':
+      modalMessage.innerHTML = `
+        <p>Your order is still in processing. Thank you for your patience!</p>
+        <div class="order-status-progress">
+          <div class="status-step active">
+            <div class="step-icon"><i class="fa fa-check-circle"></i></div>
+            <div class="step-label">Order Placed</div>
+          </div>
+          <div class="status-step">
+            <div class="step-icon"><i class="fa fa-truck"></i></div>
+            <div class="step-label">Shipped</div>
+          </div>
+          <div class="status-step">
+            <div class="step-icon"><i class="fa fa-home"></i></div>
+            <div class="step-label">Delivered</div>
+          </div>
+        </div>
+      `;
+      break;
+      
+    case 'Shipped':
+      modalMessage.innerHTML = `
+        <p>Your order has been shipped! Did the product(s) already arrive?</p>
+        <div class="order-status-progress">
+          <div class="status-step active">
+            <div class="step-icon"><i class="fa fa-check-circle"></i></div>
+            <div class="step-label">Order Placed</div>
+          </div>
+          <div class="status-step active">
+            <div class="step-icon"><i class="fa fa-truck"></i></div>
+            <div class="step-label">Shipped</div>
+          </div>
+          <div class="status-step">
+            <div class="step-icon"><i class="fa fa-home"></i></div>
+            <div class="step-label">Delivered</div>
+          </div>
+        </div>
+      `;
+      modalActions.innerHTML = `
+        <button id="claim-button" class="action-button" data-order-id="${orderId}">Claimed</button>
+      `;
+      
+      // Add event listener to claim button
+      setTimeout(() => {
+        const claimButton = document.getElementById('claim-button');
+        if (claimButton) {
+          claimButton.addEventListener('click', async function() {
+            await updateOrderStatus(orderId, 'Claimed');
+          });
+        }
+      }, 0);
+      break;
+      
+    case 'Declined':
+      modalMessage.innerHTML = `
+        <p>Sorry, your order has been declined. Thank you for your patience. We're sure there are other products here that are available for you.</p>
+      `;
+      modalActions.innerHTML = `
+        <button id="delete-button" class="action-button delete-button" data-order-id="${orderId}">Delete Order</button>
+      `;
+      
+      // Add event listener to delete button
+      setTimeout(() => {
+        const deleteButton = document.getElementById('delete-button');
+        if (deleteButton) {
+          deleteButton.addEventListener('click', async function() {
+            await deleteOrder(orderId);
+          });
+        }
+      }, 0);
+      break;
+      
+    case 'Delivered':
+    case 'Claimed':
+      modalMessage.innerHTML = `
+        <p>Your order has been delivered. Thank you for shopping with us!</p>
+        <div class="order-status-progress">
+          <div class="status-step active">
+            <div class="step-icon"><i class="fa fa-check-circle"></i></div>
+            <div class="step-label">Order Placed</div>
+          </div>
+          <div class="status-step active">
+            <div class="step-icon"><i class="fa fa-truck"></i></div>
+            <div class="step-label">Shipped</div>
+          </div>
+          <div class="status-step active">
+            <div class="step-icon"><i class="fa fa-home"></i></div>
+            <div class="step-label">Delivered</div>
+          </div>
+        </div>
+      `;
+      break;
+      
+    default:
+      modalMessage.textContent = `Current status: ${status}`;
+  }
+  
+  modal.style.display = 'block';
+}
+
+// Function to close modal
+function closeModal() {
+  const modal = document.getElementById('tracking-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+// Function to update order status
+async function updateOrderStatus(orderId, newStatus) {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      alert('You must be logged in to update an order.');
+      return;
+    }
+    
+    const orderRef = doc(db, "orders", orderId);
+    await updateDoc(orderRef, {
+      status: newStatus
+    });
+    
+    // Update UI
+    const statusElement = document.getElementById(`status-${orderId}`);
+    statusElement.textContent = newStatus;
+    
+    // Update status class
+    if (newStatus === 'Claimed') {
+      statusElement.className = 'status-delivered';
+      // Hide the track button
+      const orderElement = document.getElementById(`order-${orderId}`);
+      const trackButton = orderElement.querySelector('.track-button');
+      if (trackButton) {
+        trackButton.style.display = 'none';
+      }
+    }
+    
+    closeModal();
+    alert(`Order status updated to ${newStatus}!`);
+    
+    // Reload page to reflect changes
+    location.reload();
+    
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    alert("Failed to update order status. Please try again.");
+  }
+}
+
+// Function to delete order
+async function deleteOrder(orderId) {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      alert('You must be logged in to delete an order.');
+      return;
+    }
+    
+    if (confirm("Are you sure you want to delete this order?")) {
+      const orderRef = doc(db, "orders", orderId);
+      await deleteDoc(orderRef);
+      
+      // Remove order from UI
+      const orderElement = document.getElementById(`order-${orderId}`);
+      orderElement.remove();
+      
+      closeModal();
+      alert("Order deleted successfully!");
+      
+      // Reload to update summary count
+      location.reload();
+    }
+    
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    alert("Failed to delete order. Please try again.");
+  }
 }
 
 // Authentication state observer
@@ -353,21 +581,26 @@ onAuthStateChanged(auth, (user) => {
     `;
     
     // Display login required message with shopping cart style UI
-  const loginRequiredHTML = `
-  <div class="heading_container heading_center">
-    <h2>YOUR ORDERS</h2>
-  </div>
-  
-  <div class="card login-required-card">
-     <div class="order-icon">
+    const loginRequiredHTML = `
+    <div class="heading_container heading_center">
+      <h2>YOUR ORDERS</h2>
+    </div>
+    
+    <div class="card login-required-card">
+      <div class="order-icon">
         <i class="fa fa-file-text" aria-hidden="true"></i>
       </div>
-    <h3>Please log in to view your orders</h3>
-    <p>You need to be logged in to tracked your orders</p>
-    
-  </div>
-`;
+      <h3>Please log in to view your orders</h3>
+      <p>You need to be logged in to tracked your orders</p>
+      <a href="login.html" class="login-button">Login</a>
+    </div>
+  `;
 
-orderContainer.innerHTML = loginRequiredHTML;
-}
+  orderContainer.innerHTML = loginRequiredHTML;
+  }
+});
+
+// Initialize modal close button functionality when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  setupModalCloseListeners();
 });
