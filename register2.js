@@ -27,6 +27,29 @@ const db = getFirestore(app);
 // Variable to track if user is properly authenticated via email link
 let userAuthenticated = false;
 
+// Modal functionality
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modal-title');
+const modalMessage = document.getElementById('modal-message');
+const modalOkButton = document.getElementById('modal-ok');
+const closeModal = document.querySelector('.close-modal');
+
+// Show modal function
+function showModal(title, message, callback = null) {
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modal.classList.add('show');
+    
+    // Set up click handlers for closing modal
+    const handleClose = () => {
+        modal.classList.remove('show');
+        if (callback) callback();
+    };
+    
+    closeModal.onclick = handleClose;
+    modalOkButton.onclick = handleClose;
+}
+
 // Check if user has verified email
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -60,8 +83,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log("Email verified successfully");
             } else {
                 // If email is still not available, redirect to registration page
-                alert("Could not verify email. Please start over.");
-                window.location.href = "register.html";
+                showModal("Email Verification Failed", "Could not verify email. Please start over.", () => {
+                    window.location.href = "register.html";
+                });
             }
         } else {
             // Check if we have a verified email from a previous verification
@@ -69,8 +93,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (!verifiedEmail) {
                 // If no verified email, redirect to the email verification page
-                alert("Please verify your email before completing registration.");
-                window.location.href = "register.html";
+                showModal("Verification Required", "Please verify your email before completing registration.", () => {
+                    window.location.href = "register.html";
+                });
                 return;
             }
             
@@ -81,8 +106,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 // If not authenticated but has verifiedEmail
                 // Redirect to the verification page to re-authenticate
-                alert("Your session has expired. Please verify your email again.");
-                window.location.href = "register.html";
+                showModal("Session Expired", "Your session has expired. Please verify your email again.", () => {
+                    window.location.href = "register.html";
+                });
                 return;
             }
             
@@ -92,8 +118,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (error) {
         console.error("Error during email verification:", error);
-        alert("Error verifying email: " + error.message);
-        window.location.href = "register.html";
+        showModal("Error", "Error verifying email: " + error.message, () => {
+            window.location.href = "register.html";
+        });
     }
 });
 
@@ -166,7 +193,7 @@ submit.addEventListener("click", async function (event) {
 
     // Validate username
     if (!validateUsername(username)) {
-        alert("Username may only contain alphanumeric characters or single hyphens, and cannot begin or end with a hyphen.");
+        showModal("Invalid Username", "Username may only contain alphanumeric characters or single hyphens, and cannot begin or end with a hyphen.");
         return;
     }
 
@@ -176,14 +203,15 @@ submit.addEventListener("click", async function (event) {
     const isPasswordValid = password.length >= 15 || (password.length >= 8 && hasLowerCase && hasNumber);
     
     if (!isPasswordValid) {
-        alert("Password should be at least 15 characters OR at least 8 characters including a number and a lowercase letter.");
+        showModal("Invalid Password", "Password should be at least 15 characters OR at least 8 characters including a number and a lowercase letter.");
         return;
     }
 
     // Make sure user is authenticated
     if (!auth.currentUser) {
-        alert("Authentication session expired. Please verify your email again.");
-        window.location.href = "register.html";
+        showModal("Authentication Error", "Authentication session expired. Please verify your email again.", () => {
+            window.location.href = "register.html";
+        });
         return;
     }
 
@@ -208,14 +236,22 @@ submit.addEventListener("click", async function (event) {
         localStorage.removeItem('verifiedEmail');
         localStorage.removeItem('emailForSignIn');
 
-        alert("Registration completed successfully!");
-        window.location.href = "homepage.html";
+        showModal("Success", "Registration completed successfully!", () => {
+            window.location.href = "homepage.html";
+        });
     } catch (error) {
         console.error("Error completing registration:", error);
-        alert("Error completing registration: " + error.message);
+        showModal("Registration Error", "Error completing registration: " + error.message);
 
         // Reset button
         submit.disabled = false;
         submit.textContent = "Complete Registration";
+    }
+});
+
+// Close modal when clicking outside of it
+window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+        modal.classList.remove('show');
     }
 });
