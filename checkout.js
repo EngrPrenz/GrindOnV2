@@ -182,6 +182,108 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+// ImgBB upload functionality for payment proof
+document.addEventListener('DOMContentLoaded', function() {
+  // Setup upload functionality for GCash payment proof
+  setupUploadFunctionality('payment-proof-upload', 'upload-payment-proof-btn', 'payment-proof-preview', 'payment-proof-url');
+  
+  // Setup upload functionality for Bank Transfer payment proof
+  setupUploadFunctionality('bank-proof-upload', 'upload-bank-proof-btn', 'bank-proof-preview', 'bank-proof-url');
+});
+
+// Function to set up upload functionality for multiple upload buttons
+function setupUploadFunctionality(uploadId, buttonId, previewId, hiddenInputId) {
+  const uploadInput = document.getElementById(uploadId);
+  const uploadButton = document.getElementById(buttonId);
+  
+  if (uploadInput && uploadButton) {
+    uploadButton.addEventListener('click', async () => {
+      const files = uploadInput.files;
+      
+      if (!files.length) {
+        alert('⚠️ Please select a payment proof image first.');
+        return;
+      }
+      
+      // Show loading state
+      uploadButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Uploading...';
+      uploadButton.disabled = true;
+      
+      try {
+        const file = files[0]; // Just use the first file for payment proof
+        const base64 = await fileToBase64(file);
+        
+        const response = await fetch("https://api.imgbb.com/1/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams({
+            key: "54d7f9f504ad8667bd240160609fd2b4", // Your ImgBB API key
+            image: base64.split(",")[1]
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Store the payment proof URL in a hidden input field
+          const hiddenInput = document.getElementById(hiddenInputId);
+          if (hiddenInput) {
+            hiddenInput.value = result.data.url;
+          } else {
+            // Create the hidden field if it doesn't exist
+            const newHiddenInput = document.createElement('input');
+            newHiddenInput.type = 'hidden';
+            newHiddenInput.id = hiddenInputId;
+            newHiddenInput.name = hiddenInputId;
+            newHiddenInput.value = result.data.url;
+            document.getElementById('checkout-form').appendChild(newHiddenInput);
+          }
+          
+          // Show success message and preview
+          const previewContainer = document.getElementById(previewId);
+          if (previewContainer) {
+            previewContainer.innerHTML = `
+              <div class="upload-success">
+                <img src="${result.data.url}" alt="Payment proof" class="payment-proof-image" style="max-width: 100%; max-height: 200px;">
+                <p><i class="fa fa-check-circle"></i> Upload successful!</p>
+              </div>
+            `;
+          }
+          
+          // Update order data with payment proof URL
+          const paymentMethod = document.querySelector('input[name="payment-method"]:checked')?.value;
+          if (paymentMethod === 'gcash' || paymentMethod === 'bank-transfer') {
+            // Add payment proof to order data
+            console.log("Payment proof URL added:", result.data.url);
+          }
+          
+        } else {
+          console.error("Upload failed:", result);
+          alert('❌ Error uploading payment proof. Please try again.');
+        }
+      } catch (error) {
+        console.error("Upload error:", error);
+        alert('❌ Error uploading payment proof. Please try again.');
+      } finally {
+        uploadButton.innerHTML = '<i class="fa fa-upload"></i> Upload Receipt';
+        uploadButton.disabled = false;
+      }
+    });
+  }
+}
+
+// Convert file to base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 async function handleCheckout(event) {
   event.preventDefault();
   console.log("Checkout process started");
@@ -273,6 +375,8 @@ async function handleCheckout(event) {
       province: document.getElementById('province').value,
       postalCode: document.getElementById('zip').value,
       paymentMethod: document.querySelector('input[name="payment-method"]:checked')?.value || 'cod',
+      // Add the payment proof URL if available
+      paymentProofUrl: document.getElementById('payment-proof-url')?.value || '',
       items: window.cartItems || [],
       subtotal: window.orderSubtotal || 0,
       shipping: 150, // Fixed shipping cost
@@ -387,26 +491,6 @@ async function clearUserCart(userId) {
     // Continue with order process even if cart clearing fails
   }
 }
-
-// Handle payment method selection
-const paymentMethods = document.querySelectorAll('input[name="payment-method"]');
-paymentMethods.forEach(method => {
-  method.addEventListener('change', function() {
-    const paymentDetails = document.querySelectorAll('.payment-details');
-    
-    // Hide all payment details sections
-    paymentDetails.forEach(section => {
-      section.style.display = 'none';
-    });
-    
-    // Show the selected payment method's details section
-    const selectedMethod = this.value;
-    const detailsElement = document.getElementById(`${selectedMethod}-details`);
-    if (detailsElement) {
-      detailsElement.style.display = 'block';
-    }
-  });
-});
 
 // Initialize default payment method
 document.querySelector('input[name="payment-method"]:checked')?.dispatchEvent(new Event('change'));

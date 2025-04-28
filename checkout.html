@@ -171,7 +171,7 @@
         </div>
       </div>
       
-      <!-- Payment Information -->
+<!-- Payment Information -->
 <div class="form-section payment-method">
   <h3>Payment Method</h3>
   
@@ -190,8 +190,6 @@
       </label>
     </div>
     
-  
-   
     <!-- Card Input Fields (Hidden by Default) -->
     <div id="card-details" class="card-input-group" style="display: none;">
       <div class="form-group">
@@ -239,7 +237,15 @@
       <div class="form-group">
         <label>GCash Number: 0976 405 6887</label>
         <p>Please send the payment to the GCash number above and upload your payment receipt.</p>
-        <input type="file" class="form-control" accept="image/*">
+        <div class="payment-proof-container">
+          <input type="file" id="payment-proof-upload" class="form-control" accept="image/*">
+          <button type="button" id="upload-payment-proof-btn" class="btn btn-primary">
+            <i class="fa fa-upload"></i> Upload Receipt
+          </button>
+        </div>
+        <div id="payment-proof-preview" class="mt-2"></div>
+        <!-- Hidden input to store the uploaded image URL -->
+        <input type="hidden" id="payment-proof-url" name="payment-proof-url">
       </div>
     </div>
     
@@ -265,9 +271,25 @@
         Account Name: GrindOn Philippines<br>
         Account Number: 1234-5678-9012<br>
         Please upload your payment receipt after completing the transfer.</p>
-        <input type="file" class="form-control" accept="image/*">
+        <div class="payment-proof-container">
+          <input type="file" id="bank-proof-upload" class="form-control" accept="image/*">
+          <button type="button" id="upload-bank-proof-btn" class="btn btn-primary">
+            <i class="fa fa-upload"></i> Upload Receipt
+          </button>
+        </div>
+        <div id="bank-proof-preview" class="mt-2"></div>
+        <!-- Hidden input to store the uploaded image URL -->
+        <input type="hidden" id="bank-proof-url" name="bank-proof-url">
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Loading Overlay (Hidden by Default) -->
+<div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); z-index: 1000; justify-content: center; align-items: center;">
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Processing your order...</p>
   </div>
 </div>
       
