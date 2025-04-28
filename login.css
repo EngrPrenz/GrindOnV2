@@ -104,3 +104,54 @@ button:hover {
     opacity: 0.8;
     text-decoration: underline;
 }
+
+/* Password toggle styles */
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #777;
+    padding: 0;
+    margin: 0;
+    height: 20px;
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.toggle-password:hover {
+    color: #aaa;
+}
+
+.toggle-password:focus {
+    outline: none;
+}
+
+.toggle-password i {
+    font-size: 14px;
+}
+
+/* Override the global button styles for the toggle button */
+.toggle-password {
+    width: auto;
+    margin-top: 0;
+    padding: 0;
+}
+
+.toggle-password:hover {
+    background-color: transparent;
+}
