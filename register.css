@@ -1,256 +1,344 @@
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-  body, html {
-    height: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
+body, html {
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-  .container {
-    display: flex;
-    height: 100vh;
-  }
+.container {
+  display: flex;
+  height: 100vh;
+}
 
-  .left-side {
-    flex: 1;
-    background: url('images/Banner Logo.jpg') center center/cover no-repeat;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-  }
+.left-side {
+  flex: 1;
+  background: url('images/Banner Logo.jpg') center center/cover no-repeat;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
 
-  .left-side h1 {
-    font-size: 36px;
-    max-width: 400px;
-    line-height: 1.3;
-  }
+.left-side h1 {
+  font-size: 36px;
+  max-width: 400px;
+  line-height: 1.3;
+}
 
-  .right-side {
-    flex: 1;
-    background-color: #fff;
-    padding: 60px 40px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+.right-side {
+  flex: 1;
+  background-color: #fff;
+  padding: 60px 40px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
-  .signin-link {
-    margin: 15px 0;
-    text-align: center;
-    font-size: 14px;
-  }
-  
-  .signin-link a {
-    text-decoration: none;
-    color: black;
-    font-weight: 500;
-  }
-  
-  .signin-link a:hover {
-    text-decoration: underline;
-  }
+.signin-link {
+  margin: 15px 0;
+  text-align: center;
+  font-size: 14px;
+}
 
-  .form-wrapper {
-    max-width: 400px;
-    width: 100%;
-    margin: 0 auto;
-  }
+.signin-link a {
+  text-decoration: none;
+  color: black;
+  font-weight: 500;
+}
 
-  .form-wrapper h2 {
-    font-size: 24px;
-    margin-bottom: 24px;
-    color: #24292f;
-  }
+.signin-link a:hover {
+  text-decoration: underline;
+}
 
-  .help-text {
-    font-size: 12px;
-    color: #57606a;
-    margin-top: -10px;
-    margin-bottom: 12px;
-    line-height: 1.4;
-  }
+.form-wrapper {
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
 
-  label {
-    display: block;
-    font-size: 14px;
-    margin-bottom: 6px;
-    font-weight: 600;
-    color: #24292f;
-  }
+.form-wrapper h2 {
+  font-size: 24px;
+  margin-bottom: 24px;
+  color: #24292f;
+}
 
-  input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-  }
+.help-text {
+  font-size: 12px;
+  color: #57606a;
+  margin-top: -10px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
 
-  button {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    font-weight: bold;
-    background-color:  #2e2e2e;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
+label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #24292f;
+}
 
-  button:hover {
-    background-color: #3a3a3a;
-  }
+input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
 
-  .validation-message {
-    font-size: 12px;
-    margin-top: 4px;
-    color: red; /* Default color for invalid messages */
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color:  #2e2e2e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #3a3a3a;
+}
+
+.validation-message {
+  font-size: 12px;
+  margin-top: 4px;
+  color: red; /* Default color for invalid messages */
 }
 
 .password-container {
-    position: relative;
-    display: flex;
-    align-items: center;
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .password-container input {
-    flex: 1;
-    padding-right: 30px; /* Add space for the toggle icon */
+  flex: 1;
+  padding-right: 30px; /* Add space for the toggle icon */
 }
 
 .password-toggle-icon {
-    position: absolute;
-    right: 10px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #888;
-    user-select: none;
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #888;
+  user-select: none;
 }
 
 .password-toggle-icon:hover {
-    color: #555;
+  color: #555;
 }
 
-  #google-signup {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #757575; /* Google gray text */
-    background-color: #ffffff; /* White background */
-    border: 1px solid #ddd; /* Light gray border */
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    margin-top: 16px;
+#google-signup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #757575; /* Google gray text */
+  background-color: #ffffff; /* White background */
+  border: 1px solid #ddd; /* Light gray border */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 16px;
 }
 
 #google-signup img {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
 }
 
 #google-signup:hover {
-    background-color: #f7f7f7; /* Slightly darker background on hover */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  background-color: #f7f7f7; /* Slightly darker background on hover */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
 #google-signup:active {
-    background-color: #eeeeee; /* Even darker background on click */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Slightly deeper shadow */
+  background-color: #eeeeee; /* Even darker background on click */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Slightly deeper shadow */
 }
 
 /* Add these styles to your existing register.css file */
 
 .input-group {
-  margin-bottom: 10px;
-  position: relative;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+margin-bottom: 10px;
+position: relative;
+width: 100%;
+display: flex;
+flex-direction: column;
 }
 
 .verification-message {
-  font-size: 0.85rem;
-  margin-top: 4px;
-  transition: all 0.3s ease;
+font-size: 0.85rem;
+margin-top: 4px;
+transition: all 0.3s ease;
 }
 
 .verification-message.valid {
-  color: #4CAF50;
+color: #4CAF50;
 }
 
 .verification-message.invalid {
-  color: #F44336;
+color: #F44336;
 }
 
 /* Remove the wrapper for cleaner positioning */
 .password-input-wrapper {
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
+position: relative;
+width: 100%;
+display: flex;
+align-items: center;
 }
 
 /* Position the toggle button directly on the input */
 .toggle-password {
-  position: absolute;
-  right: 10px;
-  top: 35%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #777;
-  padding: 0;
-  margin: 0;
-  height: 20px;
-  width: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  pointer-events: auto;
+position: absolute;
+right: 10px;
+top: 35%;
+transform: translateY(-50%);
+background: transparent;
+border: none;
+cursor: pointer;
+color: #777;
+padding: 0;
+margin: 0;
+height: 20px;
+width: 20px;
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 10;
+pointer-events: auto;
 }
 
 .toggle-password:hover {
-  color: #333;
+color: #333;
 }
 
 .toggle-password:focus {
-  outline: none;
+outline: none;
 }
 
 /* Ensure inputs have consistent styling */
 input[type="password"],
 input[type="text"] {
-  width: 100%;
-  padding-right: 35px; /* Make room for the icon */
-  box-sizing: border-box;
+width: 100%;
+padding-right: 35px; /* Make room for the icon */
+box-sizing: border-box;
 }
 
 /* Make the help text follow the same pattern for all fields */
 .help-text {
-  font-size: 0.85rem;
-  color: #777;
-  margin-top: 4px;
+font-size: 0.85rem;
+color: #777;
+margin-top: 4px;
 }
 
 /* Ensure consistent spacing between form elements */
 label {
-  display: block;
-  margin-bottom: 5px;
+display: block;
+margin-bottom: 5px;
+}
+
+/* Modal Styles */
+.modal {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.5);
+z-index: 1000;
+justify-content: center;
+align-items: center;
+}
+
+.modal.visible {
+display: flex;
+}
+
+.modal-content {
+background-color: white;
+padding: 25px;
+border-radius: 8px;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+min-width: 300px;
+max-width: 90%;
+position: relative;
+animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+to {
+  opacity: 1;
+  transform: translateY(0);
+}
+}
+
+.close-modal {
+position: absolute;
+top: 15px;
+right: 15px;
+font-size: 24px;
+cursor: pointer;
+color: #aaa;
+line-height: 1;
+}
+
+.close-modal:hover {
+color: #555;
+}
+
+#modal-title {
+margin-top: 0;
+margin-bottom: 15px;
+font-size: 18px;
+color: #24292f;
+}
+
+#modal-message {
+margin-bottom: 20px;
+color: #444;
+line-height: 1.5;
+}
+
+.modal-actions {
+display: flex;
+justify-content: flex-end;
+}
+
+#modal-ok-btn {
+padding: 8px 16px;
+background-color: #2e2e2e;
+color: white;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+font-size: 14px;
+font-weight: 500;
+min-width: 80px;
+}
+
+#modal-ok-btn:hover {
+background-color: #3a3a3a;
 }

@@ -17,6 +17,50 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Modal functionality
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modal-title');
+const modalMessage = document.getElementById('modal-message');
+const modalOkBtn = document.getElementById('modal-ok-btn');
+const closeModalBtn = document.querySelector('.close-modal');
+
+// Show modal function
+function showModal(title, message, callback = null) {
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modal.classList.add('visible');
+    
+    // Reset previous event listeners
+    const newOkBtn = modalOkBtn.cloneNode(true);
+    modalOkBtn.parentNode.replaceChild(newOkBtn, modalOkBtn);
+    
+    // Set up event listener for OK button
+    newOkBtn.addEventListener('click', () => {
+        modal.classList.remove('visible');
+        if (callback && typeof callback === 'function') {
+            callback();
+        }
+    });
+    
+    // Close modal when clicking the X button
+    closeModalBtn.onclick = () => {
+        modal.classList.remove('visible');
+        if (callback && typeof callback === 'function') {
+            callback();
+        }
+    };
+    
+    // Close modal when clicking outside
+    window.onclick = (event) => {
+        if (event.target === modal) {
+            modal.classList.remove('visible');
+            if (callback && typeof callback === 'function') {
+                callback();
+            }
+        }
+    };
+}
+
 // Email verification
 const emailInput = document.getElementById('email');
 const emailVerification = document.getElementById('email-verification');
@@ -90,7 +134,7 @@ verifyEmailBtn.addEventListener("click", async function(event) {
         }
     } catch (error) {
         console.error("Error checking email:", error);
-        alert("Error checking email availability. Please try again.");
+        showModal("Error", "Error checking email availability. Please try again.");
         return;
     }
     
@@ -116,7 +160,7 @@ verifyEmailBtn.addEventListener("click", async function(event) {
         window.location.href = "email_verification.html";
     } catch (error) {
         console.error("Error sending verification email:", error);
-        alert("Error sending verification email: " + error.message);
+        showModal("Error", "Error sending verification email: " + error.message);
         
         // Reset button
         verifyEmailBtn.disabled = false;
@@ -140,7 +184,7 @@ googleButton.addEventListener("click", async function () {
         window.location.href = "register2.html";
     } catch (error) {
         console.error("Google Sign-In error:", error);
-        alert("Google Sign-In failed: " + error.message);
+        showModal("Google Sign-In Failed", error.message);
     }
 });
 
@@ -149,25 +193,34 @@ if (isSignInWithEmailLink(auth, window.location.href)) {
     // Additional security - you should call signInWithEmailLink first
     let email = localStorage.getItem('emailForSignIn');
     if (!email) {
-        // If we don't have the email stored locally, ask user for it
-        email = window.prompt('Please provide your email for confirmation');
+        // If we don't have the email stored locally, prompt user with modal
+        showModal("Email Verification", "Please provide your email for confirmation", () => {
+            // After modal is closed, prompt the user
+            const promptEmail = window.prompt('Please provide your email for confirmation');
+            if (promptEmail) {
+                completeSignInWithEmail(promptEmail);
+            }
+        });
+    } else {
+        completeSignInWithEmail(email);
     }
-    
-    if (email) {
-        signInWithEmailLink(auth, email, window.location.href)
-            .then((result) => {
-                // Clear email from storage
-                localStorage.removeItem('emailForSignIn');
-                
-                // Store the verified email
-                localStorage.setItem('verifiedEmail', email);
-                
-                // Redirect to complete registration
-                window.location.href = "register2.html";
-            })
-            .catch((error) => {
-                console.error("Error completing sign-in with email link:", error);
-                alert("Error verifying email: " + error.message);
-            });
-    }
+}
+
+// Function to complete sign-in with email link
+function completeSignInWithEmail(email) {
+    signInWithEmailLink(auth, email, window.location.href)
+        .then((result) => {
+            // Clear email from storage
+            localStorage.removeItem('emailForSignIn');
+            
+            // Store the verified email
+            localStorage.setItem('verifiedEmail', email);
+            
+            // Redirect to complete registration
+            window.location.href = "register2.html";
+        })
+        .catch((error) => {
+            console.error("Error completing sign-in with email link:", error);
+            showModal("Error", "Error verifying email: " + error.message);
+        });
 }
