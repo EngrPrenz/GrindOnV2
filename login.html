@@ -6,6 +6,7 @@
   <title>GrindOn Login</title>
   <script type="module" src="login.js" defer></script>
   <link href="login.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
@@ -17,20 +18,18 @@
     <input type="text" id="email" name="email" required />
 
     <label for="password">Password</label>
-    <input type="password" id="password" name="password" required />
+    <div class="password-input-wrapper">
+      <input type="password" id="password" name="password" required />
+      <button type="button" id="toggle-password" class="toggle-password">
+        <i class="fas fa-eye"></i>
+      </button>
+    </div>
 
     <button id="submit">Sign In</button>
 
     <div class="register-prompt">
       <span>Want to stand out on game day?</span> 
       <a href="register.html" class="register-link">Create an Account</a>
-    </div>
-  </div>
-
-  <div id="modal">
-    <div>
-        <p> <strong id="modal-message"></strong></p>
-        <button onclick="document.getElementById('modal').style.display='none'">Close</button>
     </div>
   </div>
 

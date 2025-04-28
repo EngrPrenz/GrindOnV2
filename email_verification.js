@@ -15,6 +15,50 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// Modal functionality
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modal-title');
+const modalMessage = document.getElementById('modal-message');
+const modalOkBtn = document.getElementById('modal-ok-btn');
+const closeModalBtn = document.querySelector('.close-modal');
+
+// Show modal function
+function showModal(title, message, callback = null) {
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modal.classList.add('visible');
+    
+    // Reset previous event listeners
+    const newOkBtn = modalOkBtn.cloneNode(true);
+    modalOkBtn.parentNode.replaceChild(newOkBtn, modalOkBtn);
+    
+    // Set up event listener for OK button
+    newOkBtn.addEventListener('click', () => {
+        modal.classList.remove('visible');
+        if (callback && typeof callback === 'function') {
+            callback();
+        }
+    });
+    
+    // Close modal when clicking the X button
+    closeModalBtn.onclick = () => {
+        modal.classList.remove('visible');
+        if (callback && typeof callback === 'function') {
+            callback();
+        }
+    };
+    
+    // Close modal when clicking outside
+    window.onclick = (event) => {
+        if (event.target === modal) {
+            modal.classList.remove('visible');
+            if (callback && typeof callback === 'function') {
+                callback();
+            }
+        }
+    };
+}
+
 // Display the user's email
 const userEmailSpan = document.getElementById('user-email');
 const email = localStorage.getItem('emailForSignIn');
@@ -42,8 +86,7 @@ let timerInterval = setInterval(() => {
         timerElement.textContent = '0:00';
         timerElement.style.color = 'red';
         
-        // Optionally show a message that the link has expired
-        alert("The verification link has expired. Please request a new one.");
+        showModal("Link Expired", "The verification link has expired. Please request a new one.");
     }
     
     timeLeft--;
@@ -55,8 +98,10 @@ resendButton.addEventListener('click', async () => {
     const email = localStorage.getItem('emailForSignIn');
     
     if (!email) {
-        alert("Email address not found. Please start the registration process again.");
-        window.location.href = "register.html";
+
+        showModal("Email Not Found", "Email address not found. Please start the registration process again.", () => {
+            window.location.href = "register.html";
+        });
         return;
     }
     
@@ -96,7 +141,8 @@ resendButton.addEventListener('click', async () => {
             timeLeft--;
         }, 1000);
         
-        alert("Verification email sent successfully!");
+
+        showModal("Success", "Verification email sent successfully!");
         resendButton.textContent = "Email Sent";
         
         // Reset the button after 3 seconds
@@ -107,7 +153,8 @@ resendButton.addEventListener('click', async () => {
         
     } catch (error) {
         console.error("Error sending verification email:", error);
-        alert("Error sending verification email: " + error.message);
+
+        showModal("Error", "Error sending verification email: " + error.message);
         
         // Reset button
         resendButton.disabled = false;
