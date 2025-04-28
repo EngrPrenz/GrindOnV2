@@ -61,7 +61,7 @@ function showModal(title, message, isError = false) {
   modalContent.innerHTML = `
     <img src="images/Wordmark White.png" style="height: 70px; width: auto; object-fit: contain;">
     <h5 style="color: white; padding: 10px;">${title}</h5>
-    <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color:${isError ? '#dc3545' : 'rgb(0, 0, 0)'}; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+    <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color: black; color: white; border: none; border-radius: 4px; cursor: pointer;" onmouseover="this.style.backgroundColor='grey'; this.style.color='#e0e0e0';" onmouseout="this.style.backgroundColor='black'; this.style.color='white';">Close</button>
   `;
 
   modal.appendChild(modalContent);

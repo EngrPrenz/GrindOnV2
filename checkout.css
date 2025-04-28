@@ -62,6 +62,34 @@
   background-color: #000; /* Consistent black underline accent */
 }
 
+/* Add this to your checkout.css file */
+
+/* Increase height for select dropdown specifically */
+select.form-control {
+  height: auto;
+  min-height: 48px; /* Provides more room for text */
+  padding-top: 12px;
+  padding-bottom: 12px;
+  line-height: 1.5;
+}
+
+/* Ensure text is properly aligned in dropdown */
+select.form-control option {
+  padding: 10px;
+  font-size: 15px;
+}
+
+/* Fix any potential overflow issues */
+#province {
+  text-overflow: ellipsis;
+  overflow: visible; /* Allow dropdown content to be visible */
+}
+
+/* Improve the dropdown appearance when opened */
+select.form-control:focus {
+  height: auto;
+  overflow: visible;
+}
 /* Form Controls - Enhanced with black accents */
 .form-group {
   margin-bottom: 22px;
