@@ -122,56 +122,45 @@ function checkAuth() {
   logDebug('Checking authentication');
   showLoading('Verifying authentication...');
   
-  onAuthStateChanged(auth, async (user) => {
+  // Define admin emails
+  const ADMIN_EMAILS = ["admin@gmail.com"];
+  
+  onAuthStateChanged(auth, (user) => {
     if (user) {
       logDebug('User is authenticated', user.uid);
       
-      try {
-        // Check if user has admin role
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
+      // Check if user's email is in the admin list
+      if (ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+        logDebug('User confirmed as admin by email');
         
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          logDebug('User data retrieved', userData);
-          
-          if (userData.role === "admin") {
-            logDebug('User confirmed as admin');
-            
-            // Store admin name
-            if (userData.name) {
-              localStorage.setItem('adminName', userData.name);
-              if (adminNameElement) {
-                adminNameElement.textContent = userData.name;
-              }
-              logDebug('Admin name stored and displayed', userData.name);
-            }
-            
-            // Load products
-            loadProducts();
-          } else {
-            logDebug('User is not an admin', userData.role);
-            alert("Access denied: You do not have admin privileges");
-            window.location.href = "admin_login.html";
-          }
-        } else {
-          logDebug('No user document found');
-          alert("User data not found");
-          window.location.href = "admin_login.html";
+        // Store admin info from email
+        const adminName = user.email.split('@')[0]; // Extract name from email
+        localStorage.setItem('adminEmail', user.email);
+        localStorage.setItem('adminRole', 'admin');
+        localStorage.setItem('adminName', adminName);
+        
+        if (adminNameElement) {
+          adminNameElement.textContent = adminName;
         }
-      } catch (error) {
-        logDebug('Error checking admin status', error);
-        console.error("Error checking admin status:", error);
-        alert(`Error verifying admin status: ${error.message}`);
+        logDebug('Admin info stored and displayed', adminName);
+        
+        // Load products
+        loadProducts();
         hideLoading();
+      } else {
+        logDebug('User email not in admin list', user.email);
+        alert("Access denied: You do not have admin privileges");
+        auth.signOut().then(() => {
+          window.location.href = "admin_login.html";
+        });
       }
     } else {
       logDebug('No user is signed in');
+      hideLoading();
       window.location.href = "admin_login.html";
     }
   });
 }
-
 // Show loading animation with optional message
 function showLoading(message = 'Loading products...') {
   isLoading = true;

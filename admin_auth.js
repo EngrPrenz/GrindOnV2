@@ -18,60 +18,52 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Function to store admin name in localStorage
-function setAdminNameInStorage(name) {
-    localStorage.setItem('adminName', name);
+// Admin emails - matching your Firestore structure
+const ADMIN_EMAILS = ["admin@gmail.com"];
+
+// Function to store admin info in localStorage
+function setAdminInfoInStorage(adminInfo) {
+    localStorage.setItem('adminEmail', adminInfo.email || '');
+    localStorage.setItem('adminRole', adminInfo.role || 'admin');
     
     // Update admin name in the UI if the element exists
     const adminNameElement = document.getElementById('adminName');
     if (adminNameElement) {
+        // Extract name from email or use default
+        const name = adminInfo.email ? adminInfo.email.split('@')[0] : 'Admin';
         adminNameElement.textContent = name;
+        localStorage.setItem('adminName', name);
     }
 }
 
 // Check authentication status and redirect if necessary
 function checkAdminAuth() {
     return new Promise((resolve, reject) => {
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in
                 console.log("User is signed in:", user.uid);
                 
-                // Check if the user has admin role in Firestore
-                try {
-                    const userRef = doc(db, "users", user.uid);
-                    const userSnap = await getDoc(userRef);
+                // Check if the user's email is in our admin list
+                if (ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+                    console.log("User is admin based on email:", user.email);
                     
-                    if (userSnap.exists()) {
-                        const userData = userSnap.data();
-                        
-                        if (userData.role === "admin") {
-                            // User is an admin, store name if available
-                            if (userData.name) {
-                                setAdminNameInStorage(userData.name);
-                            } else {
-                                setAdminNameInStorage("Admin"); // Default value
-                            }
-                            resolve(true);
-                        } else {
-                            // User is not an admin
-                            console.log("User does not have admin role");
-                            alert("Access denied: You do not have admin privileges");
-                            window.location.href = "admin_login.html";
-                            resolve(false);
-                        }
-                    } else {
-                        // No user document found
-                        console.log("No user document found");
-                        alert("User data not found");
+                    // Store admin info
+                    setAdminInfoInStorage({
+                        email: user.email,
+                        role: 'admin',
+                        userId: user.uid
+                    });
+                    
+                    resolve(true);
+                } else {
+                    // User is not an admin
+                    console.log("User does not have admin role");
+                    alert("Access denied: You do not have admin privileges");
+                    auth.signOut().then(() => {
                         window.location.href = "admin_login.html";
-                        resolve(false);
-                    }
-                } catch (error) {
-                    console.error("Error checking admin status:", error);
-                    alert("Error verifying admin status");
-                    window.location.href = "admin_login.html";
-                    reject(error);
+                    });
+                    resolve(false);
                 }
             } else {
                 // No user is signed in

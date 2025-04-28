@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -17,28 +17,38 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Admin emails hardcoded for security since we can't access Firestore securely
+const ADMIN_EMAILS = ["admin@gmail.com"];
+
+// Function to check if user is admin based on email
+function isAdminEmail(email) {
+    return ADMIN_EMAILS.includes(email.toLowerCase());
+}
+
 // Check if user is already logged in as admin
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Check if they're an admin
-        try {
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
+        console.log("User already logged in, checking admin status:", user.uid);
+        
+        if (isAdminEmail(user.email)) {
+            console.log("Already logged in as admin");
+            localStorage.setItem('adminEmail', user.email);
+            localStorage.setItem('adminRole', 'admin');
+            localStorage.setItem('adminUid', user.uid);
             
-            if (userSnap.exists() && userSnap.data().role === "admin") {
-                // User is already logged in as admin, redirect to dashboard
-                console.log("Already logged in as admin");
+            // Only redirect if we're not already on the admin page
+            if (!window.location.href.includes("admin.html")) {
                 window.location.href = "admin.html";
             }
-        } catch (error) {
-            console.error("Error checking admin status:", error);
+        } else {
+            console.log("Logged in user is not an admin");
         }
     }
 });
 
 // Button click
 const submit = document.getElementById('submit');
-submit.addEventListener("click", function (event){
+submit.addEventListener("click", function (event) {
     event.preventDefault();
 
     const email = document.getElementById('email').value.toLowerCase();
@@ -50,49 +60,34 @@ submit.addEventListener("click", function (event){
         return;
     }
 
+    // Check if email is in admin list before trying to authenticate
+    if (!isAdminEmail(email)) {
+        alert("Access denied: This email is not authorized for admin access.");
+        return;
+    }
+
     // Show loading state
     submit.disabled = true;
     submit.textContent = "Signing in...";
 
     signInWithEmailAndPassword(auth, email, password)
-    .then(async (userCredential) => {
+    .then((userCredential) => {
         const user = userCredential.user;
         console.log("Signed in UID:", user.uid);
-
-        // Reference to Firestore user doc
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (userSnap.exists()) {
-            const data = userSnap.data();
-            console.log("User Firestore data:", data);
-
-            if (data.role === "admin") {
-                // Store admin name in localStorage if available
-                if (data.name) {
-                    localStorage.setItem('adminName', data.name);
-                }
-                
-                alert("Welcome Admin!");
-                window.location.href = "admin.html";
-            } else {
-                alert("Access denied: Not an admin.");
-                // Sign out the user since they're not an admin
-                auth.signOut();
-            }
-        } else {
-            alert("No user role found in Firestore.");
-            console.warn("No document found in Firestore with UID:", user.uid);
-            // Sign out the user 
-            auth.signOut();
-        }
+        
+        // Store admin info in localStorage
+        localStorage.setItem('adminEmail', user.email);
+        localStorage.setItem('adminRole', 'admin');
+        localStorage.setItem('adminUid', user.uid);
+        
+        alert("Welcome Admin!");
+        window.location.href = "admin.html";
     })
     .catch((error) => {
         console.error("Error during sign-in:", error.message);
         alert("Login failed: " + error.message);
     })
     .finally(() => {
-        // Reset button state
         submit.disabled = false;
         submit.textContent = "Sign In";
     });
