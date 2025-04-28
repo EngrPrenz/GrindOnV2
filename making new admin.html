@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Setup</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        input, button { padding: 10px; margin: 5px 0; width: 100%; }
+        .message { margin-top: 15px; padding: 10px; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Setup</h1>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Admin email">
+        </div>
+        <div>
+            <label for="newAdminPassword">New Admin Password:</label>
+            <input type="password" id="newAdminPassword" placeholder="Password for new admin">
+        </div>
+        <div>
+            <label for="adminPassword">Master Admin Password:</label>
+            <input type="password" id="adminPassword" placeholder="Master admin password">
+        </div>
+        <button id="addAdmin">Add Admin</button>
+        <div id="message" class="message"></div>
+    </div>
+    
+    <script type="module" src="making new admin.js"></script>
+</body>
+</html>
