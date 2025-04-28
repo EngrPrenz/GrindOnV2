@@ -43,12 +43,44 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Set up logout button
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     
+    // Set up receipt modal functionality
+    setupReceiptModal();
+    
     // Fetch orders
     await fetchPendingOrders();
   } catch (error) {
     console.error("Error initializing page:", error);
   }
 });
+
+// Set up receipt modal functionality
+function setupReceiptModal() {
+  const modal = document.getElementById('receiptModal');
+  const closeButton = document.querySelector('.close-modal');
+  
+  // Close modal when clicking X button
+  if (closeButton) {
+    closeButton.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+  }
+  
+  // Close modal when clicking outside the image
+  window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+}
+
+// Open receipt modal with image
+function openReceiptModal(imageUrl) {
+  const modal = document.getElementById('receiptModal');
+  const fullImage = document.getElementById('fullReceiptImage');
+  
+  fullImage.src = imageUrl;
+  modal.style.display = 'flex';
+}
 
 // Handle logout
 function handleLogout(e) {
@@ -107,7 +139,7 @@ async function fetchPendingOrders() {
     if (querySnapshot.empty) {
       ordersTableBody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align: center;">No orders found</td>
+          <td colspan="9" style="text-align: center;">No orders found</td>
         </tr>
       `;
       return;
@@ -124,6 +156,24 @@ async function fetchPendingOrders() {
         pendingOrdersFound = true;
         const totalQuantity = order.items.reduce((sum, item) => sum + (item.quantity || 1), 0);
         
+        // Handle payment proof/receipt
+        let receiptCell;
+        if (order.paymentMethod && order.paymentMethod.toLowerCase() !== 'cod') {
+          // Check for payment proof URL (from either field)
+          const receiptUrl = order.paymentProofUrl || order.bankProofUrl || '';
+          
+          if (receiptUrl) {
+            receiptCell = `
+              <img src="${receiptUrl}" alt="Payment Receipt" class="receipt-thumbnail" 
+                onclick="openReceiptModal('${receiptUrl}')" data-receipt-url="${receiptUrl}">
+            `;
+          } else {
+            receiptCell = `<span class="no-receipt">No receipt uploaded</span>`;
+          }
+        } else {
+          receiptCell = `<span class="no-receipt">Cash on Delivery</span>`;
+        }
+        
         // Log for debugging
         console.log(`Found pending order: ${doc.id}`, order);
         
@@ -134,6 +184,8 @@ async function fetchPendingOrders() {
             <td>${order.firstName || ''} ${order.lastName || ''}</td>
             <td>${totalQuantity}</td>
             <td>₱${order.total ? order.total.toFixed(2) : '0.00'}</td>
+            <td>${order.paymentMethod || 'N/A'}</td>
+            <td>${receiptCell}</td>
             <td><span class="status-badge status-pending">${order.status}</span></td>
             <td>
               <button class="action-btn ship-btn" data-id="${doc.id}"><i class="fas fa-shipping-fast"></i> Ship Order</button>
@@ -148,7 +200,7 @@ async function fetchPendingOrders() {
     if (!pendingOrdersFound) {
       ordersTableBody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align: center;">No pending orders found</td>
+          <td colspan="9" style="text-align: center;">No pending orders found</td>
         </tr>
       `;
       return;
@@ -162,15 +214,26 @@ async function fetchPendingOrders() {
     document.querySelectorAll(".decline-btn").forEach((button) => {
       button.addEventListener("click", () => declineOrder(button.dataset.id));
     });
+    
+    // Add event listeners for receipt thumbnails
+    document.querySelectorAll(".receipt-thumbnail").forEach((img) => {
+      img.addEventListener("click", function() {
+        const receiptUrl = this.getAttribute("data-receipt-url");
+        openReceiptModal(receiptUrl);
+      });
+    });
   } catch (error) {
     console.error("Error fetching orders: ", error);
     ordersTableBody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align: center;">Error loading orders: ${error.message}</td>
+        <td colspan="9" style="text-align: center;">Error loading orders: ${error.message}</td>
       </tr>
     `;
   }
 }
+
+// Make the openReceiptModal function globally available
+window.openReceiptModal = openReceiptModal;
 
 // Fulfill an order and reduce stock for variations
 async function fulfillOrder(orderId) {
