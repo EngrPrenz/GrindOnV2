@@ -187,8 +187,8 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
         <img src="images/Wordmark White.png" style="height: 100px; width: auto; object-fit: contain;">
         <h4 style="color: white; padding: 10px;">Login Required!</h4>
         <p style="color: white; padding: 10px;">Please log in to add items to your cart.</p>
-        <button id="loginModalBtn" style="margin: 10px; padding: 10px 20px; background-color:rgb(0, 0, 0); color: white; border: none; border-radius: 4px; cursor: pointer;">Log In</button>
-        <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+        <button id="loginModalBtn" style="margin: 10px; padding: 10px 20px; background-color:rgb(0, 0, 0); color: white; border: none; border-radius: 4px; cursor: pointer;" onmouseover="this.style.backgroundColor='grey'; this.style.color='#f0f0f0';" onmouseout="this.style.backgroundColor='rgb(0, 0, 0)'; this.style.color='white';">Log In</button>
+        <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color: black; color: white; border: none; border-radius: 4px; cursor: pointer;" onmouseover="this.style.backgroundColor='grey'; this.style.color='#e0e0e0';" onmouseout="this.style.backgroundColor='black'; this.style.color='white';">Close</button>
       `;
 
       modal.appendChild(modalContent);
