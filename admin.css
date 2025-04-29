@@ -286,10 +286,12 @@ body.dark-mode {
 }
 
 /* Stats Cards with enhanced hover effects */
+/* Stats Cards with enhanced hover effects */
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
+  margin-bottom: 20px;
 }
 
 .stat-card {
@@ -580,7 +582,8 @@ body.dark-mode {
 /* Responsive Design */
 @media (max-width: 1024px) {
   .stats-row {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
   }
 }
 

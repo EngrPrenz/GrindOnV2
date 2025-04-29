@@ -33,6 +33,7 @@ class AdminAnalytics {
     };
     this.currentView = 'daily'; // Default view
     this.chartInstance = null;
+    this.allOrders = []; // Store all orders for calculations
   }
 
   // Initialize analytics
@@ -66,7 +67,7 @@ class AdminAnalytics {
       const querySnapshot = await getDocs(shippedOrdersQuery);
       
       // Process orders
-      const orders = [];
+      this.allOrders = [];
       querySnapshot.forEach((doc) => {
         const orderData = doc.data();
         
@@ -81,7 +82,7 @@ class AdminAnalytics {
           timestamp.toDate() : 
           (timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(timestamp));
         
-        orders.push({
+        this.allOrders.push({
           id: doc.id,
           date: date,
           total: parseFloat(orderData.total) || 0,
@@ -90,12 +91,12 @@ class AdminAnalytics {
       });
       
       // Sort orders by date
-      orders.sort((a, b) => a.date - b.date);
+      this.allOrders.sort((a, b) => a.date - b.date);
       
       // Process data for different time periods
-      this.processDailyData(orders);
-      this.processWeeklyData(orders);
-      this.processMonthlyData(orders);
+      this.processDailyData(this.allOrders);
+      this.processWeeklyData(this.allOrders);
+      this.processMonthlyData(this.allOrders);
       
       console.log('Sales data fetched successfully');
     } catch (error) {
@@ -160,6 +161,7 @@ class AdminAnalytics {
     this.salesData.daily = Object.entries(dailyData).map(([date, data]) => {
       return {
         date: this.formatDate(date, 'daily'),
+        rawDate: date, // Store raw date for easier filtering
         sales: data.sales,
         count: data.count,
         items: data.items
@@ -226,6 +228,7 @@ class AdminAnalytics {
     this.salesData.weekly = Object.entries(weeklyData).map(([date, data]) => {
       return {
         date: this.formatDate(date, 'weekly'),
+        rawDate: date, // Store raw date for easier filtering
         sales: data.sales,
         count: data.count,
         items: data.items
@@ -291,6 +294,7 @@ class AdminAnalytics {
     this.salesData.monthly = Object.entries(monthlyData).map(([date, data]) => {
       return {
         date: this.formatDate(date, 'monthly'),
+        rawDate: date, // Store raw date for easier filtering
         sales: data.sales,
         count: data.count,
         items: data.items
@@ -426,6 +430,9 @@ class AdminAnalytics {
     
     // Also update top products
     this.updateTopProductsChart();
+    
+    // Update summary cards based on current view
+    this.updateSummaryCards();
   }
   
   // Update top products chart
@@ -511,27 +518,104 @@ class AdminAnalytics {
   
   // Update summary cards with latest data
   updateSummaryCards() {
-    // Calculate total sales for last 24 hours
-    const now = new Date();
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
+    // Get the time frame label based on current view
+    let timeFrameLabel;
+    let timeFrame = {days: 0};
     
-    // Find the most recent daily data point
-    const todayData = this.salesData.daily[this.salesData.daily.length - 1];
+    switch(this.currentView) {
+      case 'daily':
+        timeFrameLabel = 'Last 24 Hours';
+        timeFrame = {days: 1}; // Just the most recent day
+        break;
+      case 'weekly':
+        timeFrameLabel = 'Last 7 Days';
+        timeFrame = {days: 7};
+        break;
+      case 'monthly':
+        timeFrameLabel = 'Last 30 Days';
+        timeFrame = {days: 30};
+        break;
+      default:
+        timeFrameLabel = 'Last 24 Hours';
+        timeFrame = {days: 1};
+    }
+    
+    // Update time period label for both cards
+    document.querySelectorAll('.stat-card .stat-info p').forEach(element => {
+      element.textContent = timeFrameLabel;
+    });
+    
+    // Calculate totals for the current time frame
+    const now = new Date();
+    const periodStart = new Date(now);
+    periodStart.setDate(now.getDate() - timeFrame.days);
+    
+    // Filter orders that fall within the current time frame
+    const currentPeriodOrders = this.allOrders.filter(order => 
+      order.date >= periodStart && order.date <= now
+    );
+    
+    // Calculate total sales and orders for current period
+    const totalSales = currentPeriodOrders.reduce((sum, order) => sum + order.total, 0);
+    const totalOrders = currentPeriodOrders.length;
     
     // Update total sales card
-    if (todayData) {
-      document.querySelector('.stat-card:nth-child(1) .stat-info h2').textContent = `₱${todayData.sales.toFixed(2)}`;
-      
-      // Calculate percentage change from previous day
-      const yesterdayData = this.salesData.daily[this.salesData.daily.length - 2];
-      if (yesterdayData && yesterdayData.sales > 0) {
-        const percentChange = ((todayData.sales - yesterdayData.sales) / yesterdayData.sales) * 100;
-        const progressCircle = document.querySelector('.stat-card:nth-child(1) .progress-circle');
-        progressCircle.setAttribute('data-value', Math.abs(percentChange).toFixed(0));
-        progressCircle.querySelector('span').textContent = `${Math.abs(percentChange).toFixed(0)}%`;
-      }
-    }
+    const salesCard = document.querySelector('.stat-card:nth-child(1)');
+    salesCard.querySelector('.stat-info h2').textContent = `₱${totalSales.toFixed(2)}`;
+    
+    // Update total orders card
+    const ordersCard = document.querySelector('.stat-card:nth-child(2)');
+    ordersCard.querySelector('.stat-info h2').textContent = `${totalOrders}`;
+    
+    // Calculate percentage changes from previous period
+    this.calculatePercentageChanges(totalSales, totalOrders, timeFrame);
+  }
+  
+  // Calculate percentage changes for summary cards
+  calculatePercentageChanges(totalSales, totalOrders, timeFrame) {
+    // Calculate previous period
+    const now = new Date();
+    const currentPeriodStart = new Date(now);
+    currentPeriodStart.setDate(now.getDate() - timeFrame.days);
+    
+    const previousPeriodEnd = new Date(currentPeriodStart);
+    previousPeriodEnd.setDate(previousPeriodEnd.getDate() - 1); // One day before current period
+    
+    const previousPeriodStart = new Date(previousPeriodEnd);
+    previousPeriodStart.setDate(previousPeriodStart.getDate() - timeFrame.days); // Same length as current period
+    
+    // Filter orders for previous period
+    const previousPeriodOrders = this.allOrders.filter(order => 
+      order.date >= previousPeriodStart && order.date <= previousPeriodEnd
+    );
+    
+    // Calculate previous period totals
+    const prevSales = previousPeriodOrders.reduce((sum, order) => sum + order.total, 0);
+    const prevOrders = previousPeriodOrders.length;
+    
+    // Calculate percentage changes
+    const salesPercentChange = prevSales > 0 ? ((totalSales - prevSales) / prevSales) * 100 : 100;
+    const ordersPercentChange = prevOrders > 0 ? ((totalOrders - prevOrders) / prevOrders) * 100 : 100;
+    
+    // Update progress circles
+    const salesProgressCircle = document.querySelector('.stat-card:nth-child(1) .progress-circle');
+    salesProgressCircle.setAttribute('data-value', Math.abs(salesPercentChange).toFixed(0));
+    salesProgressCircle.querySelector('span').textContent = `${Math.abs(salesPercentChange).toFixed(0)}%`;
+    
+    const ordersProgressCircle = document.querySelector('.stat-card:nth-child(2) .progress-circle');
+    ordersProgressCircle.setAttribute('data-value', Math.abs(ordersPercentChange).toFixed(0));
+    ordersProgressCircle.querySelector('span').textContent = `${Math.abs(ordersPercentChange).toFixed(0)}%`;
+    
+    // Update progress trend icons
+    const salesTrendIcon = document.querySelector('.stat-card:nth-child(1) .trend-icon');
+    salesTrendIcon.innerHTML = salesPercentChange >= 0 
+      ? '<i class="fas fa-arrow-up text-green-500"></i>'
+      : '<i class="fas fa-arrow-down text-red-500"></i>';
+    
+    const ordersTrendIcon = document.querySelector('.stat-card:nth-child(2) .trend-icon');
+    ordersTrendIcon.innerHTML = ordersPercentChange >= 0
+      ? '<i class="fas fa-arrow-up text-green-500"></i>'
+      : '<i class="fas fa-arrow-down text-red-500"></i>';
   }
 }
 
