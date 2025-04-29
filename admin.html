@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="admin_analytics.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script type="module" src="admin_auth.js"></script>
 </head>
 <body class="light-mode">
 
@@ -83,13 +83,13 @@
             </div>
           </div>
         </div>
-        
+
         <div class="stat-card">
           <div class="stat-icon expenses">
             <i class="fas fa-receipt"></i>
           </div>
           <div class="stat-info">
-            <h3><strong>Total Expenses</strong></h3>
+            <h3><strong>Total Orders</strong></h3>
             <h2><strong>₱14,160</strong></h2>
             <p>Last 24 Hours</p>
           </div>
@@ -116,6 +116,37 @@
           </div>
         </div>
       </div>
+
+      <!-- Analytics Section -->
+<div class="analytics-section">
+  <h2><strong>Sales Analytics</strong></h2>
+  
+  <!-- Period Toggles -->
+  <div class="period-toggle">
+    <button class="time-period-btn active" data-period="daily"><strong>Daily</strong></button>
+    <button class="time-period-btn" data-period="weekly"><strong>Weekly</strong></button>
+    <button class="time-period-btn" data-period="monthly"><strong>Monthly</strong></button>
+  </div>
+  
+  <!-- Charts Grid -->
+  <div class="charts-container">
+    <!-- Main Sales Chart -->
+    <div class="chart-card main-chart">
+      <h3><strong>Sales Overview</strong></h3>
+      <div class="chart-container">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
+    
+    <!-- Top Products Chart -->
+    <div class="chart-card">
+      <h3><strong>Top Products</strong></h3>
+      <div class="chart-container">
+        <canvas id="topProductsChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
 
       <div class="orders-section">
         <h2><strong>Recent Orders</strong></h2>
@@ -178,5 +209,8 @@
 </div>
 
   <script src="admin.js" type="module"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script type="module" src="admin_auth.js"></script>
+  <script type="module" src="admin_analytics.js"></script>
 </body>
 </html>
