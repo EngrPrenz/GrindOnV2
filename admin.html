@@ -67,118 +67,117 @@
     </div>
 
     <div class="dashboard-content">
-      <!-- This is the part of admin.html that needs to be updated -->
-        <div class="stats-row">
-          <div class="stat-card">
-            <div class="stat-icon sales">
-              <i class="fas fa-peso-sign"></i>
-            </div>
-            <div class="stat-info">
-              <h3><strong>Total Sales</strong></h3>
-              <h2><strong>₱0.00</strong></h2>
-              <p>Last 24 Hours</p>
-            </div>
-            <div class="stat-chart">
-              <div class="progress-circle" data-value="0">
-                <span><strong>0%</strong></span>
-              </div>
+      <!-- Moved period toggles here, above the stats cards -->
+      <div class="period-toggle">
+        <button class="time-period-btn active" data-period="daily"><strong>Daily</strong></button>
+        <button class="time-period-btn" data-period="weekly"><strong>Weekly</strong></button>
+        <button class="time-period-btn" data-period="monthly"><strong>Monthly</strong></button>
+      </div>
+      
+      <!-- Stats cards below the period toggle -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon sales">
+            <i class="fas fa-peso-sign"></i>
+          </div>
+          <div class="stat-info">
+            <h3><strong>Total Sales</strong></h3>
+            <h2><strong>₱0.00</strong></h2>
+            <p>Last 24 Hours</p>
+          </div>
+          <div class="stat-chart">
+            <div class="progress-circle" data-value="0">
+              <span><strong>0%</strong></span>
             </div>
           </div>
-
-          <div class="stat-card">
-            <div class="stat-icon expenses">
-              <i class="fas fa-receipt"></i>
-            </div>
-            <div class="stat-info">
-              <h3><strong>Total Orders</strong></h3>
-              <h2><strong>0</strong></h2>
-              <p>Last 24 Hours</p>
-            </div>
-            <div class="stat-chart">
-              <div class="progress-circle" data-value="0">
-                <span><strong>0%</strong></span>
-              </div>
-            </div>
-          </div>
-        </div>  
-      </div>
-
-      <!-- Analytics Section -->
-<div class="analytics-section">
-  <h2><strong>Sales Analytics</strong></h2>
-  
-  <!-- Period Toggles -->
-  <div class="period-toggle">
-    <button class="time-period-btn active" data-period="daily"><strong>Daily</strong></button>
-    <button class="time-period-btn" data-period="weekly"><strong>Weekly</strong></button>
-    <button class="time-period-btn" data-period="monthly"><strong>Monthly</strong></button>
-  </div>
-  
-  <!-- Charts Grid -->
-  <div class="charts-container">
-    <!-- Main Sales Chart -->
-    <div class="chart-card main-chart">
-      <h3><strong>Sales Overview</strong></h3>
-      <div class="chart-container">
-        <canvas id="salesChart"></canvas>
-      </div>
-    </div>
-    
-    <!-- Top Products Chart -->
-    <div class="chart-card">
-      <h3><strong>Top Products</strong></h3>
-      <div class="chart-container">
-        <canvas id="topProductsChart"></canvas>
-      </div>
-    </div>
-  </div>
-</div>
-
-      <div class="orders-section">
-        <h2><strong>Recent Orders</strong></h2>
-        <div class="orders-table-container">
-          <table class="orders-table">
-            <thead>
-              <tr>
-                <th><strong>Product Name</strong></th>
-                <th><strong>Product Number</strong></th>
-                <th><strong>Payment</strong></th>
-                <th><strong>Status</strong></th>
-                <th><strong>Action</strong></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Foldable Mini Drone</strong></td>
-                <td>85631</td>
-                <td>Due</td>
-                <td><span class="status pending"><strong>Pending</strong></span></td>
-                <td><button class="details-btn"><strong>Details</strong></button></td>
-              </tr>
-              <tr>
-                <td><strong>LARVENDER KF102 Drone</strong></td>
-                <td>36378</td>
-                <td>Refunded</td>
-                <td><span class="status declined"><strong>Declined</strong></span></td>
-                <td><button class="details-btn"><strong>Details</strong></button></td>
-              </tr>
-              <tr>
-                <td><strong>Ruko F11 Pro Drone</strong></td>
-                <td>49347</td>
-                <td>Due</td>
-                <td><span class="status pending"><strong>Pending</strong></span></td>
-                <td><button class="details-btn"><strong>Details</strong></button></td>
-              </tr>
-              <tr>
-                <td><strong>Drone with Camera Drone</strong></td>
-                <td>96996</td>
-                <td>Paid</td>
-                <td><span class="status delivered"><strong>Delivered</strong></span></td>
-                <td><button class="details-btn"><strong>Details</strong></button></td>
-              </tr>
-            </tbody>
-          </table>
         </div>
+
+        <div class="stat-card">
+          <div class="stat-icon expenses">
+            <i class="fas fa-receipt"></i>
+          </div>
+          <div class="stat-info">
+            <h3><strong>Total Orders</strong></h3>
+            <h2><strong>0</strong></h2>
+            <p>Last 24 Hours</p>
+          </div>
+          <div class="stat-chart">
+            <div class="progress-circle" data-value="0">
+              <span><strong>0%</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>  
+    </div>
+
+    <!-- Analytics Section (removed period toggle from here) -->
+    <div class="analytics-section">
+      <h2><strong>Sales Analytics</strong></h2>
+      
+      <!-- Charts Grid -->
+      <div class="charts-container">
+        <!-- Main Sales Chart -->
+        <div class="chart-card main-chart">
+          <h3><strong>Sales Overview</strong></h3>
+          <div class="chart-container">
+            <canvas id="salesChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Top Products Chart -->
+        <div class="chart-card">
+          <h3><strong>Top Products</strong></h3>
+          <div class="chart-container">
+            <canvas id="topProductsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="orders-section">
+      <h2><strong>Recent Orders</strong></h2>
+      <div class="orders-table-container">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th><strong>Product Name</strong></th>
+              <th><strong>Product Number</strong></th>
+              <th><strong>Payment</strong></th>
+              <th><strong>Status</strong></th>
+              <th><strong>Action</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Foldable Mini Drone</strong></td>
+              <td>85631</td>
+              <td>Due</td>
+              <td><span class="status pending"><strong>Pending</strong></span></td>
+              <td><button class="details-btn"><strong>Details</strong></button></td>
+            </tr>
+            <tr>
+              <td><strong>LARVENDER KF102 Drone</strong></td>
+              <td>36378</td>
+              <td>Refunded</td>
+              <td><span class="status declined"><strong>Declined</strong></span></td>
+              <td><button class="details-btn"><strong>Details</strong></button></td>
+            </tr>
+            <tr>
+              <td><strong>Ruko F11 Pro Drone</strong></td>
+              <td>49347</td>
+              <td>Due</td>
+              <td><span class="status pending"><strong>Pending</strong></span></td>
+              <td><button class="details-btn"><strong>Details</strong></button></td>
+            </tr>
+            <tr>
+              <td><strong>Drone with Camera Drone</strong></td>
+              <td>96996</td>
+              <td>Paid</td>
+              <td><span class="status delivered"><strong>Delivered</strong></span></td>
+              <td><button class="details-btn"><strong>Details</strong></button></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

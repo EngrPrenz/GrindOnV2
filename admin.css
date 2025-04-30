@@ -406,17 +406,20 @@ body.dark-mode {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: conic-gradient(var(--primary-color) 0% var(--value), #e2e8f0 var(--value) 100%);
   position: relative;
-  transition: filter var(--transition-speed) ease;
+  transition: all var(--transition-speed) ease;
+  
+  /* Default colors - will be overridden by inline styles */
+  --primary-color: #4F46E5;
+  --bg-color: #e2e8f0;
+  --value: 0%;
+  
+  /* The gradient is now set dynamically via JavaScript */
+  background: conic-gradient(var(--primary-color) 0% var(--value), var(--bg-color) var(--value) 100%);
 }
 
 .stat-card:hover .progress-circle {
   filter: brightness(1.1);
-}
-
-.dark-mode .progress-circle {
-  background: conic-gradient(var(--primary-color) 0% var(--value), #2d3748 var(--value) 100%);
 }
 
 .progress-circle::before {
@@ -438,6 +441,8 @@ body.dark-mode {
   z-index: 1;
   font-size: 14px;
   font-weight: bold;
+  color: var(--text-color);
+  transition: color var(--transition-speed) ease;
 }
 
 /* Add a subtle ripple effect on stat cards */
