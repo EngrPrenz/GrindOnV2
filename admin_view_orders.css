@@ -180,3 +180,233 @@
 #ordersTable tbody tr:nth-child(8) { animation-delay: 0.4s; }
 #ordersTable tbody tr:nth-child(9) { animation-delay: 0.45s; }
 #ordersTable tbody tr:nth-child(10) { animation-delay: 0.5s; }
+
+/* Modal base styles */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(3px);
+}
+
+/* Base modal content */
+.notification-modal-content,
+.confirmation-modal-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  position: relative;
+  transform: scale(0.9);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+/* Modal show animation */
+.notification-modal-content.show,
+.confirmation-modal-content.show {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Close button */
+.close-notification,
+.close-confirmation {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s ease;
+}
+
+.close-notification:hover,
+.close-confirmation:hover {
+  color: #000;
+}
+
+/* Modal title */
+#notificationTitle,
+#confirmationTitle {
+  font-size: 20px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+/* Modal message */
+#notificationMessage,
+#confirmationMessage {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Icon containers */
+.notification-icon-container,
+.confirmation-icon-container {
+  margin-bottom: 15px;
+}
+
+.notification-icon-container i,
+.confirmation-icon-container i {
+  font-size: 48px;
+}
+
+/* Modal buttons */
+.modal-btn {
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+  font-size: 16px;
+}
+
+.confirm-btn {
+  background-color: #6366F1;
+  color: white;
+}
+
+.confirm-btn:hover {
+  background-color: #4F46E5;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+}
+
+.cancel-btn {
+  background-color: #f1f1f1;
+  color: #333;
+  margin-right: 10px;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* Confirmation modal action buttons container */
+.confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* Status-specific styling */
+.notification-modal-content.success .notification-icon-container i {
+  color: #10B981;
+}
+
+.notification-modal-content.error .notification-icon-container i {
+  color: #EF4444;
+}
+
+.notification-modal-content.warning .notification-icon-container i {
+  color: #F59E0B;
+}
+
+.notification-modal-content.info .notification-icon-container i {
+  color: #3B82F6;
+}
+
+/* Dark mode support */
+.dark-mode .notification-modal-content,
+.dark-mode .confirmation-modal-content {
+  background-color: #1F2937;
+  color: #F9FAFB;
+}
+
+.dark-mode #notificationMessage,
+.dark-mode #confirmationMessage {
+  color: #D1D5DB;
+}
+
+.dark-mode .close-notification,
+.dark-mode .close-confirmation {
+  color: #9CA3AF;
+}
+
+.dark-mode .close-notification:hover,
+.dark-mode .close-confirmation:hover {
+  color: #F9FAFB;
+}
+
+.dark-mode .cancel-btn {
+  background-color: #374151;
+  color: #F9FAFB;
+}
+
+.dark-mode .cancel-btn:hover {
+  background-color: #4B5563;
+}
+
+/* Modal animations */
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dark mode support for receipt modal */
+.dark-mode .receipt-modal-content {
+  background-color: #1F2937;
+  color: #F9FAFB;
+}
+
+.dark-mode .close-modal {
+  color: #D1D5DB;
+}
+
+.dark-mode .close-modal:hover {
+  color: #F9FAFB;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .notification-modal-content,
+  .confirmation-modal-content,
+  .receipt-modal-content {
+    padding: 20px;
+    width: 85%;
+  }
+  
+  #notificationTitle,
+  #confirmationTitle {
+    font-size: 18px;
+  }
+  
+  #notificationMessage,
+  #confirmationMessage {
+    font-size: 14px;
+  }
+  
+  .notification-icon-container i,
+  .confirmation-icon-container i {
+    font-size: 36px;
+  }
+  
+  .modal-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  .action-btn {
+    padding: 6px 10px;
+    font-size: 14px;
+    display: block;
+    width: 100%;
+    margin-bottom: 5px;
+  }
+}

@@ -38,6 +38,161 @@ const userOptionDiv = document.querySelector('.user_option');
 // Get reference to the order container
 const orderContainer = document.querySelector('.order-container');
 
+// Modal Management System
+const showModal = (title, message, buttons = [], type = 'info') => {
+  const modal = document.getElementById('tracking-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalMessage = document.getElementById('modal-message');
+  const modalActions = document.getElementById('modal-actions');
+  
+  // Clear previous content
+  modalTitle.textContent = title;
+  modalMessage.innerHTML = message;
+  modalActions.innerHTML = '';
+  
+  // Add appropriate class based on type
+  modalTitle.className = '';
+  if (type) {
+    modalTitle.classList.add(`modal-title-${type}`);
+  }
+  
+  // Add buttons
+  buttons.forEach(button => {
+    const btnElement = document.createElement('button');
+    btnElement.className = `action-button ${button.class || ''}`;
+    btnElement.textContent = button.text;
+    btnElement.id = button.id || '';
+    
+    // Add event listener for button
+    if (button.onClick) {
+      btnElement.addEventListener('click', () => {
+        button.onClick();
+      });
+    }
+    
+    modalActions.appendChild(btnElement);
+  });
+  
+  // Show the modal
+  modal.style.display = 'block';
+  
+  // Return a promise that resolves when modal is closed
+  return new Promise((resolve) => {
+    const closeModal = () => {
+      modal.style.display = 'none';
+      resolve();
+    };
+    
+    // Set up close button functionality
+    const closeButton = document.querySelector('.close-modal');
+    if (closeButton) {
+      closeButton.addEventListener('click', closeModal, { once: true });
+    }
+    
+    // Close modal when clicking outside
+    const outsideClickHandler = (event) => {
+      if (event.target === modal) {
+        closeModal();
+        window.removeEventListener('click', outsideClickHandler);
+      }
+    };
+    window.addEventListener('click', outsideClickHandler);
+    
+    // Add close method to each button
+    buttons.forEach(button => {
+      if (button.closeOnClick !== false) {
+        const btnElement = document.getElementById(button.id);
+        if (btnElement) {
+          btnElement.addEventListener('click', closeModal, { once: true });
+        }
+      }
+    });
+  });
+};
+
+// Confirmation modal helper
+const confirmModal = (title, message, confirmText = "Confirm", cancelText = "Cancel", type = "warning") => {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('tracking-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMessage = document.getElementById('modal-message');
+    const modalActions = document.getElementById('modal-actions');
+    
+    // Clear previous content
+    modalTitle.textContent = title;
+    modalMessage.innerHTML = message;
+    modalActions.innerHTML = '';
+    
+    // Add buttons
+    const confirmButton = document.createElement('button');
+    confirmButton.className = `action-button delete-button`;
+    confirmButton.textContent = confirmText;
+    confirmButton.id = "confirm-button";
+    
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'action-button';
+    cancelButton.textContent = cancelText;
+    cancelButton.id = "cancel-button";
+    
+    // Add the buttons to modal
+    modalActions.appendChild(confirmButton);
+    modalActions.appendChild(cancelButton);
+    
+    // Show the modal
+    modal.style.display = 'block';
+    
+    // Handle button clicks
+    confirmButton.addEventListener('click', () => {
+      modal.style.display = 'none';
+      resolve(true);
+    });
+    
+    cancelButton.addEventListener('click', () => {
+      modal.style.display = 'none';
+      resolve(false);
+    });
+    
+    // Close button handler
+    const closeButton = document.querySelector('.close-modal');
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+        resolve(false);
+      });
+    }
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+        resolve(false);
+      }
+    }, { once: true });
+  });
+};
+
+// Success modal helper
+const successModal = async (title, message) => {
+  await showModal(title, message, [
+    {
+      text: "OK",
+      class: "action-button",
+      id: "ok-button"
+    }
+  ], "success");
+};
+
+// Error modal helper
+const errorModal = async (title, message) => {
+  await showModal(title, message, [
+    {
+      text: "OK",
+      class: "",
+      id: "ok-button"
+    }
+  ], "error");
+};
+
 // Format date function
 function formatDate(timestamp) {
   const date = timestamp.toDate();
@@ -126,7 +281,7 @@ function displayErrorMessage(message) {
 
 function displayOrdersSummary(orders) {
   const pendingOrders = orders.filter(order => 
-    order.status === "Pending" || order.status === "Processing" || order.status === "Shipped"
+    order.status === "pending" || order.status === "Processing" || order.status === "Shipped"
   ).length;
   
   const summaryHTML = `
@@ -166,7 +321,7 @@ function displayOrders(orders) {
     // Determine status class
     let statusClass = '';
     switch (order.status) {
-      case 'Pending':
+      case 'pending':
       case 'Processing':
         statusClass = 'status-pending';
         break;
@@ -279,26 +434,6 @@ function displayOrders(orders) {
       openTrackingModal(orderId, status);
     });
   });
-
-  // Set up modal close event listeners
-  setupModalCloseListeners();
-}
-
-// Set up event listeners for modal close button and outside click
-function setupModalCloseListeners() {
-  const modal = document.getElementById('tracking-modal');
-  const closeButton = document.querySelector('.close-modal');
-  
-  if (closeButton) {
-    closeButton.addEventListener('click', closeModal);
-  }
-  
-  // Close modal when clicking outside
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      closeModal();
-    }
-  });
 }
 
 // Function to open tracking modal with appropriate message
@@ -308,15 +443,8 @@ function openTrackingModal(orderId, status) {
   const modalMessage = document.getElementById('modal-message');
   const modalActions = document.getElementById('modal-actions');
   
-  if (!modal) {
-    console.error("Modal element not found");
-    return;
-  }
-  
-  modalTitle.textContent = `Order #${orderId.substring(0, 8)} Status`;
-  
   // Clear previous content
-  modalMessage.innerHTML = '';
+  modalTitle.textContent = `Order #${orderId.substring(0, 8)} Status`;
   modalActions.innerHTML = '';
   
   // Set content based on status
@@ -340,6 +468,15 @@ function openTrackingModal(orderId, status) {
           </div>
         </div>
       `;
+      
+      const okButton = document.createElement('button');
+      okButton.className = 'action-button';
+      okButton.textContent = "OK";
+      modalActions.appendChild(okButton);
+      
+      okButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
       break;
       
     case 'Shipped':
@@ -360,38 +497,50 @@ function openTrackingModal(orderId, status) {
           </div>
         </div>
       `;
-      modalActions.innerHTML = `
-        <button id="claim-button" class="action-button" data-order-id="${orderId}">Claimed</button>
-      `;
       
-      // Add event listener to claim button
-      setTimeout(() => {
-        const claimButton = document.getElementById('claim-button');
-        if (claimButton) {
-          claimButton.addEventListener('click', async function() {
-            await updateOrderStatus(orderId, 'Claimed');
-          });
-        }
-      }, 0);
+      const claimButton = document.createElement('button');
+      claimButton.className = 'action-button';
+      claimButton.textContent = "Mark as Claimed";
+      modalActions.appendChild(claimButton);
+      
+      const closeButton = document.createElement('button');
+      closeButton.className = 'action-button';
+      closeButton.textContent = "Close";
+      modalActions.appendChild(closeButton);
+      
+      claimButton.addEventListener('click', async () => {
+        modal.style.display = 'none';
+        await updateOrderStatus(orderId, 'Claimed');
+      });
+      
+      closeButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
       break;
       
     case 'Declined':
       modalMessage.innerHTML = `
         <p>Sorry, your order has been declined. Thank you for your patience. We're sure there are other products here that are available for you.</p>
       `;
-      modalActions.innerHTML = `
-        <button id="delete-button" class="action-button delete-button" data-order-id="${orderId}">Delete Order</button>
-      `;
       
-      // Add event listener to delete button
-      setTimeout(() => {
-        const deleteButton = document.getElementById('delete-button');
-        if (deleteButton) {
-          deleteButton.addEventListener('click', async function() {
-            await deleteOrder(orderId);
-          });
-        }
-      }, 0);
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'action-button delete-button';
+      deleteButton.textContent = "Delete Order";
+      modalActions.appendChild(deleteButton);
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'action-button';
+      closeBtn.textContent = "Close";
+      modalActions.appendChild(closeBtn);
+      
+      deleteButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+        deleteOrder(orderId);
+      });
+      
+      closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
       break;
       
     case 'Delivered':
@@ -413,21 +562,47 @@ function openTrackingModal(orderId, status) {
           </div>
         </div>
       `;
+      
+      const okBtn = document.createElement('button');
+      okBtn.className = 'action-button';
+      okBtn.textContent = "OK";
+      modalActions.appendChild(okBtn);
+      
+      okBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
       break;
       
     default:
-      modalMessage.textContent = `Current status: ${status}`;
+      modalMessage.innerHTML = `Current status: ${status}`;
+      
+      const defaultOkBtn = document.createElement('button');
+      defaultOkBtn.className = 'action-button';
+      defaultOkBtn.textContent = "OK";
+      modalActions.appendChild(defaultOkBtn);
+      
+      defaultOkBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
   }
   
+  // Show the modal
   modal.style.display = 'block';
-}
-
-// Function to close modal
-function closeModal() {
-  const modal = document.getElementById('tracking-modal');
-  if (modal) {
-    modal.style.display = 'none';
+  
+  // Set up close button functionality
+  const closeModalBtn = document.querySelector('.close-modal');
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
   }
+  
+  // Close modal when clicking outside
+  window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
 }
 
 // Function to update order status
@@ -435,7 +610,7 @@ async function updateOrderStatus(orderId, newStatus) {
   try {
     const user = auth.currentUser;
     if (!user) {
-      alert('You must be logged in to update an order.');
+      await errorModal("Authentication Error", "You must be logged in to update an order.");
       return;
     }
     
@@ -459,50 +634,116 @@ async function updateOrderStatus(orderId, newStatus) {
       }
     }
     
-    closeModal();
-    alert(`Order status updated to ${newStatus}!`);
+    await successModal("Order Updated", `Order status updated to ${newStatus}!`);
     
     // Reload page to reflect changes
     location.reload();
     
   } catch (error) {
     console.error("Error updating order status:", error);
-    alert("Failed to update order status. Please try again.");
+    await errorModal("Update Failed", "Failed to update order status. Please try again.");
   }
 }
 
+// Function to delete order
 // Function to delete order
 async function deleteOrder(orderId) {
   try {
     const user = auth.currentUser;
     if (!user) {
-      alert('You must be logged in to delete an order.');
+      // Show error modal if user isn't logged in
+      const modal = document.getElementById('tracking-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalMessage = document.getElementById('modal-message');
+      const modalActions = document.getElementById('modal-actions');
+      
+      modalTitle.textContent = "Authentication Error";
+      modalMessage.innerHTML = "You must be logged in to delete an order.";
+      modalActions.innerHTML = '';
+      
+      const okButton = document.createElement('button');
+      okButton.className = 'action-button';
+      okButton.textContent = "OK";
+      modalActions.appendChild(okButton);
+      
+      modal.style.display = 'block';
+      
+      okButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+      
       return;
     }
     
-    if (confirm("Are you sure you want to delete this order?")) {
+    // Confirm deletion
+    const isConfirmed = await confirmModal(
+      "Delete Order",
+      "Are you sure you want to delete this order? This action cannot be undone.",
+      "Delete",
+      "Cancel"
+    );
+    
+    // If user confirmed deletion
+    if (isConfirmed) {
       const orderRef = doc(db, "orders", orderId);
       await deleteDoc(orderRef);
       
       // Remove order from UI
       const orderElement = document.getElementById(`order-${orderId}`);
-      orderElement.remove();
+      if (orderElement) {
+        orderElement.remove();
+      }
       
-      closeModal();
-      alert("Order deleted successfully!");
+      // Show success message
+      const modal = document.getElementById('tracking-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalMessage = document.getElementById('modal-message');
+      const modalActions = document.getElementById('modal-actions');
       
-      // Reload to update summary count
-      location.reload();
+      modalTitle.textContent = "Order Deleted";
+      modalMessage.innerHTML = "Order deleted successfully!";
+      modalActions.innerHTML = '';
+      
+      const okButton = document.createElement('button');
+      okButton.className = 'action-button';
+      okButton.textContent = "OK";
+      modalActions.appendChild(okButton);
+      
+      modal.style.display = 'block';
+      
+      okButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+        window.location.reload();
+      });
     }
-    
   } catch (error) {
     console.error("Error deleting order:", error);
-    alert("Failed to delete order. Please try again.");
+    
+    // Show error modal
+    const modal = document.getElementById('tracking-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMessage = document.getElementById('modal-message');
+    const modalActions = document.getElementById('modal-actions');
+    
+    modalTitle.textContent = "Delete Failed";
+    modalMessage.innerHTML = "Failed to delete order. Please try again.";
+    modalActions.innerHTML = '';
+    
+    const okButton = document.createElement('button');
+    okButton.className = 'action-button';
+    okButton.textContent = "OK";
+    modalActions.appendChild(okButton);
+    
+    modal.style.display = 'block';
+    
+    okButton.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
   }
 }
 
 // Authentication state observer
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (!userOptionDiv) return; // if navbar not present, do nothing
 
   if (user) {
@@ -513,7 +754,8 @@ onAuthStateChanged(auth, (user) => {
     // Load the user's orders
     loadUserOrders(uid);
 
-    getDoc(userDocRef).then((docSnap) => {
+    try {
+      const docSnap = await getDoc(userDocRef);
       let displayName = "User";
       if (docSnap.exists() && docSnap.data().username) {
         displayName = docSnap.data().username;
@@ -531,16 +773,16 @@ onAuthStateChanged(auth, (user) => {
         </a>
       `;
 
-      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      document.getElementById('logoutBtn').addEventListener('click', async (e) => {
         e.preventDefault();
-        signOut(auth).then(() => {
+        try {
+          await signOut(auth);
           location.reload();
-        }).catch((error) => {
-          alert("Logout failed: " + error.message);
-        });
+        } catch (error) {
+          await errorModal("Logout Failed", error.message);
+        }
       });
-
-    }).catch((error) => {
+    } catch (error) {
       console.error("Failed to fetch username:", error);
       // fallback to email if username is unavailable
       const fallbackName = user.email ? user.email.substring(0, 4) + "..." : "User";
@@ -555,15 +797,16 @@ onAuthStateChanged(auth, (user) => {
         </a>
       `;
 
-      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      document.getElementById('logoutBtn').addEventListener('click', async (e) => {
         e.preventDefault();
-        signOut(auth).then(() => {
+        try {
+          await signOut(auth);
           location.reload();
-        }).catch((error) => {
-          alert("Logout failed: " + error.message);
-        });
+        } catch (error) {
+          await errorModal("Logout Failed", error.message);
+        }
       });
-    });
+    }
   } else {
     // User is signed out
     userOptionDiv.innerHTML = `
@@ -600,7 +843,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// Initialize modal close button functionality when page loads
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
-  setupModalCloseListeners();
+  // Nothing specific to initialize here
 });

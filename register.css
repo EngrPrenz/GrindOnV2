@@ -322,12 +322,13 @@ color: #444;
 line-height: 1.5;
 }
 
+/* Fix modal button styling */
 .modal-actions {
 display: flex;
 justify-content: flex-end;
 }
 
-#modal-ok-btn {
+.modal-button {
 padding: 8px 16px;
 background-color: #2e2e2e;
 color: white;
@@ -337,8 +338,9 @@ cursor: pointer;
 font-size: 14px;
 font-weight: 500;
 min-width: 80px;
+width: auto;
 }
 
-#modal-ok-btn:hover {
+.modal-button:hover {
 background-color: #3a3a3a;
 }

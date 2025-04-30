@@ -35,14 +35,15 @@ const modalOkButton = document.getElementById('modal-ok');
 const closeModal = document.querySelector('.close-modal');
 
 // Show modal function
-function showModal(title, message, callback = null) {
+function showModal(title, message, callback = null, buttonText = "OK") {
     modalTitle.textContent = title;
     modalMessage.textContent = message;
-    modal.classList.add('show');
+    modalOkButton.textContent = buttonText;
+    modal.classList.add('visible');
     
     // Set up click handlers for closing modal
     const handleClose = () => {
-        modal.classList.remove('show');
+        modal.classList.remove('visible');
         if (callback) callback();
     };
     
@@ -236,9 +237,18 @@ submit.addEventListener("click", async function (event) {
         localStorage.removeItem('verifiedEmail');
         localStorage.removeItem('emailForSignIn');
 
-        showModal("Success", "Registration completed successfully!", () => {
-            window.location.href = "homepage.html";
-        });
+        // Sign out the user after successful registration
+        await auth.signOut();
+
+        // Show success modal with Close button that redirects to login page
+        showModal(
+            "Registration Successful", 
+            "Your account has been created successfully! Please log in with your new credentials.", 
+            () => {
+                window.location.href = "login.html";
+            },
+            "Close"
+        );
     } catch (error) {
         console.error("Error completing registration:", error);
         showModal("Registration Error", "Error completing registration: " + error.message);
@@ -252,6 +262,6 @@ submit.addEventListener("click", async function (event) {
 // Close modal when clicking outside of it
 window.addEventListener('click', (event) => {
     if (event.target === modal) {
-        modal.classList.remove('show');
+        modal.classList.remove('visible');
     }
 });

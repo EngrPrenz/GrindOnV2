@@ -55,7 +55,7 @@ function handleLogout(e) {
   }).catch((error) => {
     // An error happened
     console.error("Error signing out:", error);
-    alert("Error signing out: " + error.message);
+    showModal('error', 'Logout Failed', `Error signing out: ${error.message}`);
   });
 }
 
@@ -129,6 +129,52 @@ function initDragAndDrop() {
   }
 }
 
+// Modal functionality
+function showModal(type, title, message) {
+  const modal = document.getElementById('customModal');
+  const modalIcon = modal.querySelector('.modal-icon');
+  const modalTitle = modal.querySelector('.modal-title');
+  const modalMessage = modal.querySelector('.modal-message');
+  
+  // Clear previous classes
+  modalIcon.className = 'modal-icon';
+  
+  // Set icon and color based on type
+  if (type === 'success') {
+    modalIcon.className = 'modal-icon success';
+    modalIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+  } else if (type === 'error') {
+    modalIcon.className = 'modal-icon error';
+    modalIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+  } else if (type === 'warning') {
+    modalIcon.className = 'modal-icon warning';
+    modalIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+  } else {
+    modalIcon.className = 'modal-icon info';
+    modalIcon.innerHTML = '<i class="fas fa-info-circle"></i>';
+  }
+  
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+  
+  modal.style.display = 'flex';
+  
+  // Close modal with X or confirm button
+  const closeButtons = modal.querySelectorAll('.close-modal, .modal-confirm');
+  closeButtons.forEach(button => {
+    button.onclick = function() {
+      modal.style.display = 'none';
+    };
+  });
+  
+  // Close on click outside
+  window.onclick = function(event) {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  };
+}
+
 // Form submit handler
 document.getElementById("addProductForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -142,7 +188,7 @@ document.getElementById("addProductForm").addEventListener("submit", async (e) =
   const large = parseInt(document.getElementById("large").value);
 
   if (uploadedImageUrls.length === 0) {
-    alert("⚠️ Please upload at least one image.");
+    showModal('warning', 'Missing Images', 'Please upload at least one image.');
     return;
   }
 
@@ -163,14 +209,14 @@ document.getElementById("addProductForm").addEventListener("submit", async (e) =
 
   try {
     await addDoc(collection(db, "products"), product);
-    alert("✅ Product added successfully!");
+    showModal('success', 'Product Added', 'Product added successfully!');
     document.getElementById("addProductForm").reset();
     document.getElementById("imagePreviewContainer").innerHTML = "";
     document.getElementById("imageUrl").value = "";
     uploadedImageUrls = [];
   } catch (error) {
     console.error("Error adding product:", error);
-    alert("❌ Failed to add product.");
+    showModal('error', 'Add Product Failed', 'Failed to add product.');
   }
 });
 
@@ -199,7 +245,7 @@ document.getElementById("uploadToImgBB").addEventListener("click", async () => {
   const files = fileInput.files;
 
   if (!files.length) {
-    alert("⚠️ Please select image(s) first.");
+    showModal('warning', 'No Images Selected', 'Please select image(s) first.');
     return;
   }
 
@@ -234,7 +280,7 @@ document.getElementById("uploadToImgBB").addEventListener("click", async () => {
 
   document.getElementById("imageUrl").value = uploadedImageUrls.join(", ");
   document.getElementById("uploadToImgBB").innerText = "✅ Upload to ImgBB";
-  alert("🎉 All images uploaded successfully!");
+  showModal('success', 'Images Uploaded', 'All images uploaded successfully!');
 });
 
 function fileToBase64(file) {

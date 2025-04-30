@@ -101,6 +101,35 @@
     </div>
   </div>
 
+  <!-- Notification Modal -->
+  <div id="notificationModal" class="modal-overlay">
+    <div class="notification-modal-content">
+      <span class="close-notification">&times;</span>
+      <div class="notification-icon-container">
+        <i id="notificationIcon" class="fas fa-info-circle"></i>
+      </div>
+      <h3 id="notificationTitle">Notification Title</h3>
+      <p id="notificationMessage">Notification message goes here.</p>
+      <button id="confirmNotification" class="modal-btn confirm-btn">OK</button>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="modal-overlay">
+    <div class="confirmation-modal-content">
+      <span class="close-confirmation">&times;</span>
+      <div class="confirmation-icon-container">
+        <i class="fas fa-question-circle"></i>
+      </div>
+      <h3 id="confirmationTitle">Confirmation Required</h3>
+      <p id="confirmationMessage">Are you sure you want to perform this action?</p>
+      <div class="confirm-actions">
+        <button id="confirmNo" class="modal-btn cancel-btn">Cancel</button>
+        <button id="confirmYes" class="modal-btn confirm-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Add these to all your admin pages (admin.html, add_products.html, admin_view_products.html, etc.) -->
   <link rel="stylesheet" href="page_transition.css">
   <script src="page_transition.js" defer></script>
