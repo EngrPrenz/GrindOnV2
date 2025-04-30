@@ -46,6 +46,12 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Set up receipt modal functionality
     setupReceiptModal();
     
+    // Set up notification modal functionality
+    setupNotificationModal();
+    
+    // Set up confirmation modal functionality
+    setupConfirmationModal();
+    
     // Add loading state to the table before fetching orders
     showTableLoadingState();
     
@@ -53,8 +59,29 @@ document.addEventListener("DOMContentLoaded", async function() {
     await fetchPendingOrders();
   } catch (error) {
     console.error("Error initializing page:", error);
+    showNotification("Error", "Failed to initialize page: " + error.message, "error");
   }
 });
+
+// Set up confirmation modal
+function setupConfirmationModal() {
+  // Close button functionality
+  document.querySelector('.close-confirmation').addEventListener('click', () => {
+    document.getElementById('confirmationModal').style.display = 'none';
+  });
+  
+  // Close on background click
+  document.getElementById('confirmationModal').addEventListener('click', (event) => {
+    if (event.target === document.getElementById('confirmationModal')) {
+      document.getElementById('confirmationModal').style.display = 'none';
+    }
+  });
+  
+  // Default button actions (will be overridden in showConfirmation)
+  document.getElementById('confirmNo').addEventListener('click', () => {
+    document.getElementById('confirmationModal').style.display = 'none';
+  });
+}
 
 // Show loading state for the table
 function showTableLoadingState() {
@@ -91,6 +118,107 @@ function showTableLoadingState() {
   }
 }
 
+// Set up notification modal
+function setupNotificationModal() {
+  // Close button functionality
+  document.querySelectorAll('.close-notification').forEach(button => {
+    button.addEventListener('click', () => {
+      document.getElementById('notificationModal').style.display = 'none';
+    });
+  });
+  
+  // Close on background click
+  window.addEventListener('click', (event) => {
+    const modal = document.getElementById('notificationModal');
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+  
+  // Close on confirmation button click
+  document.getElementById('confirmNotification').addEventListener('click', () => {
+    document.getElementById('notificationModal').style.display = 'none';
+  });
+}
+
+// Show notification modal with custom title, message and type (success, error, warning)
+function showNotification(title, message, type = "info") {
+  const modal = document.getElementById('notificationModal');
+  const modalTitle = document.getElementById('notificationTitle');
+  const modalMessage = document.getElementById('notificationMessage');
+  const modalIcon = document.getElementById('notificationIcon');
+  const modalContent = document.querySelector('.notification-modal-content');
+  
+  // Set content
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+  
+  // Reset classes
+  modalContent.className = 'notification-modal-content';
+  modalIcon.className = '';
+  
+  // Set type-specific styles
+  if (type === "success") {
+    modalContent.classList.add('success');
+    modalIcon.className = 'fas fa-check-circle';
+  } else if (type === "error") {
+    modalContent.classList.add('error');
+    modalIcon.className = 'fas fa-exclamation-circle';
+  } else if (type === "warning") {
+    modalContent.classList.add('warning');
+    modalIcon.className = 'fas fa-exclamation-triangle';
+  } else {
+    modalContent.classList.add('info');
+    modalIcon.className = 'fas fa-info-circle';
+  }
+  
+  // Show modal with animation
+  modal.style.display = 'flex';
+  setTimeout(() => {
+    modalContent.classList.add('show');
+  }, 10);
+}
+
+// Show confirmation modal
+function showConfirmation(title, message, onConfirm) {
+  const modal = document.getElementById('confirmationModal');
+  const modalTitle = document.getElementById('confirmationTitle');
+  const modalMessage = document.getElementById('confirmationMessage');
+  const modalContent = document.querySelector('.confirmation-modal-content');
+  
+  // Set content
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+  
+  // Show modal with animation
+  modal.style.display = 'flex';
+  setTimeout(() => {
+    modalContent.classList.add('show');
+  }, 10);
+  
+  // Set up confirm button
+  const confirmBtn = document.getElementById('confirmYes');
+  const cancelBtn = document.getElementById('confirmNo');
+  
+  // Remove existing event listeners
+  const newConfirmBtn = confirmBtn.cloneNode(true);
+  const newCancelBtn = cancelBtn.cloneNode(true);
+  confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+  cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+  
+  // Add new event listeners
+  newConfirmBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    if (typeof onConfirm === 'function') {
+      onConfirm();
+    }
+  });
+  
+  newCancelBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+}
+
 // Set up receipt modal functionality
 function setupReceiptModal() {
   const modal = document.getElementById('receiptModal');
@@ -124,15 +252,17 @@ function openReceiptModal(imageUrl) {
 function handleLogout(e) {
   e.preventDefault();
   
-  signOut(auth).then(() => {
-    // Sign-out successful
-    console.log("User signed out");
-    localStorage.removeItem('adminName');
-    window.location.href = "admin_login.html";
-  }).catch((error) => {
-    // An error happened
-    console.error("Error signing out:", error);
-    alert("Error signing out: " + error.message);
+  showConfirmation("Confirm Logout", "Are you sure you want to log out?", () => {
+    signOut(auth).then(() => {
+      // Sign-out successful
+      console.log("User signed out");
+      localStorage.removeItem('adminName');
+      window.location.href = "admin_login.html";
+    }).catch((error) => {
+      // An error happened
+      console.error("Error signing out:", error);
+      showNotification("Error", "Failed to sign out: " + error.message, "error");
+    });
   });
 }
 
@@ -284,6 +414,7 @@ async function fetchPendingOrders() {
         <td colspan="9" style="text-align: center;">Error loading orders: ${error.message}</td>
       </tr>
     `;
+    showNotification("Error", "Failed to load orders: " + error.message, "error");
   }
 }
 
@@ -300,7 +431,7 @@ async function fulfillOrder(orderId) {
     const orderSnap = await getDoc(orderRef);
     
     if (!orderSnap.exists()) {
-      alert("Order not found!");
+      showNotification("Error", "Order not found!", "error");
       return;
     }
     
@@ -326,6 +457,7 @@ async function fulfillOrder(orderId) {
       
       if (!productSnap.exists()) {
         console.error(`Product ${productId} not found`);
+        showNotification("Error", `Product ${productId} not found`, "error");
         continue;
       }
       
@@ -335,12 +467,14 @@ async function fulfillOrder(orderId) {
       // Check if variations exist
       if (!productData.variations) {
         console.error(`Product ${productId} has no variations`);
+        showNotification("Error", `Product ${productId} has no variations`, "error");
         continue;
       }
       
       // Check if this color exists in variations
       if (!productData.variations[color]) {
         console.error(`Color "${color}" not found in variations`);
+        showNotification("Error", `Color "${color}" not found in product variations`, "error");
         continue;
       }
       
@@ -352,6 +486,7 @@ async function fulfillOrder(orderId) {
         
         if (productData.variations[color][size] === undefined) {
           console.error(`Size "${size}" not found for color "${color}"`);
+          showNotification("Error", `Size "${size}" not found for color "${color}"`, "error");
           continue;
         }
       }
@@ -361,6 +496,7 @@ async function fulfillOrder(orderId) {
       
       if (currentStock < quantity) {
         console.error(`Not enough stock. Need: ${quantity}, Have: ${currentStock}`);
+        showNotification("Warning", `Not enough stock for ${item.name}. Need: ${quantity}, Have: ${currentStock}`, "warning");
         continue;
       }
       
@@ -379,31 +515,31 @@ async function fulfillOrder(orderId) {
     await updateDoc(orderRef, { status: "Shipped" });
     console.log("Order status updated to Shipped");
     
-    alert("Order shipped and stock updated successfully!");
+    showNotification("Success", "Order shipped and stock updated successfully!", "success");
     
     // Show loading state before refreshing the table
     showTableLoadingState();
     fetchPendingOrders(); // Refresh the table
   } catch (error) {
     console.error("Error fulfilling order:", error);
-    alert(`Failed to ship the order: ${error.message}`);
+    showNotification("Error", `Failed to ship the order: ${error.message}`, "error");
   }
 }
 
 // Decline an order
 async function declineOrder(orderId) {
-  if (!confirm("Are you sure you want to decline this order?")) return;
-
-  try {
-    const orderRef = doc(db, "orders", orderId);
-    await updateDoc(orderRef, { status: "Declined" });
-    alert("Order declined successfully!");
-    
-    // Show loading state before refreshing the table
-    showTableLoadingState();
-    fetchPendingOrders(); // Refresh the table
-  } catch (error) {
-    console.error("Error declining order: ", error);
-    alert("Failed to decline the order. Please try again.");
-  }
+  showConfirmation("Confirm Decline", "Are you sure you want to decline this order?", async () => {
+    try {
+      const orderRef = doc(db, "orders", orderId);
+      await updateDoc(orderRef, { status: "Declined" });
+      showNotification("Success", "Order declined successfully!", "success");
+      
+      // Show loading state before refreshing the table
+      showTableLoadingState();
+      fetchPendingOrders(); // Refresh the table
+    } catch (error) {
+      console.error("Error declining order: ", error);
+      showNotification("Error", "Failed to decline the order: " + error.message, "error");
+    }
+  });
 }
