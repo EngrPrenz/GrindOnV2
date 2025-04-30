@@ -34,6 +34,13 @@ class AdminAnalytics {
     this.currentView = 'daily'; // Default view
     this.chartInstance = null;
     this.allOrders = []; // Store all orders for calculations
+    
+    // Define target sales and order counts for each time period
+    this.targets = {
+      daily: { sales: 5000, orders: 20 },
+      weekly: { sales: 10000, orders: 40 },
+      monthly: { sales: 50000, orders: 80 }
+    };
   }
 
   // Initialize analytics
@@ -51,10 +58,76 @@ class AdminAnalytics {
       // Update summary cards with latest data
       this.updateSummaryCards();
       
+      // Initialize progress circle styles properly
+      this.initProgressCircles();
+      
       console.log('Analytics initialized successfully');
     } catch (error) {
       console.error('Error initializing analytics:', error);
     }
+  }
+  
+  // Initialize progress circles with correct CSS variables
+  initProgressCircles() {
+    // Get all progress circles
+    const progressCircles = document.querySelectorAll('.progress-circle');
+    
+    // For each progress circle
+    progressCircles.forEach(circle => {
+      const dataValue = parseInt(circle.getAttribute('data-value')) || 0;
+      // Set the CSS variable for the progress value
+      circle.style.setProperty('--value', `${dataValue}%`);
+      
+      // Set primary color variable based on current mode
+      const isDarkMode = document.documentElement.classList.contains('dark-mode');
+      this.updateProgressCircleColors(isDarkMode);
+    });
+    
+    // Set up observer for dark mode changes
+    this.setupDarkModeObserver();
+  }
+  
+  // Set up observer to detect dark mode changes
+  setupDarkModeObserver() {
+    // Create a MutationObserver to watch for dark mode class changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const isDarkMode = document.documentElement.classList.contains('dark-mode');
+          this.updateProgressCircleColors(isDarkMode);
+        }
+      });
+    });
+    
+    // Start observing the document root for class changes
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  }
+  
+  // Update progress circle colors based on dark/light mode
+  updateProgressCircleColors(isDarkMode) {
+    const primaryColor = isDarkMode ? '#6366F1' : '#4F46E5'; // Indigo color
+    const bgColor = isDarkMode ? '#2d3748' : '#e2e8f0'; // Slate color
+    
+    document.querySelectorAll('.progress-circle').forEach(circle => {
+      const dataValue = parseInt(circle.getAttribute('data-value')) || 0;
+      
+      // Update CSS variables
+      circle.style.setProperty('--primary-color', primaryColor);
+      circle.style.setProperty('--bg-color', bgColor);
+      circle.style.setProperty('--value', `${dataValue}%`);
+      
+      // Create the background gradient directly
+      circle.style.background = `conic-gradient(${primaryColor} 0% ${dataValue}%, ${bgColor} ${dataValue}% 100%)`;
+      
+      // Update the inner circle color
+      const innerCircle = circle.querySelector('::before') || circle;
+      if (innerCircle) {
+        innerCircle.style.backgroundColor = isDarkMode ? 'var(--card-bg-dark)' : 'var(--card-bg-light)';
+      }
+    });
   }
   
   // Fetch sales data from Firestore
@@ -567,53 +640,42 @@ class AdminAnalytics {
     const ordersCard = document.querySelector('.stat-card:nth-child(2)');
     ordersCard.querySelector('.stat-info h2').textContent = `${totalOrders}`;
     
-    // Calculate percentage changes from previous period
-    this.calculatePercentageChanges(totalSales, totalOrders, timeFrame);
+    // Calculate percentage based on target values
+    this.calculateTargetPercentages(totalSales, totalOrders);
   }
   
-  // Calculate percentage changes for summary cards
-  calculatePercentageChanges(totalSales, totalOrders, timeFrame) {
-    // Calculate previous period
-    const now = new Date();
-    const currentPeriodStart = new Date(now);
-    currentPeriodStart.setDate(now.getDate() - timeFrame.days);
+  // Calculate percentages based on target values
+  calculateTargetPercentages(totalSales, totalOrders) {
+    // Get target values for current view
+    const salesTarget = this.targets[this.currentView].sales;
+    const ordersTarget = this.targets[this.currentView].orders;
     
-    const previousPeriodEnd = new Date(currentPeriodStart);
-    previousPeriodEnd.setDate(previousPeriodEnd.getDate() - 1); // One day before current period
+    // Calculate percentages based on targets (capped at 100%)
+    const salesPercentage = Math.min(Math.round((totalSales / salesTarget) * 100), 100);
+    const ordersPercentage = Math.min(Math.round((totalOrders / ordersTarget) * 100), 100);
     
-    const previousPeriodStart = new Date(previousPeriodEnd);
-    previousPeriodStart.setDate(previousPeriodStart.getDate() - timeFrame.days); // Same length as current period
-    
-    // Filter orders for previous period
-    const previousPeriodOrders = this.allOrders.filter(order => 
-      order.date >= previousPeriodStart && order.date <= previousPeriodEnd
-    );
-    
-    // Calculate previous period totals
-    const prevSales = previousPeriodOrders.reduce((sum, order) => sum + order.total, 0);
-    const prevOrders = previousPeriodOrders.length;
-    
-    // Calculate percentage changes
-    const salesPercentChange = prevSales > 0 ? ((totalSales - prevSales) / prevSales) * 100 : 100;
-    const ordersPercentChange = prevOrders > 0 ? ((totalOrders - prevOrders) / prevOrders) * 100 : 100;
-    
-    // Update progress circles
+    // Update sales progress circle
     const salesProgressCircle = document.querySelector('.stat-card:nth-child(1) .progress-circle');
-    salesProgressCircle.setAttribute('data-value', Math.abs(salesPercentChange).toFixed(0));
-    salesProgressCircle.querySelector('span').textContent = `${Math.abs(salesPercentChange).toFixed(0)}%`;
+    salesProgressCircle.setAttribute('data-value', salesPercentage);
+    salesProgressCircle.style.setProperty('--value', `${salesPercentage}%`);
+    salesProgressCircle.querySelector('span').textContent = `${salesPercentage}%`;
+    salesProgressCircle.style.background = `conic-gradient(var(--primary-color) 0% ${salesPercentage}%, var(--bg-color) ${salesPercentage}% 100%)`;
     
+    // Update orders progress circle
     const ordersProgressCircle = document.querySelector('.stat-card:nth-child(2) .progress-circle');
-    ordersProgressCircle.setAttribute('data-value', Math.abs(ordersPercentChange).toFixed(0));
-    ordersProgressCircle.querySelector('span').textContent = `${Math.abs(ordersPercentChange).toFixed(0)}%`;
+    ordersProgressCircle.setAttribute('data-value', ordersPercentage);
+    ordersProgressCircle.style.setProperty('--value', `${ordersPercentage}%`);
+    ordersProgressCircle.querySelector('span').textContent = `${ordersPercentage}%`;
+    ordersProgressCircle.style.background = `conic-gradient(var(--primary-color) 0% ${ordersPercentage}%, var(--bg-color) ${ordersPercentage}% 100%)`;
     
-    // Update progress trend icons
+    // Update trend icons based on performance against targets
     const salesTrendIcon = document.querySelector('.stat-card:nth-child(1) .trend-icon');
-    salesTrendIcon.innerHTML = salesPercentChange >= 0 
+    salesTrendIcon.innerHTML = salesPercentage >= 75 
       ? '<i class="fas fa-arrow-up text-green-500"></i>'
       : '<i class="fas fa-arrow-down text-red-500"></i>';
     
     const ordersTrendIcon = document.querySelector('.stat-card:nth-child(2) .trend-icon');
-    ordersTrendIcon.innerHTML = ordersPercentChange >= 0
+    ordersTrendIcon.innerHTML = ordersPercentage >= 75
       ? '<i class="fas fa-arrow-up text-green-500"></i>'
       : '<i class="fas fa-arrow-down text-red-500"></i>';
   }
