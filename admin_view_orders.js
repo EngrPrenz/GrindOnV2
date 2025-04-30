@@ -46,12 +46,50 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Set up receipt modal functionality
     setupReceiptModal();
     
+    // Add loading state to the table before fetching orders
+    showTableLoadingState();
+    
     // Fetch orders
     await fetchPendingOrders();
   } catch (error) {
     console.error("Error initializing page:", error);
   }
 });
+
+// Show loading state for the table
+function showTableLoadingState() {
+  const ordersTableBody = document.querySelector("#ordersTable tbody");
+  
+  // Clear existing content
+  ordersTableBody.innerHTML = "";
+  
+  // Create 5 loading placeholder rows
+  for (let i = 0; i < 5; i++) {
+    const loadingRow = document.createElement('tr');
+    loadingRow.className = 'loading-row';
+    
+    // Create 9 columns (matching our table structure)
+    for (let j = 0; j < 9; j++) {
+      const cell = document.createElement('td');
+      const placeholder = document.createElement('div');
+      placeholder.className = 'loading-placeholder';
+      
+      // Make some columns wider than others for visual variety
+      if (j === 1 || j === 2) {
+        placeholder.style.width = '80%';
+      } else if (j === 8) {
+        placeholder.style.width = '90%';
+      } else {
+        placeholder.style.width = '60%';
+      }
+      
+      cell.appendChild(placeholder);
+      loadingRow.appendChild(cell);
+    }
+    
+    ordersTableBody.appendChild(loadingRow);
+  }
+}
 
 // Set up receipt modal functionality
 function setupReceiptModal() {
@@ -126,8 +164,7 @@ function initTheme() {
 // Fetch pending orders from Firestore - fixed to handle case-sensitivity
 async function fetchPendingOrders() {
   const ordersTableBody = document.querySelector("#ordersTable tbody");
-  ordersTableBody.innerHTML = ""; // Clear existing rows
-
+  
   try {
     const ordersRef = collection(db, "orders");
     
@@ -136,92 +173,110 @@ async function fetchPendingOrders() {
 
     console.log(`Total orders found: ${querySnapshot.size}`);
     
+    // Create new table content with a hidden class
+    const tableContent = document.createElement('tbody');
+    tableContent.className = 'new-table-content';
+    tableContent.style.opacity = '0';
+    
+    let pendingOrdersFound = false;
+
     if (querySnapshot.empty) {
-      ordersTableBody.innerHTML = `
+      tableContent.innerHTML = `
         <tr>
           <td colspan="9" style="text-align: center;">No orders found</td>
         </tr>
       `;
-      return;
-    }
-
-    let pendingOrdersFound = false;
-
-    querySnapshot.forEach((doc) => {
-      const order = doc.data();
-      
-      // Case-insensitive check for "pending" status
-      // This ensures we match "pending", "Pending", "PENDING", etc.
-      if (order.status && order.status.toLowerCase() === "pending") {
-        pendingOrdersFound = true;
-        const totalQuantity = order.items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    } else {
+      querySnapshot.forEach((doc) => {
+        const order = doc.data();
         
-        // Handle payment proof/receipt
-        let receiptCell;
-        if (order.paymentMethod && order.paymentMethod.toLowerCase() !== 'cod') {
-          // Check for payment proof URL (from either field)
-          const receiptUrl = order.paymentProofUrl || order.bankProofUrl || '';
+        // Case-insensitive check for "pending" status
+        // This ensures we match "pending", "Pending", "PENDING", etc.
+        if (order.status && order.status.toLowerCase() === "pending") {
+          pendingOrdersFound = true;
+          const totalQuantity = order.items.reduce((sum, item) => sum + (item.quantity || 1), 0);
           
-          if (receiptUrl) {
-            receiptCell = `
-              <img src="${receiptUrl}" alt="Payment Receipt" class="receipt-thumbnail" 
-                onclick="openReceiptModal('${receiptUrl}')" data-receipt-url="${receiptUrl}">
-            `;
+          // Handle payment proof/receipt
+          let receiptCell;
+          if (order.paymentMethod && order.paymentMethod.toLowerCase() !== 'cod') {
+            // Check for payment proof URL (from either field)
+            const receiptUrl = order.paymentProofUrl || order.bankProofUrl || '';
+            
+            if (receiptUrl) {
+              receiptCell = `
+                <img src="${receiptUrl}" alt="Payment Receipt" class="receipt-thumbnail" 
+                  onclick="openReceiptModal('${receiptUrl}')" data-receipt-url="${receiptUrl}">
+              `;
+            } else {
+              receiptCell = `<span class="no-receipt">No receipt uploaded</span>`;
+            }
           } else {
-            receiptCell = `<span class="no-receipt">No receipt uploaded</span>`;
+            receiptCell = `<span class="no-receipt">Cash on Delivery</span>`;
           }
-        } else {
-          receiptCell = `<span class="no-receipt">Cash on Delivery</span>`;
+          
+          // Log for debugging
+          console.log(`Found pending order: ${doc.id}`, order);
+          
+          const row = `
+            <tr>
+              <td>${doc.id}</td>
+              <td>${order.items.map(item => item.name).join(", ")}</td>
+              <td>${order.firstName || ''} ${order.lastName || ''}</td>
+              <td>${totalQuantity}</td>
+              <td>₱${order.total ? order.total.toFixed(2) : '0.00'}</td>
+              <td>${order.paymentMethod || 'N/A'}</td>
+              <td>${receiptCell}</td>
+              <td><span class="status-badge status-pending">${order.status}</span></td>
+              <td>
+                <button class="action-btn ship-btn" data-id="${doc.id}"><i class="fas fa-shipping-fast"></i> Ship Order</button>
+                <button class="action-btn decline-btn" data-id="${doc.id}"><i class="fas fa-times-circle"></i> Decline</button>
+              </td>
+            </tr>
+          `;
+          tableContent.innerHTML += row;
         }
-        
-        // Log for debugging
-        console.log(`Found pending order: ${doc.id}`, order);
-        
-        const row = `
+      });
+
+      if (!pendingOrdersFound) {
+        tableContent.innerHTML = `
           <tr>
-            <td>${doc.id}</td>
-            <td>${order.items.map(item => item.name).join(", ")}</td>
-            <td>${order.firstName || ''} ${order.lastName || ''}</td>
-            <td>${totalQuantity}</td>
-            <td>₱${order.total ? order.total.toFixed(2) : '0.00'}</td>
-            <td>${order.paymentMethod || 'N/A'}</td>
-            <td>${receiptCell}</td>
-            <td><span class="status-badge status-pending">${order.status}</span></td>
-            <td>
-              <button class="action-btn ship-btn" data-id="${doc.id}"><i class="fas fa-shipping-fast"></i> Ship Order</button>
-              <button class="action-btn decline-btn" data-id="${doc.id}"><i class="fas fa-times-circle"></i> Decline</button>
-            </td>
+            <td colspan="9" style="text-align: center;">No pending orders found</td>
           </tr>
         `;
-        ordersTableBody.innerHTML += row;
       }
-    });
-
-    if (!pendingOrdersFound) {
-      ordersTableBody.innerHTML = `
-        <tr>
-          <td colspan="9" style="text-align: center;">No pending orders found</td>
-        </tr>
-      `;
-      return;
     }
-
-    // Add event listeners for ship and decline buttons
-    document.querySelectorAll(".ship-btn").forEach((button) => {
-      button.addEventListener("click", () => fulfillOrder(button.dataset.id));
-    });
-
-    document.querySelectorAll(".decline-btn").forEach((button) => {
-      button.addEventListener("click", () => declineOrder(button.dataset.id));
-    });
     
-    // Add event listeners for receipt thumbnails
-    document.querySelectorAll(".receipt-thumbnail").forEach((img) => {
-      img.addEventListener("click", function() {
-        const receiptUrl = this.getAttribute("data-receipt-url");
-        openReceiptModal(receiptUrl);
-      });
-    });
+    // Add a small delay to simulate loading and make the transition noticeable
+    setTimeout(() => {
+      // Replace the old table body with the new one
+      const table = document.getElementById('ordersTable');
+      const oldTbody = table.querySelector('tbody');
+      table.replaceChild(tableContent, oldTbody);
+      
+      // Apply a fade-in transition to the new content
+      setTimeout(() => {
+        tableContent.style.transition = 'opacity 0.6s ease';
+        tableContent.style.opacity = '1';
+        
+        // Add event listeners for ship and decline buttons
+        document.querySelectorAll(".ship-btn").forEach((button) => {
+          button.addEventListener("click", () => fulfillOrder(button.dataset.id));
+        });
+
+        document.querySelectorAll(".decline-btn").forEach((button) => {
+          button.addEventListener("click", () => declineOrder(button.dataset.id));
+        });
+        
+        // Add event listeners for receipt thumbnails
+        document.querySelectorAll(".receipt-thumbnail").forEach((img) => {
+          img.addEventListener("click", function() {
+            const receiptUrl = this.getAttribute("data-receipt-url");
+            openReceiptModal(receiptUrl);
+          });
+        });
+      }, 50);
+    }, 800); // Simulate loading delay
+    
   } catch (error) {
     console.error("Error fetching orders: ", error);
     ordersTableBody.innerHTML = `
@@ -325,6 +380,9 @@ async function fulfillOrder(orderId) {
     console.log("Order status updated to Shipped");
     
     alert("Order shipped and stock updated successfully!");
+    
+    // Show loading state before refreshing the table
+    showTableLoadingState();
     fetchPendingOrders(); // Refresh the table
   } catch (error) {
     console.error("Error fulfilling order:", error);
@@ -340,6 +398,9 @@ async function declineOrder(orderId) {
     const orderRef = doc(db, "orders", orderId);
     await updateDoc(orderRef, { status: "Declined" });
     alert("Order declined successfully!");
+    
+    // Show loading state before refreshing the table
+    showTableLoadingState();
     fetchPendingOrders(); // Refresh the table
   } catch (error) {
     console.error("Error declining order: ", error);
