@@ -329,6 +329,12 @@ async function handleCheckout(event) {
     return;
   }
   
+  // Make sure success message is hidden during processing
+  const orderSuccess = document.getElementById('order-success');
+  if (orderSuccess) {
+    orderSuccess.style.display = 'none';
+  }
+  
   // Show loading overlay
   const loadingOverlay = document.getElementById('loading-overlay');
   if (loadingOverlay) {
@@ -386,7 +392,7 @@ async function handleCheckout(event) {
     };
     console.log("Order data prepared:", orderData);
     
-    // Create new order in Firestore
+    // Process all backend operations
     console.log("Attempting to create order in Firestore collection 'orders'");
     const orderRef = await addDoc(collection(db, "orders"), orderData);
     console.log("Order created successfully with ID:", orderRef.id);
@@ -401,14 +407,15 @@ async function handleCheckout(event) {
     await clearUserCart(user.uid);
     console.log("User cart cleared");
     
-    // Hide loading overlay before showing success message
+    // All backend processing is complete, now update the UI
+    
+    // First, hide the loading overlay
     const loadingElem = document.getElementById('loading-overlay');
     if (loadingElem) {
       loadingElem.style.display = 'none';
     }
     
     // Show success message with order number
-    const orderSuccess = document.getElementById('order-success');
     if (orderSuccess) {
       // Set the order number in the success message
       const orderNumberElement = document.getElementById('success-order-number');
@@ -416,18 +423,23 @@ async function handleCheckout(event) {
         orderNumberElement.textContent = `GRD-${orderRef.id.substr(0, 5).toUpperCase()}`;
       }
       
-      // Show the success message
+      // Show the success message and ensure it's visible
       orderSuccess.style.display = 'block';
       
       // Scroll to the success message
       orderSuccess.scrollIntoView({ behavior: 'smooth' });
       
-      // After 8 seconds, redirect to homepage (increased from 3 seconds)
-      setTimeout(() => {
+      // Important: Only set up the redirect timer once we've displayed the success message
+      // This ensures the user has time to see the confirmation before redirect
+      console.log("Setting up redirect timer after showing success message");
+      clearTimeout(window.redirectTimer); // Clear any existing timer
+      window.redirectTimer = setTimeout(() => {
+        console.log("Redirecting to homepage after success message display");
         window.location.href = 'homepage.html';
-      }, 8000); // 8 seconds is a good middle ground between 6-10 seconds
+      }, 8000);
+      
     } else {
-      // If success element not found, redirect immediately
+      console.log("Success element not found, redirecting immediately");
       window.location.href = 'homepage.html';
     }
   } catch (error) {
