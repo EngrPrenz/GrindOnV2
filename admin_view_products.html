@@ -97,6 +97,33 @@
         </div>
       </div>
 
+      <div id="deleteModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Confirm Delete</h2>
+            <span class="close-modal">&times;</span>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete "<span id="deleteProductName"></span>"?</p>
+            <div class="product-preview">
+              <img id="deleteProductImage" src="" alt="Product Image">
+              <div class="product-preview-details">
+                <div id="deleteProductPrice" class="product-price"></div>
+                <div id="deleteProductCategory" class="product-category"></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="cancelDelete" class="btn-secondary">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+            <button id="confirmDelete" class="btn-danger">
+              <i class="fas fa-trash"></i> Delete Product
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Pagination -->
       <div class="pagination" id="pagination">
         <!-- Pagination buttons will be added here dynamically -->

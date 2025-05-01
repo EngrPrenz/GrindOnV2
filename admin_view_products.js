@@ -536,19 +536,138 @@ function sortProducts() {
   logDebug('Products sorted');
 }
 
-// Confirm and delete product
+// Now, replace the confirmDeleteProduct function with this new version
 function confirmDeleteProduct(productId, productName) {
   if (isLoading) return;
   
-  logDebug('Confirming product deletion', { id: productId, name: productName });
+  logDebug('Opening delete modal for product', { id: productId, name: productName });
   
-  if (confirm(`Are you sure you want to delete "${productName}"?`)) {
-    deleteProduct(productId);
-  } else {
-    logDebug('Product deletion cancelled');
+  // Find product details
+  const product = allProducts.find(p => p.id === productId);
+  if (!product) {
+    logDebug('Product not found for deletion', productId);
+    return;
   }
+  
+  // Create modal if it doesn't exist
+  let modal = document.getElementById('deleteModal');
+  if (!modal) {
+    modal = createDeleteModal();
+    document.body.appendChild(modal);
+    setupModalEventListeners(modal);
+  }
+  
+  // Set product details in modal
+  document.getElementById('deleteProductName').textContent = product.name;
+  
+  const imageElement = document.getElementById('deleteProductImage');
+  const imageUrl = product.imageUrls?.[0] || product.imageUrl || 'images/placeholder-product.jpg';
+  imageElement.src = imageUrl;
+  imageElement.onerror = function() {
+    this.src = 'images/placeholder-product.jpg';
+  };
+  
+  document.getElementById('deleteProductPrice').textContent = `₱${(parseFloat(product.price) || 0).toFixed(2)}`;
+  document.getElementById('deleteProductCategory').textContent = product.category || 'No Category';
+  
+  // Set click handler for confirm button
+  const confirmButton = document.getElementById('confirmDelete');
+  if (confirmButton) {
+    // Remove existing event listeners (prevent duplicates)
+    const newConfirmButton = confirmButton.cloneNode(true);
+    confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+    
+    // Add new event listener
+    newConfirmButton.addEventListener('click', () => {
+      closeModal(modal);
+      deleteProduct(productId);
+    });
+  }
+  
+  // Open modal
+  modal.style.display = 'block';
 }
 
+// Create delete modal if it doesn't exist
+function createDeleteModal() {
+  logDebug('Creating delete modal');
+  
+  const modal = document.createElement('div');
+  modal.id = 'deleteModal';
+  modal.className = 'modal';
+  
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete "<span id="deleteProductName"></span>"?</p>
+        <div class="product-preview">
+          <img id="deleteProductImage" src="" alt="Product Image">
+          <div class="product-preview-details">
+            <div id="deleteProductPrice" class="product-price"></div>
+            <div id="deleteProductCategory" class="product-category"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelDelete" class="btn-secondary">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button id="confirmDelete" class="btn-danger">
+          <i class="fas fa-trash"></i> Delete Product
+        </button>
+      </div>
+    </div>
+  `;
+  
+  return modal;
+}
+
+// Set up event listeners for modal
+function setupModalEventListeners(modal) {
+  logDebug('Setting up modal event listeners');
+  
+  // Close modal when clicking on X
+  const closeButton = modal.querySelector('.close-modal');
+  if (closeButton) {
+    closeButton.addEventListener('click', () => closeModal(modal));
+  }
+  
+  // Close modal when clicking on Cancel button
+  const cancelButton = modal.querySelector('#cancelDelete');
+  if (cancelButton) {
+    cancelButton.addEventListener('click', () => closeModal(modal));
+  }
+  
+  // Close modal when clicking outside of it
+  window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      closeModal(modal);
+    }
+  });
+  
+  // Close modal when pressing Escape key
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal.style.display === 'block') {
+      closeModal(modal);
+    }
+  });
+}
+
+// Close modal function
+function closeModal(modal) {
+  logDebug('Closing delete modal');
+  
+  // Add fade-out animation
+  modal.style.opacity = '0';
+  setTimeout(() => {
+    modal.style.display = 'none';
+    modal.style.opacity = '1'; // Reset opacity for next use
+  }, 300);
+}
 // Delete product from Firestore
 async function deleteProduct(productId) {
   logDebug('Deleting product', productId);
