@@ -311,14 +311,13 @@ async function loadUserCart(userId) {
     }
     
     // Update the summary amounts
-    const shipping = 150;
-    const total = subtotal + shipping;
-    
+    const total = subtotal; // No shipping fee
+  
     const subtotalElement = document.querySelector('.summary-row:first-child span:last-child');
     if (subtotalElement) {
       subtotalElement.innerText = '₱' + subtotal.toFixed(2);
     }
-    
+      
     const totalElement = document.querySelector('.summary-row.total span:last-child');
     if (totalElement) {
       totalElement.innerText = '₱' + total.toFixed(2);
@@ -561,8 +560,8 @@ function updateCartTotal() {
     total += parseFloat(item.innerText.replace('₱', ''));
   });
   
-  const shipping = 150; // Fixed shipping cost
-  const finalTotal = total + shipping;
+  // No shipping fee anymore
+  const finalTotal = total;
   
   document.querySelector('.summary-row:first-child span:last-child').innerText = '₱' + total.toFixed(2);
   document.querySelector('.summary-row.total span:last-child').innerText = '₱' + finalTotal.toFixed(2);
@@ -711,6 +710,20 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
     showModal("Failed to add item to cart. Please try again.");
   }
 }
+
+// Create summary element if it doesn't exist
+const newSummary = document.createElement('div');
+newSummary.className = 'cart-summary';
+newSummary.innerHTML = `
+  <div class="summary-row">
+    <span>Subtotal</span>
+    <span>₱${subtotal.toFixed(2)}</span>
+  </div>
+  <div class="summary-row total">
+    <span>Total</span>
+    <span>₱${subtotal.toFixed(2)}</span>
+  </div>
+`;
 
 // Expose functions to global scope for use in HTML elements
 window.addToCart = addToCart;

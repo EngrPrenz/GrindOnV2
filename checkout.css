@@ -749,3 +749,30 @@ textarea.form-control {
   font-size: 16px;
   color: #333;
 }
+
+.shipping-calculation-info {
+  background-color: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #495057;
+}
+
+.shipping-formula {
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.shipping-details {
+  background-color: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  margin-top: -10px;
+  margin-bottom: 15px;
+}
+
+.distance-info {
+  margin-bottom: 5px;
+}

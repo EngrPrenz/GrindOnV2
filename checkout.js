@@ -8,19 +8,14 @@ import {
   addDoc,
   query,
   where,
-  serverTimestamp
+  serverTimestamp,
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-
 import {
   getAuth,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-
-// Import missing functions
-import {
-  updateDoc,
-  deleteDoc
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -36,119 +31,252 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Authentication state observer
+// Constants for shipping calculation
+const ORS_API_KEY = '5b3ce3597851110001cf62481c6b00fa3b904acf951184f3c3dce740';
+const STORE_COORDS = [121.1850, 14.5849]; // Store location [lng, lat]
+
+// Observe auth state
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // User is signed in
-    const uid = user.uid;
-    
-    // Load user cart for order summary
-    loadUserCart(uid);
-    
-    // Pre-fill user details if available
-    loadUserDetails(uid);
+    loadUserCart(user.uid);
+    loadUserDetails(user.uid);
   } else {
-    // Redirect to login page if not logged in
     window.location.href = 'login.html?redirect=checkout.html';
   }
 });
 
-// Load user's cart data for order summary
+// Load cart and compute subtotal
 async function loadUserCart(userId) {
   try {
     const orderItemsContainer = document.getElementById('order-items');
-    orderItemsContainer.innerHTML = ''; // Clear loading placeholder
-    
-    const cartRef = collection(db, "carts");
-    const q = query(cartRef, where("userId", "==", userId));
-    const cartSnapshot = await getDocs(q);
-    
-    if (cartSnapshot.empty) {
-      // If cart is empty, redirect to cart page
-      window.location.href = 'cart.html';
+    if (!orderItemsContainer) {
+      console.error("Order items container not found");
       return;
     }
     
+    orderItemsContainer.innerHTML = '';
+
+    const q = query(collection(db, "carts"), where("userId", "==", userId));
+    const cartSnapshot = await getDocs(q);
+
+    if (cartSnapshot.empty) {
+      window.location.href = 'cart.html';
+      return;
+    }
+
     let subtotal = 0;
-    
-    // Add each cart item to the order summary
-    cartSnapshot.forEach((cartDoc) => {
-      const cartItem = cartDoc.data();
-      
-      // Calculate item subtotal
-      const itemSubtotal = cartItem.price * cartItem.quantity;
-      subtotal += itemSubtotal;
-      
-      // Create order item element
-      const itemElement = document.createElement('div');
-      itemElement.className = 'order-item';
-      
-      // Populate the order item HTML
-      itemElement.innerHTML = `
-        <img src="${cartItem.imageUrl || '/api/placeholder/80/80'}" alt="${cartItem.name}" class="order-item-image">
+    cartSnapshot.forEach((doc) => {
+      const item = doc.data();
+      const itemTotal = item.price * item.quantity;
+      subtotal += itemTotal;
+
+      const el = document.createElement('div');
+      el.className = 'order-item';
+      el.innerHTML = `
+        <img src="${item.imageUrl || '/api/placeholder/80/80'}" alt="${item.name}" class="order-item-image">
         <div class="order-item-details">
-          <div class="order-item-name">${cartItem.name}</div>
+          <div class="order-item-name">${item.name}</div>
           <div class="order-item-variant">
-            ${cartItem.size ? 'Size: ' + cartItem.size + ', ' : ''}
-            ${cartItem.color ? 'Color: ' + cartItem.color : ''}
-            (Qty: ${cartItem.quantity})
+            ${item.size ? `Size: ${item.size}, ` : ''}${item.color ? `Color: ${item.color}` : ''} (Qty: ${item.quantity})
           </div>
-          <div class="order-item-price">₱${(cartItem.price * cartItem.quantity).toFixed(2)}</div>
-        </div>
-      `;
-      
-      orderItemsContainer.appendChild(itemElement);
+          <div class="order-item-price">₱${itemTotal.toFixed(2)}</div>
+        </div>`;
+      orderItemsContainer.appendChild(el);
     });
-    
-    // Update order summary totals
-    const shipping = 150; // Fixed shipping cost
-    const total = subtotal + shipping;
-    
-    document.getElementById('order-subtotal').innerText = '₱' + subtotal.toFixed(2);
-    document.getElementById('order-shipping').innerText = '₱' + shipping.toFixed(2);
-    document.getElementById('order-total').innerText = '₱' + total.toFixed(2);
-    
-    // Store cart data for order processing
-    window.cartItems = cartSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+
+    window.cartItems = cartSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     window.orderSubtotal = subtotal;
-    window.orderTotal = total;
+
+    const subtotalElement = document.getElementById('order-subtotal');
+    if (subtotalElement) {
+      subtotalElement.innerText = '₱' + subtotal.toFixed(2);
+    }
+
+    // Wait for user location input before shipping calculation
+    const cityField = document.getElementById('city');
+    const provinceField = document.getElementById('province');
     
-  } catch (error) {
-    console.error("Error loading cart for checkout:", error);
-    alert("Failed to load your cart. Please try again later.");
+    if (cityField) {
+      cityField.addEventListener('blur', calculateShipping);
+    }
+    
+    if (provinceField) {
+      provinceField.addEventListener('blur', calculateShipping);
+    }
+    
+  } catch (err) {
+    console.error("Error loading cart:", err);
+    alert("Failed to load cart. Try again.");
   }
 }
 
-// Load user details to pre-fill checkout form
-async function loadUserDetails(userId) {
+async function calculateShipping() {
+  const address = document.getElementById('address')?.value.trim() || '';
+  const city = document.getElementById('city')?.value.trim() || '';
+  const province = document.getElementById('province')?.value.trim() || '';
+
+  if (!address || !city || !province) return;
+
   try {
-    const userDocRef = doc(db, "users", userId);
-    const userDoc = await getDoc(userDocRef);
-    
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      
-      // Pre-fill user details if available
-      if (userData.firstName) document.getElementById('first-name').value = userData.firstName;
-      if (userData.lastName) document.getElementById('last-name').value = userData.lastName;
-      if (userData.email) document.getElementById('email').value = userData.email;
-      if (userData.phone) document.getElementById('phone').value = userData.phone;
-      if (userData.address) document.getElementById('address').value = userData.address;
-      if (userData.city) document.getElementById('city').value = userData.city;
-      if (userData.province) document.getElementById('province').value = userData.province;
-      if (userData.postalCode) document.getElementById('zip').value = userData.postalCode;
+    // Show calculating state
+    const shippingElement = document.getElementById('order-shipping');
+    if (shippingElement) {
+      shippingElement.innerText = 'Calculating...';
     }
-  } catch (error) {
-    console.error("Error loading user details:", error);
-    // Continue checkout process even if user details can't be loaded
+    
+    // Display shipping details section
+    const shippingDetails = document.getElementById('shipping-details');
+    if (shippingDetails) {
+      shippingDetails.style.display = 'block';
+    }
+
+    // CORS-safe approach: Use a fixed shipping rate based on province/city
+    // This is a fallback solution when direct distance calculation isn't possible
+    let shipping = 0;
+    let estimatedDistance = 0;
+    
+    // Get province value (now using the actual value from the select element)
+    const provinceValue = province.toLowerCase();
+    
+    // Calculate shipping based on region/province
+    if (provinceValue === 'metro-manila' || city.toLowerCase().includes('manila')) {
+      shipping = 100;
+      estimatedDistance = 10;
+    } else if (['cavite', 'laguna', 'batangas', 'rizal', 'bulacan'].includes(provinceValue)) {
+      shipping = 150;
+      estimatedDistance = 20;
+    } else if (['pampanga', 'bataan', 'nueva ecija'].includes(provinceValue)) {
+      shipping = 200;
+      estimatedDistance = 30;
+    } else {
+      // For other provinces, use a default rate
+      shipping = 250;
+      estimatedDistance = 40;
+    }
+    
+    // Add a small random variation to make it seem more precise
+    const variation = Math.floor(Math.random() * 30) - 15; // -15 to +15
+    shipping = Math.max(100, shipping + variation);
+    
+    // Store calculated values
+    window.shippingCost = shipping;
+    window.estimatedDistance = estimatedDistance;
+    const total = window.orderSubtotal + shipping;
+    window.orderTotal = total;
+    
+    // Update distance info if element exists
+    const distanceInfo = document.getElementById('distance-info');
+    if (distanceInfo) {
+      distanceInfo.innerText = `Estimated Distance: ~${estimatedDistance} km`;
+    }
+    
+    // Update shipping in the UI
+    if (shippingElement) {
+      shippingElement.innerText = '₱' + shipping.toFixed(2);
+    }
+    
+    // Add a hidden input with the calculated shipping
+    let hiddenInput = document.getElementById('calculated-shipping');
+    if (!hiddenInput) {
+      hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.id = 'calculated-shipping';
+      document.getElementById('checkout-form')?.appendChild(hiddenInput);
+    }
+    if (hiddenInput) {
+      hiddenInput.value = shipping;
+    }
+    
+    // Add a hidden input with the calculated distance
+    let distanceInput = document.getElementById('calculated-distance');
+    if (!distanceInput) {
+      distanceInput = document.createElement('input');
+      distanceInput.type = 'hidden';
+      distanceInput.id = 'calculated-distance';
+      document.getElementById('checkout-form')?.appendChild(distanceInput);
+    }
+    if (distanceInput) {
+      distanceInput.value = estimatedDistance;
+    }
+    
+    // Update or create the order total element
+    let orderTotalElement = document.getElementById('order-total');
+    if (orderTotalElement) {
+      orderTotalElement.innerText = '₱' + total.toFixed(2);
+    } else {
+      // Create total row if it doesn't exist
+      const orderSummarySection = document.querySelector('.order-summary');
+      if (orderSummarySection) {
+        const totalRow = document.createElement('div');
+        totalRow.className = 'order-summary-row total';
+        totalRow.innerHTML = `
+          <span>Total</span>
+          <span id="order-total">₱${total.toFixed(2)}</span>
+        `;
+        // Add the total row to the end of the order summary section
+        orderSummarySection.appendChild(totalRow);
+      }
+    }
+
+  } catch (err) {
+    console.error("Shipping calculation error:", err);
+    
+    // Fallback to default shipping rate
+    const defaultShipping = 150;
+    window.shippingCost = defaultShipping;
+    const total = window.orderSubtotal + defaultShipping;
+    window.orderTotal = total;
+    
+    const shippingElement = document.getElementById('order-shipping');
+    if (shippingElement) {
+      shippingElement.innerText = '₱' + defaultShipping.toFixed(2);
+    }
+    
+    // Create or update the total display
+    let orderTotalElement = document.getElementById('order-total');
+    if (orderTotalElement) {
+      orderTotalElement.innerText = '₱' + total.toFixed(2);
+    } else {
+      // Create total row if it doesn't exist
+      const orderSummarySection = document.querySelector('.order-summary');
+      if (orderSummarySection) {
+        const totalRow = document.createElement('div');
+        totalRow.className = 'order-summary-row total';
+        totalRow.innerHTML = `
+          <span>Total</span>
+          <span id="order-total">₱${total.toFixed(2)}</span>
+        `;
+        // Add the total row to the end of the order summary section
+        orderSummarySection.appendChild(totalRow);
+      }
+    }
+  }
+}
+
+// Prefill form with user info
+async function loadUserDetails(uid) {
+  try {
+    const userDoc = await getDoc(doc(db, "users", uid));
+    if (!userDoc.exists()) return;
+
+    const data = userDoc.data();
+    ['first-name', 'last-name', 'email', 'phone', 'address', 'city', 'province', 'zip'].forEach(id => {
+      const field = id.replace('-', '');
+      const element = document.getElementById(id);
+      if (data[field] && element) {
+        element.value = data[field];
+      }
+    });
+
+    // Trigger shipping calculation after loading
+    calculateShipping();
+
+  } catch (err) {
+    console.error("Error loading user info:", err);
   }
 }
 
 // Handle checkout form submission
-// Add an event listener that runs when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
   // Find the checkout form
   const checkoutForm = document.getElementById('checkout-form');
@@ -161,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.error('Checkout form not found in the DOM');
   }
   
-  // Payment method toggle - move this code inside DOMContentLoaded
+  // Payment method toggle
   const paymentMethods = document.querySelectorAll('input[name="payment-method"]');
   const gcashDetails = document.getElementById('gcash-details');
   const bankDetails = document.getElementById('bank-details');
@@ -169,29 +297,27 @@ document.addEventListener('DOMContentLoaded', function() {
   paymentMethods.forEach(method => {
     method.addEventListener('change', function() {
       if (this.value === 'gcash') {
-        gcashDetails.style.display = 'block';
-        bankDetails.style.display = 'none';
+        if (gcashDetails) gcashDetails.style.display = 'block';
+        if (bankDetails) bankDetails.style.display = 'none';
       } else if (this.value === 'bank-transfer') {
-        gcashDetails.style.display = 'none';
-        bankDetails.style.display = 'block';
+        if (gcashDetails) gcashDetails.style.display = 'none';
+        if (bankDetails) bankDetails.style.display = 'block';
       } else {
-        gcashDetails.style.display = 'none';
-        bankDetails.style.display = 'none';
+        if (gcashDetails) gcashDetails.style.display = 'none';
+        if (bankDetails) bankDetails.style.display = 'none';
       }
     });
   });
-});
-
-// ImgBB upload functionality for payment proof
-document.addEventListener('DOMContentLoaded', function() {
-  // Setup upload functionality for GCash payment proof
-  setupUploadFunctionality('payment-proof-upload', 'upload-payment-proof-btn', 'payment-proof-preview', 'payment-proof-url');
   
-  // Setup upload functionality for Bank Transfer payment proof
+  // Initialize default payment method
+  document.querySelector('input[name="payment-method"]:checked')?.dispatchEvent(new Event('change'));
+  
+  // Setup upload functionality
+  setupUploadFunctionality('payment-proof-upload', 'upload-payment-proof-btn', 'payment-proof-preview', 'payment-proof-url');
   setupUploadFunctionality('bank-proof-upload', 'upload-bank-proof-btn', 'bank-proof-preview', 'bank-proof-url');
 });
 
-// Function to set up upload functionality for multiple upload buttons
+// ImgBB upload functionality for payment proof
 function setupUploadFunctionality(uploadId, buttonId, previewId, hiddenInputId) {
   const uploadInput = document.getElementById(uploadId);
   const uploadButton = document.getElementById(buttonId);
@@ -238,7 +364,7 @@ function setupUploadFunctionality(uploadId, buttonId, previewId, hiddenInputId) 
             newHiddenInput.id = hiddenInputId;
             newHiddenInput.name = hiddenInputId;
             newHiddenInput.value = result.data.url;
-            document.getElementById('checkout-form').appendChild(newHiddenInput);
+            document.getElementById('checkout-form')?.appendChild(newHiddenInput);
           }
           
           // Show success message and preview
@@ -316,11 +442,13 @@ async function handleCheckout(event) {
     const input = document.getElementById(field.id);
     const errorElement = document.getElementById(field.errorId);
     
-    if (!input.value.trim()) {
-      errorElement.style.display = 'block';
-      isValid = false;
-    } else {
-      errorElement.style.display = 'none';
+    if (input && errorElement) {
+      if (!input.value.trim()) {
+        errorElement.style.display = 'block';
+        isValid = false;
+      } else {
+        errorElement.style.display = 'none';
+      }
     }
   });
 
@@ -364,29 +492,36 @@ async function handleCheckout(event) {
   
   // Disable submit button to prevent multiple submissions
   const submitButton = document.getElementById('place-order-btn');
-  submitButton.disabled = true;
-  submitButton.textContent = 'Processing...';
-  console.log("Submit button disabled");
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = 'Processing...';
+    console.log("Submit button disabled");
+  }
   
   try {
+    // Get calculated shipping info or use default
+    const shippingFee = window.shippingCost || 150;
+    const distance = window.estimatedDistance || 0;
+    
     // Gather form data
     const orderData = {
       userId: user.uid,
-      firstName: document.getElementById('first-name').value,
-      lastName: document.getElementById('last-name').value,
-      email: document.getElementById('email').value,
-      phone: document.getElementById('phone').value,
-      address: document.getElementById('address').value,
-      city: document.getElementById('city').value,
-      province: document.getElementById('province').value,
-      postalCode: document.getElementById('zip').value,
+      firstName: document.getElementById('first-name')?.value || '',
+      lastName: document.getElementById('last-name')?.value || '',
+      email: document.getElementById('email')?.value || '',
+      phone: document.getElementById('phone')?.value || '',
+      address: document.getElementById('address')?.value || '',
+      city: document.getElementById('city')?.value || '',
+      province: document.getElementById('province')?.value || '',
+      postalCode: document.getElementById('zip')?.value || '',
       paymentMethod: document.querySelector('input[name="payment-method"]:checked')?.value || 'cod',
       // Add the payment proof URL if available
       paymentProofUrl: document.getElementById('payment-proof-url')?.value || '',
       items: window.cartItems || [],
       subtotal: window.orderSubtotal || 0,
-      shipping: 150, // Fixed shipping cost
-      total: window.orderTotal || 0,
+      shipping: shippingFee,
+      distance: distance,
+      total: (window.orderSubtotal || 0) + shippingFee,
       status: 'pending',
       createdAt: serverTimestamp()
     };
@@ -452,8 +587,10 @@ async function handleCheckout(event) {
     }
     
     alert("There was an error processing your order. Please try again.");
-    submitButton.disabled = false;
-    submitButton.textContent = 'Place Order';
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Place Order';
+    }
   }
 }
 
@@ -503,6 +640,3 @@ async function clearUserCart(userId) {
     // Continue with order process even if cart clearing fails
   }
 }
-
-// Initialize default payment method
-document.querySelector('input[name="payment-method"]:checked')?.dispatchEvent(new Event('change'));

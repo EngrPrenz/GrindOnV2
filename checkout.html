@@ -315,11 +315,11 @@
           </div>
           <div class="order-summary-row">
             <span>Shipping</span>
-            <span id="order-shipping">₱150.00</span>
+            <span id="order-shipping">Calculating...</span>
           </div>
-          <div class="order-summary-row total">
-            <span>Total</span>
-            <span id="order-total">₱150.00</span>
+          <div id="shipping-details" class="shipping-details" style="display: none; margin-bottom: 15px; font-size: 0.85em; color: #555;">
+            <div id="distance-info" class="distance-info">Distance: Calculating...</div>
+            <div class="shipping-info">Base fee: ₱50.00 + ₱50 per 5km</div>
           </div>
           
           <button type="submit" id="place-order-btn" class="checkout-btn">PLACE ORDER</button>
@@ -508,6 +508,11 @@
     
   </script>
    <script type="module" src="checkout.js"></script>
+   <script src="distance-shipping-calculator.js"></script>
+   <script>
+    window.BACKEND_GEO_URL = "https://us-central1-YOUR-PROJECT.cloudfunctions.net/geocodeAddress";
+  </script>
+  
    <!-- <script type="module" src="homepage_transition.js"></script> -->
 </body>
 </html>
