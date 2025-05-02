@@ -536,7 +536,7 @@ function sortProducts() {
   logDebug('Products sorted');
 }
 
-// Now, replace the confirmDeleteProduct function with this new version
+// Replace the confirmDeleteProduct function with this simplified version
 function confirmDeleteProduct(productId, productName) {
   if (isLoading) return;
   
@@ -549,12 +549,12 @@ function confirmDeleteProduct(productId, productName) {
     return;
   }
   
-  // Create modal if it doesn't exist
-  let modal = document.getElementById('deleteModal');
+  // Get the existing modal from HTML
+  const modal = document.getElementById('deleteModal');
   if (!modal) {
-    modal = createDeleteModal();
-    document.body.appendChild(modal);
-    setupModalEventListeners(modal);
+    logDebug('Delete modal not found in the document');
+    alert('Could not open delete dialog');
+    return;
   }
   
   // Set product details in modal
@@ -569,6 +569,12 @@ function confirmDeleteProduct(productId, productName) {
   
   document.getElementById('deleteProductPrice').textContent = `₱${(parseFloat(product.price) || 0).toFixed(2)}`;
   document.getElementById('deleteProductCategory').textContent = product.category || 'No Category';
+  
+  // Setup modal event listeners (only once)
+  if (!modal.hasListenersSetup) {
+    setupModalEventListeners(modal);
+    modal.hasListenersSetup = true;
+  }
   
   // Set click handler for confirm button
   const confirmButton = document.getElementById('confirmDelete');
@@ -588,45 +594,7 @@ function confirmDeleteProduct(productId, productName) {
   modal.style.display = 'block';
 }
 
-// Create delete modal if it doesn't exist
-function createDeleteModal() {
-  logDebug('Creating delete modal');
-  
-  const modal = document.createElement('div');
-  modal.id = 'deleteModal';
-  modal.className = 'modal';
-  
-  modal.innerHTML = `
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Confirm Delete</h2>
-        <span class="close-modal">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete "<span id="deleteProductName"></span>"?</p>
-        <div class="product-preview">
-          <img id="deleteProductImage" src="" alt="Product Image">
-          <div class="product-preview-details">
-            <div id="deleteProductPrice" class="product-price"></div>
-            <div id="deleteProductCategory" class="product-category"></div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="cancelDelete" class="btn-secondary">
-          <i class="fas fa-times"></i> Cancel
-        </button>
-        <button id="confirmDelete" class="btn-danger">
-          <i class="fas fa-trash"></i> Delete Product
-        </button>
-      </div>
-    </div>
-  `;
-  
-  return modal;
-}
-
-// Set up event listeners for modal
+// Simplified setup modal event listeners function
 function setupModalEventListeners(modal) {
   logDebug('Setting up modal event listeners');
   
@@ -668,7 +636,80 @@ function closeModal(modal) {
     modal.style.opacity = '1'; // Reset opacity for next use
   }, 300);
 }
-// Delete product from Firestore
+
+// Add these functions to admin_view_products.js
+
+// Show success modal with message
+function showSuccessModal(message = 'Product deleted successfully') {
+  logDebug('Showing success modal', message);
+  
+  const successModal = document.getElementById('successModal');
+  const successMessage = document.getElementById('successMessage');
+  
+  if (!successModal || !successMessage) {
+    logDebug('Success modal elements not found, falling back to alert');
+    alert(message);
+    return;
+  }
+  
+  // Set the message
+  successMessage.textContent = message;
+  
+  // Show the modal
+  successModal.style.display = 'block';
+  
+  // Setup event listeners if not already set
+  if (!successModal.hasListenersSetup) {
+    setupSuccessModalListeners(successModal);
+    successModal.hasListenersSetup = true;
+  }
+}
+
+// Set up success modal event listeners
+function setupSuccessModalListeners(modal) {
+  logDebug('Setting up success modal event listeners');
+  
+  // Close on OK button click
+  const okButton = document.getElementById('successOkButton');
+  if (okButton) {
+    okButton.addEventListener('click', () => closeSuccessModal(modal));
+  }
+  
+  // Close modal when pressing Escape key
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal.style.display === 'block') {
+      closeSuccessModal(modal);
+    }
+  });
+  
+  // Auto-close after 3 seconds
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      closeSuccessModal(modal);
+    }
+  });
+}
+
+// Close success modal with animation
+function closeSuccessModal(modal) {
+  logDebug('Closing success modal');
+  
+  const modalContent = modal.querySelector('.success-modal-content');
+  
+  // Add fade-out animations
+  modal.classList.add('fade-out');
+  if (modalContent) modalContent.classList.add('fade-out');
+  
+  // Hide after animation completes
+  setTimeout(() => {
+    modal.style.display = 'none';
+    modal.classList.remove('fade-out');
+    if (modalContent) modalContent.classList.remove('fade-out');
+  }, 300);
+}
+
+// Modify the deleteProduct function to use success modal instead of alert
+// Replace your current deleteProduct function with this one
 async function deleteProduct(productId) {
   logDebug('Deleting product', productId);
   showLoading('Deleting product...');
@@ -695,8 +736,8 @@ async function deleteProduct(productId) {
     renderPagination();
     hideLoading();
     
-    // Show success message
-    alert('Product deleted successfully');
+    // Show success message with modal instead of alert
+    showSuccessModal('Product deleted successfully');
   } catch (error) {
     logDebug('Error deleting product', error);
     console.error("Error deleting product:", error);
