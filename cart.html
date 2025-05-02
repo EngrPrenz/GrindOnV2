@@ -111,13 +111,9 @@
               <span>Subtotal</span>
               <span>₱0.00</span>
             </div>
-            <div class="summary-row">
-              <span>Shipping</span>
-              <span>₱150.00</span>
-            </div>
             <div class="summary-row total">
               <span>Total</span>
-              <span>₱150.00</span>
+              <span>₱0.00</span>
             </div>
           </div>
         </div>
@@ -280,19 +276,19 @@
       }
       
       function updateCartTotal() {
-        const subtotals = document.querySelectorAll('.cart-item-subtotal');
-        let total = 0;
-        
-        subtotals.forEach(item => {
-          total += parseFloat(item.innerText.replace('₱', ''));
-        });
-        
-        const shipping = 150; // Fixed shipping cost
-        const finalTotal = total + shipping;
-        
-        document.querySelector('.summary-row:first-child span:last-child').innerText = '₱' + total.toFixed(2);
-        document.querySelector('.summary-row.total span:last-child').innerText = '₱' + finalTotal.toFixed(2);
-      }
+  const subtotals = document.querySelectorAll('.cart-item-subtotal');
+  let total = 0;
+  
+  subtotals.forEach(item => {
+    total += parseFloat(item.innerText.replace('₱', ''));
+  });
+  
+  // No shipping cost anymore
+  const finalTotal = total;
+  
+  document.querySelector('.summary-row:first-child span:last-child').innerText = '₱' + total.toFixed(2);
+  document.querySelector('.summary-row.total span:last-child').innerText = '₱' + finalTotal.toFixed(2);
+}
     });
   </script>
   
