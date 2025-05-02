@@ -40,6 +40,10 @@ const colorVariations = document.getElementById('colorVariations');
 const addVariationBtn = document.getElementById('addVariationBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 const adminNameElement = document.getElementById('adminName');
+const successModal = document.getElementById('successModal');
+const closeModalBtn = document.getElementById('closeModal');
+const viewProductsBtn = document.getElementById('viewProducts');
+const modalOverlay = document.getElementById('modalOverlay');
 
 // Variables
 let currentProduct = null;
@@ -86,7 +90,54 @@ document.addEventListener('DOMContentLoaded', function() {
       handleLogout();
     });
   }
+  
+  // Close modal on button click
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', closeModal);
+  }
+  
+  // View Products button in modal
+  if (viewProductsBtn) {
+    viewProductsBtn.addEventListener('click', () => {
+      window.location.href = 'admin_view_products.html';
+    });
+  }
+  
+  // Close modal when clicking outside
+  if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        closeModal();
+      }
+    });
+  }
 });
+
+// Function to open modal
+function openModal() {
+  if (successModal && modalOverlay) {
+    modalOverlay.style.display = 'flex';
+    successModal.style.display = 'block';
+    
+    // Add animation class
+    successModal.classList.add('modal-animate');
+    
+    // Prevent body scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+// Function to close modal
+function closeModal() {
+  if (successModal && modalOverlay) {
+    modalOverlay.style.display = 'none';
+    successModal.style.display = 'none';
+    successModal.classList.remove('modal-animate');
+    
+    // Re-enable body scrolling
+    document.body.style.overflow = 'auto';
+  }
+}
 
 // Add this function to handle logout
 function handleLogout() {
@@ -308,13 +359,149 @@ document.getElementById('uploadImage').addEventListener('change', function() {
   }
 });
 
-// Upload new images to ImgBB
+// Add these functions for ImgBB upload modal
+
+// Function to open ImgBB modal
+function openImgbbModal(message, isError = false) {
+  const imgbbModal = document.getElementById('imgbbModal');
+  const imgbbModalOverlay = document.getElementById('imgbbModalOverlay');
+  const imgbbModalMessage = document.getElementById('imgbbModalMessage');
+  const imgbbModalProgress = document.getElementById('imgbbModalProgress');
+  const imgbbModalSuccess = document.getElementById('imgbbModalSuccess');
+  const imgbbModalError = document.getElementById('imgbbModalError');
+  const imgbbErrorMessage = document.getElementById('imgbbErrorMessage');
+  const selectImagesBtn = document.getElementById('selectImagesBtn');
+  
+  if (imgbbModal && imgbbModalOverlay) {
+    // Reset modal state
+    imgbbModalProgress.style.display = 'none';
+    imgbbModalSuccess.style.display = 'none';
+    imgbbModalError.style.display = 'none';
+    
+    // Set message
+    imgbbModalMessage.textContent = message;
+    
+    if (isError) {
+      imgbbModalError.style.display = 'flex';
+      imgbbErrorMessage.textContent = message;
+      imgbbModalMessage.style.display = 'none';
+      selectImagesBtn.style.display = 'none';
+    } else {
+      imgbbModalMessage.style.display = 'block';
+      selectImagesBtn.style.display = 'inline-block';
+    }
+    
+    // Show modal
+    imgbbModalOverlay.style.display = 'flex';
+    imgbbModal.style.display = 'block';
+    imgbbModal.classList.add('modal-animate');
+    
+    // Prevent body scrolling
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+// Function to close ImgBB modal
+function closeImgbbModal() {
+  const imgbbModal = document.getElementById('imgbbModal');
+  const imgbbModalOverlay = document.getElementById('imgbbModalOverlay');
+  
+  if (imgbbModal && imgbbModalOverlay) {
+    imgbbModalOverlay.style.display = 'none';
+    imgbbModal.style.display = 'none';
+    imgbbModal.classList.remove('modal-animate');
+    
+    // Re-enable body scrolling
+    document.body.style.overflow = 'auto';
+  }
+}
+
+// Function to show upload progress
+function showUploadProgress(total) {
+  const imgbbModalMessage = document.getElementById('imgbbModalMessage');
+  const imgbbModalProgress = document.getElementById('imgbbModalProgress');
+  const uploadCount = document.getElementById('uploadCount');
+  const selectImagesBtn = document.getElementById('selectImagesBtn');
+  
+  imgbbModalMessage.style.display = 'none';
+  imgbbModalProgress.style.display = 'block';
+  uploadCount.textContent = `0/${total}`;
+  selectImagesBtn.style.display = 'none';
+}
+
+// Function to update upload progress
+function updateUploadProgress(current, total) {
+  const progressFill = document.querySelector('.upload-progress-fill');
+  const uploadCount = document.getElementById('uploadCount');
+  
+  const percentage = (current / total) * 100;
+  progressFill.style.width = `${percentage}%`;
+  uploadCount.textContent = `${current}/${total}`;
+}
+
+// Function to show upload success
+function showUploadSuccess() {
+  const imgbbModalProgress = document.getElementById('imgbbModalProgress');
+  const imgbbModalSuccess = document.getElementById('imgbbModalSuccess');
+  
+  imgbbModalProgress.style.display = 'none';
+  imgbbModalSuccess.style.display = 'flex';
+  
+  // Auto close after 3 seconds
+  setTimeout(closeImgbbModal, 3000);
+}
+
+// Function to show upload error
+function showUploadError(errorMsg) {
+  const imgbbModalProgress = document.getElementById('imgbbModalProgress');
+  const imgbbModalError = document.getElementById('imgbbModalError');
+  const imgbbErrorMessage = document.getElementById('imgbbErrorMessage');
+  
+  imgbbModalProgress.style.display = 'none';
+  imgbbModalError.style.display = 'flex';
+  imgbbErrorMessage.textContent = errorMsg;
+}
+
+// Add event listeners when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+  // Close ImgBB modal buttons
+  const closeImgbbModalBtn = document.getElementById('closeImgbbModal');
+  const closeImgbbBtn = document.getElementById('closeImgbbBtn');
+  const selectImagesBtn = document.getElementById('selectImagesBtn');
+  const imgbbModalOverlay = document.getElementById('imgbbModalOverlay');
+  
+  if (closeImgbbModalBtn) {
+    closeImgbbModalBtn.addEventListener('click', closeImgbbModal);
+  }
+  
+  if (closeImgbbBtn) {
+    closeImgbbBtn.addEventListener('click', closeImgbbModal);
+  }
+  
+  if (selectImagesBtn) {
+    selectImagesBtn.addEventListener('click', function() {
+      document.getElementById('uploadImage').click();
+      closeImgbbModal();
+    });
+  }
+  
+  if (imgbbModalOverlay) {
+    imgbbModalOverlay.addEventListener('click', function(e) {
+      if (e.target === imgbbModalOverlay) {
+        closeImgbbModal();
+      }
+    });
+  }
+});
+
+// Modify the Upload to ImgBB button click handler
 document.getElementById('uploadToImgBB').addEventListener('click', async () => {
   const fileInput = document.getElementById('uploadImage');
   const files = fileInput.files;
   
   if (!files.length) {
-    alert('⚠️ Please select image(s) first.');
+    // Show modal instead of alert
+    openImgbbModal('Please select image(s) first.');
     return;
   }
   
@@ -325,8 +512,16 @@ document.getElementById('uploadToImgBB').addEventListener('click', async () => {
   newUploadedImageUrls = [];
   
   try {
-    for (let file of files) {
+    // Show upload progress in modal
+    showUploadProgress(files.length);
+    openImgbbModal('Uploading images...');
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       const base64 = await fileToBase64(file);
+      
+      // Update progress
+      updateUploadProgress(i, files.length);
       
       const response = await fetch("https://api.imgbb.com/1/upload", {
         method: "POST",
@@ -345,14 +540,21 @@ document.getElementById('uploadToImgBB').addEventListener('click', async () => {
         newUploadedImageUrls.push(result.data.url);
       } else {
         console.error("Upload failed for one image:", result);
+        throw new Error(`Upload failed for image ${i+1}`);
       }
     }
     
+    // Final progress update
+    updateUploadProgress(files.length, files.length);
+    
     document.getElementById('imageUrl').value = newUploadedImageUrls.join(', ');
-    alert('🎉 All images uploaded successfully!');
+    
+    // Show success in modal
+    showUploadSuccess();
   } catch (error) {
     console.error("Upload error:", error);
-    alert('❌ Error uploading images. Please try again.');
+    // Show error in modal
+    showUploadError(error.message || 'Error uploading images. Please try again.');
   } finally {
     uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload to ImgBB';
     uploadBtn.disabled = false;
@@ -435,30 +637,14 @@ editProductForm.addEventListener('submit', async (e) => {
     // Update product in Firestore
     await updateDoc(doc(db, "products", productId), updatedProduct);
     
-    // Show success message
-    const successMessage = document.createElement('div');
-    successMessage.className = 'success-banner';
-    successMessage.innerHTML = `
-      <div>
-        <i class="fas fa-check-circle"></i>
-        Product updated successfully!
-      </div>
-      <button type="button" class="close-btn">&times;</button>
-    `;
+    // Update the product name in the modal
+    const productNameInModal = document.getElementById('updatedProductName');
+    if (productNameInModal) {
+      productNameInModal.textContent = name;
+    }
     
-    editProductForm.insertAdjacentElement('beforebegin', successMessage);
-    
-    // Add event listener to close button
-    successMessage.querySelector('.close-btn').addEventListener('click', () => {
-      successMessage.remove();
-    });
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-      if (successMessage.parentNode) {
-        successMessage.remove();
-      }
-    }, 5000);
+    // Show success modal
+    openModal();
     
     // Update original image URLs and reset new uploads
     originalImageUrls = updatedImageUrls;

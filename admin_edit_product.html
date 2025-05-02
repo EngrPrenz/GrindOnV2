@@ -156,6 +156,65 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Overlay -->
+<div id="modalOverlay" class="modal-overlay">
+  <!-- Success Modal -->
+  <div id="successModal" class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-check-circle"></i>
+        Product Updated Successfully
+      </h3>
+      <button id="closeModal" class="modal-close-btn">&times;</button>
+    </div>
+    <div class="modal-content">
+      <p>Your product <span id="updatedProductName" class="product-name"></span> has been updated successfully.</p>
+      <p>The changes will be immediately visible on your store.</p>
+    </div>
+    <div class="modal-actions">
+
+      <button id="viewProducts" class="modal-btn btn-primary">View All Products</button>
+    </div>
+  </div>
+</div>
+
+<!-- ImgBB Upload Modal Overlay -->
+<div id="imgbbModalOverlay" class="modal-overlay">
+  <!-- ImgBB Upload Modal -->
+  <div id="imgbbModal" class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <span id="imgbbModalTitle">Upload Images</span>
+      </h3>
+      <button id="closeImgbbModal" class="modal-close-btn">&times;</button>
+    </div>
+    <div class="modal-content" id="imgbbModalContent">
+      <!-- Content will be dynamically set -->
+      <p id="imgbbModalMessage">Please select image(s) first.</p>
+      <div id="imgbbModalProgress" class="upload-progress-container" style="display: none;">
+        <div class="upload-progress-bar">
+          <div class="upload-progress-fill"></div>
+        </div>
+        <p class="upload-status">Uploading images... <span id="uploadCount">0/0</span></p>
+      </div>
+      <div id="imgbbModalSuccess" class="upload-success" style="display: none;">
+        <i class="fas fa-check-circle"></i>
+        <p>All images uploaded successfully!</p>
+      </div>
+      <div id="imgbbModalError" class="upload-error" style="display: none;">
+        <i class="fas fa-exclamation-circle"></i>
+        <p id="imgbbErrorMessage">Error uploading images.</p>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button id="closeImgbbBtn" class="modal-btn btn-secondary">Close</button>
+      <button id="selectImagesBtn" class="modal-btn btn-primary">Select Images</button>
+    </div>
+  </div>
+</div>
+
   <!-- Add this in the head section of both admin.html and add_products.html -->
   <link rel="stylesheet" href="page_transition.css">
   <script src="page_transition.js" defer></script>
