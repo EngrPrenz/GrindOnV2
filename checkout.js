@@ -95,6 +95,11 @@ async function loadUserCart(userId) {
     // Wait for user location input before shipping calculation
     const cityField = document.getElementById('city');
     const provinceField = document.getElementById('province');
+    const barangayField = document.getElementById('barangay');
+
+    if (barangayField) {
+      barangayField.addEventListener('blur', calculateShipping);
+    }
     
     if (cityField) {
       cityField.addEventListener('blur', calculateShipping);
@@ -112,6 +117,7 @@ async function loadUserCart(userId) {
 
 async function calculateShipping() {
   const address = document.getElementById('address')?.value.trim() || '';
+  const barangay = document.getElementById('barangay')?.value.trim() || '';
   const city = document.getElementById('city')?.value.trim() || '';
   const province = document.getElementById('province')?.value.trim() || '';
 
@@ -130,16 +136,63 @@ async function calculateShipping() {
       shippingDetails.style.display = 'block';
     }
 
-    // CORS-safe approach: Use a fixed shipping rate based on province/city
-    // This is a fallback solution when direct distance calculation isn't possible
+    // If we have the improved shipping calculator available, use it
+    if (window.ShippingCalculator) {
+      const result = await window.ShippingCalculator.calculateShippingFee(address, barangay, city, province);
+      
+      // Store calculated values
+      window.shippingCost = result.shipping;
+      window.estimatedDistance = result.distance;
+      const total = window.orderSubtotal + result.shipping;
+      window.orderTotal = total;
+      
+      // Update distance info if element exists
+      const distanceInfo = document.getElementById('distance-info');
+      if (distanceInfo) {
+        distanceInfo.innerText = `Estimated Distance: ~${result.distance} km`;
+      }
+      
+      // Update shipping in the UI
+      if (shippingElement) {
+        shippingElement.innerText = '₱' + result.shipping.toFixed(2);
+      }
+      
+      // Update total
+      let orderTotalElement = document.getElementById('order-total');
+      if (orderTotalElement) {
+        orderTotalElement.innerText = '₱' + total.toFixed(2);
+      } else {
+        // Create total row if it doesn't exist
+        const orderSummarySection = document.querySelector('.order-summary');
+        if (orderSummarySection) {
+          const totalRow = document.createElement('div');
+          totalRow.className = 'order-summary-row total';
+          totalRow.innerHTML = `
+            <span>Total</span>
+            <span id="order-total">₱${total.toFixed(2)}</span>
+          `;
+          // Add the total row to the end of the order summary section
+          orderSummarySection.appendChild(totalRow);
+        }
+      }
+      
+      // Add hidden input fields with the calculated values
+      updateHiddenField('calculated-shipping', result.shipping);
+      updateHiddenField('calculated-distance', result.distance);
+      
+      return;
+    }
+
+    // CORS-safe approach as fallback: Use a fixed shipping rate based on province/city
+    // This is a fallback solution when the shipping calculator isn't available
     let shipping = 0;
     let estimatedDistance = 0;
     
-    // Get province value (now using the actual value from the select element)
+    // Get province value
     const provinceValue = province.toLowerCase();
     
     // Calculate shipping based on region/province
-    if (provinceValue === 'metro-manila' || city.toLowerCase().includes('manila')) {
+    if (provinceValue === 'metro-manila' || provinceValue === 'metro manila' || city.toLowerCase().includes('manila')) {
       shipping = 100;
       estimatedDistance = 10;
     } else if (['cavite', 'laguna', 'batangas', 'rizal', 'bulacan'].includes(provinceValue)) {
@@ -175,29 +228,9 @@ async function calculateShipping() {
       shippingElement.innerText = '₱' + shipping.toFixed(2);
     }
     
-    // Add a hidden input with the calculated shipping
-    let hiddenInput = document.getElementById('calculated-shipping');
-    if (!hiddenInput) {
-      hiddenInput = document.createElement('input');
-      hiddenInput.type = 'hidden';
-      hiddenInput.id = 'calculated-shipping';
-      document.getElementById('checkout-form')?.appendChild(hiddenInput);
-    }
-    if (hiddenInput) {
-      hiddenInput.value = shipping;
-    }
-    
-    // Add a hidden input with the calculated distance
-    let distanceInput = document.getElementById('calculated-distance');
-    if (!distanceInput) {
-      distanceInput = document.createElement('input');
-      distanceInput.type = 'hidden';
-      distanceInput.id = 'calculated-distance';
-      document.getElementById('checkout-form')?.appendChild(distanceInput);
-    }
-    if (distanceInput) {
-      distanceInput.value = estimatedDistance;
-    }
+    // Update or add hidden input fields
+    updateHiddenField('calculated-shipping', shipping);
+    updateHiddenField('calculated-distance', estimatedDistance);
     
     // Update or create the order total element
     let orderTotalElement = document.getElementById('order-total');
@@ -253,6 +286,20 @@ async function calculateShipping() {
   }
 }
 
+
+// Helper function to update or create hidden input fields
+function updateHiddenField(id, value) {
+  let hiddenInput = document.getElementById(id);
+  if (!hiddenInput) {
+    hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.id = id;
+    hiddenInput.name = id;
+    document.getElementById('checkout-form')?.appendChild(hiddenInput);
+  }
+  hiddenInput.value = value;
+}
+
 // Prefill form with user info
 async function loadUserDetails(uid) {
   try {
@@ -260,14 +307,14 @@ async function loadUserDetails(uid) {
     if (!userDoc.exists()) return;
 
     const data = userDoc.data();
-    ['first-name', 'last-name', 'email', 'phone', 'address', 'city', 'province', 'zip'].forEach(id => {
+    ['first-name', 'last-name', 'email', 'phone', 'address', 'barangay', 'city', 'province', 'zip'].forEach(id => {
       const field = id.replace('-', '');
       const element = document.getElementById(id);
       if (data[field] && element) {
         element.value = data[field];
       }
     });
-
+    
     // Trigger shipping calculation after loading
     calculateShipping();
 
@@ -431,6 +478,7 @@ async function handleCheckout(event) {
     { id: 'email', errorId: 'email-error' },
     { id: 'phone', errorId: 'phone-error' },
     { id: 'address', errorId: 'address-error' },
+    { id: 'barangay', errorId: 'barangay-error' },
     { id: 'city', errorId: 'city-error' },
     { id: 'zip', errorId: 'zip-error' },
     { id: 'province', errorId: 'province-error' }
@@ -511,6 +559,7 @@ async function handleCheckout(event) {
       email: document.getElementById('email')?.value || '',
       phone: document.getElementById('phone')?.value || '',
       address: document.getElementById('address')?.value || '',
+      barangay: document.getElementById('barangay')?.value || '',
       city: document.getElementById('city')?.value || '',
       province: document.getElementById('province')?.value || '',
       postalCode: document.getElementById('zip')?.value || '',

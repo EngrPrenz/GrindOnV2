@@ -1,7 +1,7 @@
 // Improved distance and shipping calculator
 
 // Constants for shipping calculation
-const STORE_COORDS = [121.1850, 14.5849]; // Store location [lng, lat]
+const STORE_COORDS = [121.1755, 14.6208]; // URS Antipolo Campus [lng, lat]
 const BASE_FEE = 50; // Base shipping fee in PHP
 const PER_KM_RATE = 10; // PHP per km
 const MIN_SHIPPING_FEE = 100; // Minimum shipping fee
@@ -12,14 +12,15 @@ const ORS_API_KEY = '5b3ce3597851110001cf62481c6b00fa3b904acf951184f3c3dce740';
 
 /**
  * Calculate shipping cost based on address
- * @param {string} address - Full address
+ * @param {string} address - Street address
+ * @param {string} barangay - Barangay/Village
  * @param {string} city - City
  * @param {string} province - Province
  */
-async function calculateShippingFee(address, city, province) {
+async function calculateShippingFee(address, barangay, city, province) {
   try {
     // First, attempt to get precise coordinates using geocoding
-    const coordinates = await geocodeAddress(address, city, province);
+    const coordinates = await geocodeAddress(address, barangay, city, province);
     
     if (coordinates) {
       // If we got coordinates, calculate actual distance
@@ -37,25 +38,26 @@ async function calculateShippingFee(address, city, province) {
       };
     } else {
       // Fallback to region-based estimation
-      return calculateEstimatedShipping(province, city);
+      return calculateEstimatedShipping(province, city, barangay);
     }
   } catch (error) {
     console.error("Error calculating shipping:", error);
-    return calculateEstimatedShipping(province, city);
+    return calculateEstimatedShipping(province, city, barangay);
   }
 }
 
 /**
  * Geocode address to coordinates using OpenRoute Service
  * @param {string} address - Street address
+ * @param {string} barangay - Barangay/Village
  * @param {string} city - City
  * @param {string} province - Province
  * @returns {Array|null} - [longitude, latitude] or null if failed
  */
-async function geocodeAddress(address, city, province) {
+async function geocodeAddress(address, barangay, city, province) {
   try {
-    // Construct full address
-    const fullAddress = `${address}, ${city}, ${province}, Philippines`;
+    // Construct full address with barangay for better accuracy
+    const fullAddress = `${address}, ${barangay}, ${city}, ${province}, Philippines`;
     
     // URL encode the address
     const encodedAddress = encodeURIComponent(fullAddress);
@@ -71,6 +73,19 @@ async function geocodeAddress(address, city, province) {
     if (data.features && data.features.length > 0) {
       const coordinates = data.features[0].geometry.coordinates;
       return coordinates; // [longitude, latitude]
+    }
+    
+    // Try again without the street address if first attempt failed
+    const simplifiedAddress = `${barangay}, ${city}, ${province}, Philippines`;
+    const encodedSimplifiedAddress = encodeURIComponent(simplifiedAddress);
+    
+    const simplifiedApiUrl = `https://api.openrouteservice.org/geocode/search?api_key=${ORS_API_KEY}&text=${encodedSimplifiedAddress}&boundary.country=PHL`;
+    
+    const simplifiedResponse = await fetch(simplifiedApiUrl);
+    const simplifiedData = await simplifiedResponse.json();
+    
+    if (simplifiedData.features && simplifiedData.features.length > 0) {
+      return simplifiedData.features[0].geometry.coordinates;
     }
     
     return null;
@@ -135,41 +150,132 @@ function calculateFeeFromDistance(distance) {
  * Fallback method: Calculate estimated shipping based on region
  * @param {string} province - Province name
  * @param {string} city - City name
+ * @param {string} barangay - Barangay name (optional)
  * @returns {Object} - Shipping details
  */
-function calculateEstimatedShipping(province, city) {
+function calculateEstimatedShipping(province, city, barangay = '') {
   let shipping = 0;
   let estimatedDistance = 0;
   
-  // Get province value
-  const provinceValue = province.toLowerCase();
-  const cityValue = city.toLowerCase();
+  // Convert inputs to lowercase for case-insensitive comparison
+  const provinceValue = province.toLowerCase().trim();
+  const cityValue = city.toLowerCase().trim();
+  const barangayValue = barangay ? barangay.toLowerCase().trim() : '';
   
-  // Estimated shipping costs based on regions
-  if (provinceValue === 'metro-manila' || cityValue.includes('manila')) {
-    shipping = 100;
-    estimatedDistance = 10;
-  } else if (['cavite', 'laguna', 'batangas', 'rizal', 'bulacan'].includes(provinceValue)) {
-    shipping = 150;
-    estimatedDistance = 25;
+  // Special case for Antipolo (since our store is in Antipolo URS)
+  if (provinceValue === 'rizal' && cityValue.includes('antipolo')) {
+    // Define URS Antipolo nearby barangays
+    const veryNearBarangays = ['mayamot', 'dela paz', 'cupang', 'mambugan', 'dalig', 'bagong nayon'];
+    const nearBarangays = ['san isidro', 'san jose', 'san luis', 'san roque', 'santa cruz'];
+    const moderateBarangays = ['beverly hills', 'calawis', 'forest hills', 'muntingdilaw', 'munting dilao'];
+    
+    // Check if barangay is specified and match to distance group
+    if (barangayValue) {
+      if (veryNearBarangays.some(b => barangayValue.includes(b))) {
+        // Very near barangays to URS
+        shipping = 70;
+        estimatedDistance = 3;
+      } else if (nearBarangays.some(b => barangayValue.includes(b))) {
+        // Near barangays
+        shipping = 90;
+        estimatedDistance = 7;
+      } else if (moderateBarangays.some(b => barangayValue.includes(b))) {
+        // Moderate distance barangays
+        shipping = 110;
+        estimatedDistance = 10;
+      } else {
+        // Other Antipolo barangays
+        shipping = 120;
+        estimatedDistance = 12;
+      }
+    } else {
+      // If no barangay specified, use general Antipolo estimate
+      shipping = 100;
+      estimatedDistance = 8;
+    }
+  } 
+  // Special case for Rizal province nearby cities
+  else if (provinceValue === 'rizal') {
+    if (['taytay', 'cainta'].includes(cityValue)) {
+      shipping = 130;
+      estimatedDistance = 12;
+    } else if (['angono', 'binangonan', 'teresa'].includes(cityValue)) {
+      shipping = 150;
+      estimatedDistance = 15;
+    } else if (['tanay', 'morong', 'baras', 'pililla', 'jala-jala'].includes(cityValue)) {
+      shipping = 180;
+      estimatedDistance = 20;
+    } else if (['rodriguez', 'san mateo'].includes(cityValue)) {
+      shipping = 160;
+      estimatedDistance = 17;
+    } else {
+      // Other Rizal locations
+      shipping = 170;
+      estimatedDistance = 18;
+    }
+  }
+  // Metro Manila
+  else if (provinceValue === 'metro-manila' || provinceValue === 'metro manila' || cityValue.includes('manila') || 
+          ['pasig', 'quezon city', 'marikina', 'makati', 'taguig', 'pasay', 'parañaque', 'mandaluyong', 
+           'san juan', 'caloocan', 'valenzuela', 'malabon', 'navotas', 'muntinlupa', 'las piñas', 'pateros'].includes(cityValue)) {
+    
+    // Eastern Metro Manila (closer to Antipolo)
+    if (['marikina', 'pasig'].includes(cityValue)) {
+      shipping = 120;
+      estimatedDistance = 12;
+    } 
+    // Central Metro Manila
+    else if (['quezon city', 'mandaluyong', 'san juan'].includes(cityValue)) {
+      shipping = 140;
+      estimatedDistance = 15;
+    }
+    // Western/Southern Metro Manila (farther from Antipolo)
+    else {
+      shipping = 160;
+      estimatedDistance = 20;
+    }
+  } 
+  // Laguna - fix the San Pablo issue
+  else if (provinceValue === 'laguna') {
+    if (cityValue.includes('san pablo')) {
+      shipping = 300;
+      estimatedDistance = 80;  // San Pablo is quite far from Antipolo
+    } else if (['biñan', 'santa rosa', 'cabuyao', 'calamba'].includes(cityValue)) {
+      shipping = 220;
+      estimatedDistance = 45;
+    } else {
+      shipping = 260;
+      estimatedDistance = 60;
+    }
+  }
+  // Other provinces
+  else if (['cavite'].includes(provinceValue)) {
+    shipping = 230;
+    estimatedDistance = 50;
+  } else if (['batangas'].includes(provinceValue)) {
+    shipping = 270;
+    estimatedDistance = 65;
+  } else if (['bulacan'].includes(provinceValue)) {
+    shipping = 230;
+    estimatedDistance = 50;
   } else if (['pampanga', 'bataan', 'nueva ecija', 'tarlac'].includes(provinceValue)) {
-    shipping = 200;
-    estimatedDistance = 40;
+    shipping = 300;
+    estimatedDistance = 85;
   } else if (['pangasinan', 'zambales', 'aurora', 'quezon'].includes(provinceValue)) {
-    shipping = 250;
-    estimatedDistance = 70;
+    shipping = 330;
+    estimatedDistance = 100;
   } else if (['ilocos', 'cagayan', 'isabela', 'quirino', 'nueva vizcaya', 'abra', 'apayao', 'kalinga', 'mountain', 'ifugao', 'benguet'].includes(provinceValue) || provinceValue.includes('ilocos') || provinceValue.includes('cagayan')) {
-    shipping = 350;
+    shipping = 400;
     estimatedDistance = 200;
   } else {
     // For other provinces, use a default rate
-    shipping = 300;
+    shipping = 350;
     estimatedDistance = 150;
   }
   
-  // Add a small random variation to make it seem more precise
-  const variation = Math.floor(Math.random() * 30) - 15; // -15 to +15
-  shipping = Math.max(100, shipping + variation);
+  // Add a small random variation to make it seem more precise (but smaller variation)
+  const variation = Math.floor(Math.random() * 20) - 10; // -10 to +10
+  shipping = Math.max(70, shipping + variation);
   
   return {
     success: true,
@@ -181,8 +287,9 @@ function calculateEstimatedShipping(province, city) {
 }
 
 // Add small utilities for address validation and formatting
-function formatAddress(address, city, province, postalCode) {
-  return `${address}, ${city}, ${province} ${postalCode}, Philippines`;
+function formatAddress(address, barangay, city, province, postalCode) {
+  const barangayPart = barangay ? `${barangay}, ` : '';
+  return `${address}, ${barangayPart}${city}, ${province} ${postalCode}, Philippines`;
 }
 
 function validateAddress(address, city, province) {
