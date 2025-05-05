@@ -55,18 +55,31 @@ function showModal(title, message, isError = false) {
   modalContent.style.width = '90%';
 
   modalContent.innerHTML = `
-    <img src="images/Wordmark White.png" style="height: 70px; width: auto; object-fit: contain;">
-    <h4 style="color: white; padding: 10px;">${title}</h4>
-    <p style="color: white; padding: 10px;">${message}</p>
-    <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color:${isError ? '#dc3545' : 'rgb(0, 0, 0)'}; color: white; border: none; border-radius: 4px; cursor: pointer;">Continue Shopping</button>
-  `;
+  <img src="images/Wordmark White.png" style="height: 70px; width: auto; object-fit: contain;">
+  <h4 style="color: white; padding: 10px;">${title}</h4>
+  <p style="color: white; padding: 10px;">${message}</p>
+  <button id="closeModalBtn" style="margin: 10px; padding: 10px 20px; background-color:${isError ? '#dc3545' : 'rgb(0, 0, 0)'}; color: white; border: 2px solid transparent; border-radius: 4px; cursor: pointer; transition: all 0.3s ease;">Continue Shopping</button>
+`;
 
-  modal.appendChild(modalContent);
-  document.body.appendChild(modal);
+modal.appendChild(modalContent);
+document.body.appendChild(modal);
 
-  document.getElementById('closeModalBtn').addEventListener('click', () => {
-    document.body.removeChild(modal);
-  });
+// Add hover effect with JavaScript
+const closeBtn = document.getElementById('closeModalBtn');
+
+closeBtn.addEventListener('mouseover', () => {
+  closeBtn.style.backgroundColor = '#555555'; // Grey color on hover
+  closeBtn.style.borderColor = 'white';      // White border on hover
+});
+
+closeBtn.addEventListener('mouseout', () => {
+  closeBtn.style.backgroundColor = isError ? '#dc3545' : 'rgb(0, 0, 0)'; // Return to original color
+  closeBtn.style.borderColor = 'transparent';                            // Return to transparent border
+});
+
+closeBtn.addEventListener('click', () => {
+  document.body.removeChild(modal);
+});
 }
 
 // Get reference to the user option div in navbar (if it exists)
