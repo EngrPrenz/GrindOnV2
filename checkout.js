@@ -419,6 +419,217 @@ document.addEventListener('DOMContentLoaded', function() {
   setupUploadFunctionality('bank-proof-upload', 'upload-bank-proof-btn', 'bank-proof-preview', 'bank-proof-url');
 });
 
+// Map initialization for location selection
+document.addEventListener('DOMContentLoaded', function() {
+  // Check if map container exists
+  const mapContainer = document.getElementById('location-map');
+  if (!mapContainer) return;
+
+  // Initialize the map with default center (Philippines)
+  const map = L.map('location-map').setView([14.5995, 120.9842], 13);
+
+  // Add OpenStreetMap tile layer
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  // Initialize marker at map center
+  let marker = L.marker(map.getCenter(), {
+    draggable: true
+  }).addTo(map);
+
+  // Update hidden fields when marker is moved
+  marker.on('dragend', function(e) {
+    const position = marker.getLatLng();
+    document.getElementById('latitude').value = position.lat;
+    document.getElementById('longitude').value = position.lng;
+    
+    // Show confirmation message
+    document.getElementById('location-confirmed').style.display = 'block';
+    
+    // Use reverse geocoding to update address fields (optional)
+    reverseGeocode(position.lat, position.lng);
+  });
+
+  // Handle "Use My Current Location" button
+  document.getElementById('use-my-location').addEventListener('click', function() {
+    const locationStatus = document.getElementById('location-status');
+    locationStatus.textContent = 'Locating...';
+    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          
+          // Update map and marker
+          map.setView([lat, lng], 16);
+          marker.setLatLng([lat, lng]);
+          
+          // Update hidden fields
+          document.getElementById('latitude').value = lat;
+          document.getElementById('longitude').value = lng;
+          
+          // Show confirmation
+          document.getElementById('location-confirmed').style.display = 'block';
+          locationStatus.textContent = 'Location found!';
+          
+          // Use reverse geocoding to update address fields
+          reverseGeocode(lat, lng);
+        },
+        function(error) {
+          locationStatus.textContent = 'Error: ' + getGeolocationErrorMessage(error);
+        }
+      );
+    } else {
+      locationStatus.textContent = 'Geolocation is not supported by your browser';
+    }
+  });
+
+  // Handle location search
+  document.getElementById('search-location-btn').addEventListener('click', searchLocation);
+  document.getElementById('search-location').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchLocation();
+    }
+  });
+
+  function searchLocation() {
+    const searchInput = document.getElementById('search-location');
+    const query = searchInput.value.trim();
+    
+    if (!query) return;
+    
+    // Show searching status
+    const locationStatus = document.getElementById('location-status');
+    locationStatus.textContent = 'Searching...';
+    
+    // Use Nominatim API for geocoding (note: for production, use a service with appropriate terms)
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}, Philippines`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.length > 0) {
+          const result = data[0];
+          const lat = parseFloat(result.lat);
+          const lng = parseFloat(result.lon);
+          
+          // Update map and marker
+          map.setView([lat, lng], 16);
+          marker.setLatLng([lat, lng]);
+          
+          // Update hidden fields
+          document.getElementById('latitude').value = lat;
+          document.getElementById('longitude').value = lng;
+          
+          // Show confirmation
+          document.getElementById('location-confirmed').style.display = 'block';
+          locationStatus.textContent = 'Location found!';
+          
+          // Update address fields
+          updateAddressFields(result);
+        } else {
+          locationStatus.textContent = 'Location not found';
+        }
+      })
+      .catch(error => {
+        console.error('Search error:', error);
+        locationStatus.textContent = 'Error searching location';
+      });
+  }
+
+  // Helper function to update address fields from Nominatim result
+  function updateAddressFields(result) {
+    // Extract address components
+    if (result.address) {
+      // Check if address fields exist before setting values
+      const addressField = document.getElementById('address');
+      const cityField = document.getElementById('city');
+      const provinceField = document.getElementById('province');
+      const zipField = document.getElementById('zip');
+      const barangayField = document.getElementById('barangay');
+      
+      if (addressField) {
+        // Combine road and house number if available
+        const road = result.address.road || result.address.street || '';
+        const houseNumber = result.address.house_number || '';
+        addressField.value = (houseNumber ? houseNumber + ' ' : '') + road;
+      }
+      
+      if (cityField && (result.address.city || result.address.town || result.address.municipality)) {
+        cityField.value = result.address.city || result.address.town || result.address.municipality;
+      }
+      
+      if (provinceField) {
+        const province = result.address.state || result.address.province || '';
+        
+        // Try to match with select options
+        if (province) {
+          // Convert to lowercase for comparison
+          const provinceLower = province.toLowerCase();
+          
+          // Find matching option
+          const options = provinceField.options;
+          for (let i = 0; i < options.length; i++) {
+            if (options[i].value.toLowerCase() === provinceLower || 
+                options[i].text.toLowerCase() === provinceLower) {
+              provinceField.selectedIndex = i;
+              break;
+            }
+          }
+          
+          // If no match found, select "other"
+          if (provinceField.value === "") {
+            const otherOption = Array.from(options).find(opt => opt.value.toLowerCase() === "other");
+            if (otherOption) {
+              otherOption.selected = true;
+            }
+          }
+        }
+      }
+      
+      if (zipField && result.address.postcode) {
+        zipField.value = result.address.postcode;
+      }
+      
+      if (barangayField && result.address.suburb) {
+        barangayField.value = result.address.suburb;
+      }
+      
+      // Trigger shipping calculation
+      calculateShipping();
+    }
+  }
+
+  // Reverse geocoding to update address fields from coordinates
+  function reverseGeocode(lat, lng) {
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+      .then(response => response.json())
+      .then(data => {
+        updateAddressFields(data);
+      })
+      .catch(error => {
+        console.error('Reverse geocoding error:', error);
+      });
+  }
+
+  // Helper for geolocation error messages
+  function getGeolocationErrorMessage(error) {
+    switch(error.code) {
+      case error.PERMISSION_DENIED:
+        return "Location permission denied";
+      case error.POSITION_UNAVAILABLE:
+        return "Location information unavailable";
+      case error.TIMEOUT:
+        return "Location request timed out";
+      case error.UNKNOWN_ERROR:
+        return "Unknown error occurred";
+      default:
+        return "Error finding location";
+    }
+  }
+});
+
 // ImgBB upload functionality for payment proof
 function setupUploadFunctionality(uploadId, buttonId, previewId, hiddenInputId) {
   const uploadInput = document.getElementById(uploadId);

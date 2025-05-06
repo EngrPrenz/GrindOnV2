@@ -839,3 +839,64 @@ textarea.form-control {
 .modal-button:hover {
   background-color: #45a049;
 }
+
+#location-map {
+  height: 250px;
+  width: 100%;
+  border-radius: 5px;
+  margin: 15px 0;
+  border: 1px solid #ccc;
+}
+.map-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.map-pin-info {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-size: 0.9em;
+  border-left: 3px solid #000;
+}
+.use-my-location-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9em;
+}
+.use-my-location-btn:hover {
+  background-color: #0069d9;
+}
+.location-confirmed {
+  color: #28a745;
+  font-weight: bold;
+  display: none;
+  margin-top: 5px;
+}
+.search-location-input {
+  display: flex;
+  margin-bottom: 10px;
+}
+#search-location {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  border-radius: 5px 0 0 5px;
+  padding: 6px 12px;
+}
+#search-location-btn {
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 0 5px 5px 0;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
