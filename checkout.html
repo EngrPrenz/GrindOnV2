@@ -26,6 +26,9 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+
   <!-- Custom styles for this template -->
   <link href="homepage.css" rel="stylesheet" />
   <!-- responsive style -->
@@ -33,8 +36,8 @@
   <!-- checkout style -->
   <link href="checkout.css" rel="stylesheet" />
   <link rel="stylesheet" href="homepage_transition.css">
+  
 
- 
 </head>
 
 <body>
@@ -88,8 +91,6 @@
   </div>
   <!-- end hero area -->
 
-<!-- In your checkout.html file, find and replace the checkout form structure with this: -->
-
 <div class="checkout-container">
   <!-- Checkout Form -->
   <div id="checkout-form-container">
@@ -125,6 +126,38 @@
           <input type="tel" id="phone" class="form-control" required>
           <div class="error-message" id="phone-error">Please enter a valid phone number</div>
         </div>
+
+        <!-- Location Map Section -->
+        <div class="form-group">
+          <label>Pin Your Delivery Location *</label>
+          
+          <div class="search-location-input">
+            <input type="text" id="search-location" placeholder="Search for your address...">
+            <button type="button" id="search-location-btn">
+              <i class="fa fa-search"></i>
+            </button>
+          </div>
+          
+          <div class="map-controls">
+            <button type="button" class="use-my-location-btn" id="use-my-location">
+              <i class="fa fa-location-arrow"></i> Use My Current Location
+            </button>
+            <span id="location-status"></span>
+          </div>
+          
+          <div id="location-map"></div>
+          
+          <div class="map-pin-info">
+            <p><i class="fa fa-info-circle"></i> Drag the marker to pinpoint your exact delivery location.</p>
+            <div id="location-confirmed" class="location-confirmed">
+              <i class="fa fa-check-circle"></i> Location confirmed!
+            </div>
+          </div>
+          
+          <!-- Hidden fields to store coordinates -->
+          <input type="hidden" id="latitude" name="latitude">
+          <input type="hidden" id="longitude" name="longitude">
+        </div>
         
         <div class="form-group">
           <label for="address">Street Address *</label>
@@ -155,21 +188,68 @@
           </div>
         </div>
         
-        <div class="form-group">
-          <label for="province">Province *</label>
-          <select id="province" class="form-control" required>
-            <option value="">Select Province</option>
-            <option value="metro-manila">Metro Manila</option>
-            <option value="cavite">Cavite</option>
-            <option value="laguna">Laguna</option>
-            <option value="batangas">Batangas</option>
-            <option value="rizal">Rizal</option>
-            <option value="bulacan">Bulacan</option>
-            <option value="pampanga">Pampanga</option>
-            <option value="other">Other</option>
-          </select>
-          <div class="error-message" id="province-error">Province is required</div>
-        </div>
+        <!-- Replace the existing province dropdown with this updated version -->
+<div class="form-group">
+  <label for="province">Province *</label>
+  <select id="province" class="form-control" required>
+    <option value="">Select Province</option>
+    <!-- Luzon - NCR -->
+    <option value="metro-manila">Metro Manila</option>
+    
+    <!-- Luzon - CAR (Cordillera Administrative Region) -->
+    <option value="abra">Abra</option>
+    <option value="apayao">Apayao</option>
+    <option value="benguet">Benguet</option>
+    <option value="ifugao">Ifugao</option>
+    <option value="kalinga">Kalinga</option>
+    <option value="mountain-province">Mountain Province</option>
+    
+    <!-- Luzon - Ilocos Region (Region I) -->
+    <option value="ilocos-norte">Ilocos Norte</option>
+    <option value="ilocos-sur">Ilocos Sur</option>
+    <option value="la-union">La Union</option>
+    <option value="pangasinan">Pangasinan</option>
+    
+    <!-- Luzon - Cagayan Valley (Region II) -->
+    <option value="batanes">Batanes</option>
+    <option value="cagayan">Cagayan</option>
+    <option value="isabela">Isabela</option>
+    <option value="nueva-vizcaya">Nueva Vizcaya</option>
+    <option value="quirino">Quirino</option>
+    
+    <!-- Luzon - Central Luzon (Region III) -->
+    <option value="aurora">Aurora</option>
+    <option value="bataan">Bataan</option>
+    <option value="bulacan">Bulacan</option>
+    <option value="nueva-ecija">Nueva Ecija</option>
+    <option value="pampanga">Pampanga</option>
+    <option value="tarlac">Tarlac</option>
+    <option value="zambales">Zambales</option>
+    
+    <!-- Luzon - CALABARZON (Region IV-A) -->
+    <option value="batangas">Batangas</option>
+    <option value="cavite">Cavite</option>
+    <option value="laguna">Laguna</option>
+    <option value="quezon">Quezon</option>
+    <option value="rizal">Rizal</option>
+    
+    <!-- Luzon - MIMAROPA (Region IV-B) -->
+    <option value="marinduque">Marinduque</option>
+    <option value="occidental-mindoro">Occidental Mindoro</option>
+    <option value="oriental-mindoro">Oriental Mindoro</option>
+    <option value="palawan">Palawan</option>
+    <option value="romblon">Romblon</option>
+    
+    <!-- Luzon - Bicol Region (Region V) -->
+    <option value="albay">Albay</option>
+    <option value="camarines-norte">Camarines Norte</option>
+    <option value="camarines-sur">Camarines Sur</option>
+    <option value="catanduanes">Catanduanes</option>
+    <option value="masbate">Masbate</option>
+    <option value="sorsogon">Sorsogon</option>
+  </select>
+  <div class="error-message" id="province-error">Province is required</div>
+</div>
         
         <div class="form-group">
           <label>Special Instructions (Optional)</label>
@@ -350,15 +430,6 @@
       </div>
     </div>
   </section>
-
-  <div id="modal-container" class="modal-container" style="display: none;">
-    <div class="modal-content">
-      <span class="modal-close">&times;</span>
-      <div class="modal-icon"></div>
-      <div id="modal-message"></div>
-      <button id="modal-ok-btn" class="modal-button">OK</button>
-    </div>
-  </div>
   <!-- end checkout section -->
 
   <!-- footer section -->
@@ -435,6 +506,10 @@
 
   <!-- Bootstrap JS -->
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <!-- Leaflet JS for Map -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  
   <script src="js/jquery-3.4.1.min.js"></script>
   <script src="js/bootstrap.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
@@ -526,7 +601,7 @@
    <script src="distance-shipping-calculator.js"></script>
    <script>
     window.BACKEND_GEO_URL = "https://us-central1-YOUR-PROJECT.cloudfunctions.net/geocodeAddress";
-  </script>
+   </script>
   
    <!-- <script type="module" src="homepage_transition.js"></script> -->
 </body>
