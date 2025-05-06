@@ -158,7 +158,7 @@ function handleLogout() {
   }).catch((error) => {
     // An error happened
     console.error("Error signing out:", error);
-    alert("Error signing out: " + error.message);
+    openModal("Error signing out: " + error.message);
   });
 }
 
@@ -500,7 +500,6 @@ document.getElementById('uploadToImgBB').addEventListener('click', async () => {
   const files = fileInput.files;
   
   if (!files.length) {
-    // Show modal instead of alert
     openImgbbModal('Please select image(s) first.');
     return;
   }
@@ -592,7 +591,7 @@ editProductForm.addEventListener('submit', async (e) => {
   
   // Validate form
   if (!name || isNaN(price) || price <= 0) {
-    alert('⚠️ Please fill all required fields correctly.');
+    openModal('⚠️ Please fill all required fields correctly.');
     return;
   }
   
@@ -664,7 +663,7 @@ editProductForm.addEventListener('submit', async (e) => {
     
   } catch (error) {
     console.error("Error updating product:", error);
-    alert(`❌ Error updating product: ${error.message}`);
+    openModal(`❌ Error updating product: ${error.message}`);
   } finally {
     // Restore button state
     submitBtn.innerHTML = originalBtnText;
