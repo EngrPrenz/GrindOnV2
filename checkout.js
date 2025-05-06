@@ -45,6 +45,61 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+
+function showModal(message, type = 'error') {
+  const modalContainer = document.getElementById('modal-container');
+  const modalMessage = document.getElementById('modal-message');
+  const modalIcon = document.querySelector('.modal-icon');
+  const closeBtn = document.querySelector('.modal-close');
+  const okBtn = document.getElementById('modal-ok-btn');
+  
+  if (!modalContainer || !modalMessage) {
+    // Fallback to alert if modal elements don't exist
+    alert(message);
+    return;
+  }
+  
+  // Set icon based on type
+  if (modalIcon) {
+    if (type === 'error') {
+      modalIcon.innerHTML = '<i class="fa fa-exclamation-circle" style="color: #e74c3c;"></i>';
+    } else if (type === 'warning') {
+      modalIcon.innerHTML = '<i class="fa fa-exclamation-triangle" style="color: #f39c12;"></i>';
+    } else if (type === 'success') {
+      modalIcon.innerHTML = '<i class="fa fa-check-circle" style="color: #2ecc71;"></i>';
+    } else if (type === 'info') {
+      modalIcon.innerHTML = '<i class="fa fa-info-circle" style="color: #3498db;"></i>';
+    }
+  }
+  
+  // Set message
+  modalMessage.textContent = message;
+  
+  // Show modal
+  modalContainer.style.display = 'flex';
+  
+  // Close modal on close button click
+  if (closeBtn) {
+    closeBtn.onclick = function() {
+      modalContainer.style.display = 'none';
+    };
+  }
+  
+  // Close modal on OK button click
+  if (okBtn) {
+    okBtn.onclick = function() {
+      modalContainer.style.display = 'none';
+    };
+  }
+  
+  // Close modal when clicking outside
+  window.onclick = function(event) {
+    if (event.target === modalContainer) {
+      modalContainer.style.display = 'none';
+    }
+  };
+}
+
 // Load cart and compute subtotal
 async function loadUserCart(userId) {
   try {
@@ -111,7 +166,7 @@ async function loadUserCart(userId) {
     
   } catch (err) {
     console.error("Error loading cart:", err);
-    alert("Failed to load cart. Try again.");
+    showModal("Failed to load cart. Try again.");
   }
 }
 
@@ -374,7 +429,7 @@ function setupUploadFunctionality(uploadId, buttonId, previewId, hiddenInputId) 
       const files = uploadInput.files;
       
       if (!files.length) {
-        alert('⚠️ Please select a payment proof image first.');
+        showModal('⚠️ Please select a payment proof image first.');
         return;
       }
       
@@ -434,11 +489,11 @@ function setupUploadFunctionality(uploadId, buttonId, previewId, hiddenInputId) 
           
         } else {
           console.error("Upload failed:", result);
-          alert('❌ Error uploading payment proof. Please try again.');
+          showModal('❌ Error uploading payment proof. Please try again.');
         }
       } catch (error) {
         console.error("Upload error:", error);
-        alert('❌ Error uploading payment proof. Please try again.');
+        showModal('❌ Error uploading payment proof. Please try again.');
       } finally {
         uploadButton.innerHTML = '<i class="fa fa-upload"></i> Upload Receipt';
         uploadButton.disabled = false;
@@ -465,7 +520,7 @@ async function handleCheckout(event) {
   const user = auth.currentUser;
   if (!user) {
     console.log("No authenticated user found");
-    alert("Please log in to complete your order.");
+    showModal("Please log in to complete your order.");
     window.location.href = 'login.html?redirect=checkout.html';
     return;
   }
@@ -635,7 +690,7 @@ async function handleCheckout(event) {
       loadingElem.style.display = 'none';
     }
     
-    alert("There was an error processing your order. Please try again.");
+    showModal("There was an error processing your order. Please try again.");
     if (submitButton) {
       submitButton.disabled = false;
       submitButton.textContent = 'Place Order';

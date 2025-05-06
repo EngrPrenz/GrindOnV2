@@ -99,7 +99,7 @@ function handleLogout() {
     // An error happened
     logDebug("Error signing out:", error);
     console.error("Error signing out:", error);
-    alert("Error signing out: " + error.message);
+    openModal("Error signing out: " + error.message);
   });
 }
 
@@ -149,7 +149,7 @@ function checkAuth() {
         hideLoading();
       } else {
         logDebug('User email not in admin list', user.email);
-        alert("Access denied: You do not have admin privileges");
+        openModal("Access denied: You do not have admin privileges");
         auth.signOut().then(() => {
           window.location.href = "admin_login.html";
         });
@@ -553,7 +553,7 @@ function confirmDeleteProduct(productId, productName) {
   const modal = document.getElementById('deleteModal');
   if (!modal) {
     logDebug('Delete modal not found in the document');
-    alert('Could not open delete dialog');
+    openModal('Could not open delete dialog');
     return;
   }
   
@@ -708,7 +708,6 @@ function closeSuccessModal(modal) {
   }, 300);
 }
 
-// Modify the deleteProduct function to use success modal instead of alert
 // Replace your current deleteProduct function with this one
 async function deleteProduct(productId) {
   logDebug('Deleting product', productId);
@@ -736,12 +735,11 @@ async function deleteProduct(productId) {
     renderPagination();
     hideLoading();
     
-    // Show success message with modal instead of alert
     showSuccessModal('Product deleted successfully');
   } catch (error) {
     logDebug('Error deleting product', error);
     console.error("Error deleting product:", error);
-    alert('Error deleting product: ' + error.message);
+    openModal('Error deleting product: ' + error.message);
     hideLoading();
   }
 }
