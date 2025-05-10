@@ -14,7 +14,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import {
   getAuth,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 // Firebase config
@@ -40,6 +41,64 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     loadUserCart(user.uid);
     loadUserDetails(user.uid);
+    
+    // Get reference to the user option div in navbar
+    const userOptionDiv = document.querySelector('.user_option');
+    if (userOptionDiv) {
+      const userDocRef = doc(db, "users", user.uid);
+
+      getDoc(userDocRef).then((docSnap) => {
+        let displayName = "User";
+        if (docSnap.exists() && docSnap.data().username) {
+          displayName = docSnap.data().username;
+        }
+
+        userOptionDiv.innerHTML = `
+          <a href="cart.html">
+            <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+          </a>      
+        
+          <span style="color: white; margin-right: 10px;">Hi, <strong>${displayName}</strong></span>
+          <a href="#" id="logoutBtn">
+            <i class="fa fa-sign-out" aria-hidden="true"></i>
+            <span style="color: white;">Logout</span>
+          </a>
+        `;
+
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+          e.preventDefault();
+          signOut(auth).then(() => {
+            location.reload();
+          }).catch((error) => {
+            showModal("Logout failed: " + error.message);
+          });
+        });
+
+      }).catch((error) => {
+        console.error("Failed to fetch username:", error);
+        // fallback to email if username is unavailable
+        const fallbackName = user.email.substring(0, 4) + "...";
+        userOptionDiv.innerHTML = `
+          <a href="cart.html">
+            <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+          </a>
+          <span style="color: white; margin-right: 10px;">Hi, ${fallbackName}</span>
+          <a href="#" id="logoutBtn">
+            <i class="fa fa-sign-out" aria-hidden="true"></i>
+            <span style="color: white;">Logout</span>
+          </a>
+        `;
+
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+          e.preventDefault();
+          signOut(auth).then(() => {
+            location.reload();
+          }).catch((error) => {
+            showModal("Logout failed: " + error.message);
+          });
+        });
+      });
+    }
   } else {
     window.location.href = 'login.html?redirect=checkout.html';
   }
