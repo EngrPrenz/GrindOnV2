@@ -53,6 +53,35 @@
     color: #cccccc;
   }
 
+  .password-input-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .password-input-wrapper input {
+    width: 100%;
+    padding-right: 40px;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    width: auto;
+    margin: 0;
+  }
+
+  .toggle-password:hover {
+    color: #999;
+    background: none;
+  }
+
   input[type="text"],
   input[type="password"] {
     width: 100%;
