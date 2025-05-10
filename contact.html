@@ -32,73 +32,61 @@
   <!-- responsive style -->
   <link href="responsive.css" rel="stylesheet" />
   <link rel="stylesheet" href="homepage_transition.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 
 <body>
     <div class="hero_area">
-      <!-- Header section starts -->
-          <!-- header section starts -->
-          <header class="header_section">
-              <nav class="navbar navbar-expand-lg custom_nav-container">
-                <!-- Logo Section -->
-                <a class="navbar-brand" href="homepage.html">
-                  <img src="images/Wordmark Black.png" style="height: 50px; width: auto; object-fit: contain;">
-                </a>
-        
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                  <span class=""></span>
-                </button>
-        
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                  <ul class="navbar-nav">
-                    <li class="nav-item">
-                      <a class="nav-link" href="homepage.html">Home <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="shop.html">Shop</a>
-                    </li>
-                    <li class="nav-item active">
-                      <a class="nav-link" href="contact.html">Contact Us</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="my_orders.html">My orders</a>
-                    </li>
-                  </ul>
-        
-                  <div class="user_option">
-                    <!-- Cart icon -->
-                    <a href="cart.html">
-                      <i class="fa fa-shopping-cart" aria-hidden="true"></i>
-                    </a>
-        
-                  <div class="user_option">
-                    <!-- Login/Register links (replace with logout when logged in) -->
-                    <a href="login.html">
-                      <i class="fa fa-user" aria-hidden="true"></i>
-                      <span style="color: white;">Login</span>
-                    </a>
-                    <a href="register.html">
-                      <i class="fa fa-vcard" aria-hidden="true"></i>
-                      <span style="color: white;">Register</span>
-                    </a>
-                    
-                    <!-- Shopping cart (visible when logged in) -->
-                    <!-- <a href="mycart.html">
-                      <i class="fa fa-shopping-bag" aria-hidden="true"></i>
-                      <span style="color: white;">0</span>
-                    </a>
-                    <form style="padding: 15px" method="POST" action="logout.html">
-                      <input class="logout-btn" type="submit" value="Logout">
-                    </form> -->
-                  </div>
-                </div>
-              </nav>
-            </header>
-            <!-- end header section -->
-      <!-- Header section ends -->
+      <!-- Logo above the navbar -->
+      <div class="navbar-top-logo text-center py-2">
+        <a href="homepage.html">
+          <img src="images/Wordmark Black.png" alt="Logo" class="top-logo-img">
+        </a>
+      </div>
   
-      <!-- Slider section -->
-      <!-- Add your slider content here if needed -->
+      <!-- header section starts -->
+      <header class="header_section">
+        <nav class="navbar navbar-expand-lg custom_nav-container">
+          
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class=""></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="homepage.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="shop.html">Shop</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="contact.html">Contact Us</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="my_orders.html">My orders</a>
+              </li>
+            </ul>
+
+            <div class="user_option">
+              <!-- Cart icon -->
+              <a href="cart.html">
+                <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+              </a>
+              <!-- Login/Register links (replace with logout when logged in) -->
+              <a href="login.html">
+                <i class="fa fa-user" aria-hidden="true"></i>
+                <span style="color: white;">Login</span>
+              </a>
+              <a href="register.html">
+                <i class="fa fa-vcard" aria-hidden="true"></i>
+                <span style="color: white;">Register</span>
+              </a>
+            </div>
+          </div>
+        </nav>
+      </header>
+      <!-- end header section -->
     </div>
     <!-- End hero area -->
 
@@ -126,7 +114,6 @@
     
             <!-- Form Section -->
             <form action="{{ route('contact.submit') }}" method="POST">
-              
               <div>
                 <input type="text" name="name" placeholder="Name" required />
               </div>
@@ -223,6 +210,9 @@
   <script src="js/bootstrap.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
   <script src="js/custom.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
     // Set the current year for the footer
     document.getElementById("displayYear").innerHTML = new Date().getFullYear();
