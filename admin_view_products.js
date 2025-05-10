@@ -768,5 +768,29 @@ function debounce(func, delay) {
   };
 }
 
+// Theme toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const themeToggle = document.getElementById('themeToggle');
+  const body = document.body;
+  
+  // Check if user previously set a theme preference
+  const currentTheme = localStorage.getItem('theme');
+  if (currentTheme === 'dark') {
+    body.classList.add('dark-mode');
+    themeToggle.checked = true;
+  }
+  
+  // Theme toggle event listener
+  themeToggle.addEventListener('change', function() {
+    if (this.checked) {
+      body.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+    }
+  });
+});
+
 // Log initial script load
 logDebug('admin_view_products.js loaded');
