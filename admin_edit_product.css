@@ -260,6 +260,7 @@
   z-index: 1001;
   opacity: 0;
   transform: translateY(-20px);
+  margin: auto;
 }
 
 .modal-animate {
@@ -316,6 +317,12 @@
   margin-bottom: 20px;
   color: #4b5563;
   line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  width: 100%;
 }
 
 .modal-content .product-name {
@@ -424,44 +431,66 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   margin: 10px 0;
-  padding: 10px;
+  padding: 20px;
   border-radius: 6px;
   animation: fadeIn 0.3s forwards;
+  width: 100%;
+  text-align: center;
+}
+
+.upload-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  margin-left: 20px;
 }
 
 .upload-success {
   background-color: rgba(16, 185, 129, 0.1);
 }
 
-.upload-error {
-  background-color: rgba(239, 68, 68, 0.1);
+.upload-success i, .upload-error i {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
 }
 
 .upload-success i {
   color: #10b981;
-  font-size: 2rem;
-  margin-bottom: 10px;
 }
 
 .upload-error i {
   color: #ef4444;
-  font-size: 2rem;
-  margin-bottom: 10px;
 }
 
 .upload-success p, .upload-error p {
   margin: 0;
-  text-align: center;
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 80%;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.upload-error p {
+  color: #ef4444;
+}
+
+.upload-success p {
+  color: #10b981;
+}
+
+.dark-mode .upload-error {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+.dark-mode .upload-success {
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
+.dark-mode .upload-error p {
+  color: #fca5a5;
+}
+
+.dark-mode .upload-success p {
+  color: #6ee7b7;
 }
 
 /* Dark mode adjustments */
@@ -471,14 +500,6 @@
 
 .dark-mode .upload-status {
   color: #9ca3af;
-}
-
-.dark-mode .upload-success {
-  background-color: rgba(16, 185, 129, 0.2);
-}
-
-.dark-mode .upload-error {
-  background-color: rgba(239, 68, 68, 0.2);
 }
 
 /* Base styles remain the same */
@@ -508,11 +529,34 @@
   }
   
   .modal {
-    max-width: 700px;
+    max-width: 600px;
+    padding: 30px;
+  }
+  
+  .modal-content {
+    min-height: 200px;
+  }
+  
+  .upload-success, .upload-error {
+    padding: 30px;
+  }
+  
+  .upload-success i, .upload-error i {
+    font-size: 3rem;
+    margin-bottom: 20px;
+  }
+  
+  .upload-success p, .upload-error p {
+    font-size: 1.1rem;
+    max-width: 70%;
   }
   
   .variation-row {
     padding: 20px;
+  }
+  
+  .upload-error {
+    margin-left: 30px;
   }
 }
 
@@ -793,4 +837,120 @@
   .current-images {
     justify-content: flex-start;
   }
+}
+
+#imgbbModal {
+  display: none;
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 25px;
+  z-index: 1001;
+  opacity: 0;
+  transform: translateY(-20px);
+  margin: auto;
+}
+
+#imgbbModal .modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+  text-align: center;
+  padding: 0;
+}
+
+#imgbbModal .upload-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 30px;
+  border-radius: 6px;
+  animation: fadeIn 0.3s forwards;
+  width: 100%;
+  text-align: center;
+  background-color: rgba(239, 68, 68, 0.1);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#imgbbModal .upload-error i {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  color: #ef4444;
+}
+
+#imgbbModal .upload-error p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 80%;
+  color: #ef4444;
+}
+
+/* Success Modal Styles */
+#successModal {
+  display: none;
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 25px;
+  z-index: 1001;
+  opacity: 0;
+  transform: translateY(-20px);
+  margin: auto;
+}
+
+#successModal .modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+  text-align: center;
+  padding: 0;
+  position: relative;
+  gap: 15px;
+}
+
+#successModal .modal-content p {
+  position: relative;
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 80%;
+  color: #4b5563;
+  padding: 0 20px;
+}
+
+#successModal .modal-content p:first-child {
+  margin-bottom: 10px;
+}
+
+#successModal .modal-content .product-name {
+  font-weight: 600;
+  color: #111827;
+  display: inline-block;
+  margin: 0 5px;
+}
+
+.dark-mode #successModal .modal-content p {
+  color: #d1d5db;
+}
+
+.dark-mode #successModal .modal-content .product-name {
+  color: #f3f4f6;
 }

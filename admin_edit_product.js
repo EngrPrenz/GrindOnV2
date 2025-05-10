@@ -237,6 +237,15 @@ function renderCurrentImages() {
       // Add event listener for remove button
       imageContainer.querySelector('.image-remove').addEventListener('click', (e) => {
         const urlToRemove = e.currentTarget.getAttribute('data-url');
+        
+        // Check if this is the last remaining image
+        const remainingImages = originalImageUrls.filter(url => !imagesToDelete.includes(url));
+        if (remainingImages.length <= 1) {
+          // Show error modal
+          openImgbbModal('Cannot delete the last remaining image. Products must have at least one image.', true);
+          return;
+        }
+        
         imagesToDelete.push(urlToRemove);
         renderCurrentImages(); // Re-render to reflect removal
       });

@@ -13,22 +13,24 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
     color: #fff;
+    padding: 20px;
 }
 
 .login-container {
     background-color: #1a1a1a;
     border: 1px solid #333;
-    padding: 32px;
-    width: 320px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.4);
     text-align: center;
 }
 
 .logo {
-    width: 160px;
+    width: 140px;
     max-width: 100%;
     margin-bottom: 20px;
     display: block;
@@ -38,7 +40,7 @@ body {
 
 .login-container h2 {
     font-weight: 600;
-    font-size: 22px;
+    font-size: 20px;
     margin-bottom: 24px;
     color: #f0f0f0;
     letter-spacing: 1px;
@@ -56,7 +58,7 @@ label {
 input[type="text"],
 input[type="password"] {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border-radius: 8px;
     background-color: #111;
     border: 1px solid #444;
@@ -154,4 +156,106 @@ button:hover {
 
 .toggle-password:hover {
     background-color: transparent;
+}
+
+/* Media Queries for Responsive Design */
+/* Mobile S (320px and up) */
+@media screen and (min-width: 320px) {
+    .login-container {
+        padding: 20px;
+    }
+    
+    .logo {
+        width: 120px;
+    }
+    
+    .login-container h2 {
+        font-size: 18px;
+    }
+}
+
+/* Mobile M (375px and up) */
+@media screen and (min-width: 375px) {
+    .login-container {
+        padding: 24px;
+    }
+    
+    .logo {
+        width: 130px;
+    }
+}
+
+/* Mobile L (425px and up) */
+@media screen and (min-width: 425px) {
+    .login-container {
+        padding: 28px;
+    }
+    
+    .logo {
+        width: 140px;
+    }
+}
+
+/* Tablet (768px and up) */
+@media screen and (min-width: 768px) {
+    .login-container {
+        padding: 32px;
+        max-width: 450px;
+    }
+    
+    .logo {
+        width: 160px;
+    }
+    
+    .login-container h2 {
+        font-size: 22px;
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+        padding: 14px;
+        font-size: 15px;
+    }
+    
+    button {
+        padding: 14px;
+        font-size: 16px;
+    }
+}
+
+/* Laptop (1024px and up) */
+@media screen and (min-width: 1024px) {
+    .login-container {
+        max-width: 480px;
+    }
+    
+    .logo {
+        width: 180px;
+    }
+}
+
+/* Laptop L (1440px and up) */
+@media screen and (min-width: 1440px) {
+    .login-container {
+        max-width: 500px;
+    }
+    
+    .logo {
+        width: 200px;
+    }
+    
+    .login-container h2 {
+        font-size: 24px;
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+        padding: 16px;
+        font-size: 16px;
+    }
+    
+    button {
+        padding: 16px;
+        font-size: 17px;
+    }
 }

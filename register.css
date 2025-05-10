@@ -11,16 +11,14 @@ body, html {
 
 .container {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
+  flex-direction: column;
 }
 
 .left-side {
-  flex: 1;
+  display: none; /* Hide on mobile by default */
   background: url('images/Banner Logo.jpg') center center/cover no-repeat;
   color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: 40px;
 }
 
@@ -33,7 +31,7 @@ body, html {
 .right-side {
   flex: 1;
   background-color: #fff;
-  padding: 60px 40px;
+  padding: 30px 20px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -63,8 +61,8 @@ body, html {
 }
 
 .form-wrapper h2 {
-  font-size: 24px;
-  margin-bottom: 24px;
+  font-size: 22px;
+  margin-bottom: 16px;
   color: #24292f;
 }
 
@@ -96,9 +94,9 @@ input {
 button {
   width: 100%;
   padding: 12px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
-  background-color:  #2e2e2e;
+  background-color: #2e2e2e;
   color: white;
   border: none;
   border-radius: 6px;
@@ -113,7 +111,7 @@ button:hover {
 .validation-message {
   font-size: 12px;
   margin-top: 4px;
-  color: red; /* Default color for invalid messages */
+  color: red;
 }
 
 .password-container {
@@ -124,7 +122,7 @@ button:hover {
 
 .password-container input {
   flex: 1;
-  padding-right: 30px; /* Add space for the toggle icon */
+  padding-right: 30px;
 }
 
 .password-toggle-icon {
@@ -148,9 +146,9 @@ button:hover {
   padding: 12px;
   font-size: 14px;
   font-weight: 600;
-  color: #757575; /* Google gray text */
-  background-color: #ffffff; /* White background */
-  border: 1px solid #ddd; /* Light gray border */
+  color: #757575;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
@@ -164,183 +162,296 @@ button:hover {
 }
 
 #google-signup:hover {
-  background-color: #f7f7f7; /* Slightly darker background on hover */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  background-color: #f7f7f7;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #google-signup:active {
-  background-color: #eeeeee; /* Even darker background on click */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Slightly deeper shadow */
+  background-color: #eeeeee;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Add these styles to your existing register.css file */
-
 .input-group {
-margin-bottom: 10px;
-position: relative;
-width: 100%;
-display: flex;
-flex-direction: column;
+  margin-bottom: 10px;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .verification-message {
-font-size: 0.85rem;
-margin-top: 4px;
-transition: all 0.3s ease;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  transition: all 0.3s ease;
 }
 
 .verification-message.valid {
-color: #4CAF50;
+  color: #4CAF50;
 }
 
 .verification-message.invalid {
-color: #F44336;
+  color: #F44336;
 }
 
-/* Remove the wrapper for cleaner positioning */
 .password-input-wrapper {
-position: relative;
-width: 100%;
-display: flex;
-align-items: center;
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
 }
 
-/* Position the toggle button directly on the input */
 .toggle-password {
-position: absolute;
-right: 10px;
-top: 35%;
-transform: translateY(-50%);
-background: transparent;
-border: none;
-cursor: pointer;
-color: #777;
-padding: 0;
-margin: 0;
-height: 20px;
-width: 20px;
-display: flex;
-align-items: center;
-justify-content: center;
-z-index: 10;
-pointer-events: auto;
+  position: absolute;
+  right: 10px;
+  top: 35%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #777;
+  padding: 0;
+  margin: 0;
+  height: 20px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: auto;
 }
 
 .toggle-password:hover {
-color: #333;
+  color: #333;
 }
 
 .toggle-password:focus {
-outline: none;
+  outline: none;
 }
 
-/* Ensure inputs have consistent styling */
 input[type="password"],
 input[type="text"] {
-width: 100%;
-padding-right: 35px; /* Make room for the icon */
-box-sizing: border-box;
-}
-
-/* Make the help text follow the same pattern for all fields */
-.help-text {
-font-size: 0.85rem;
-color: #777;
-margin-top: 4px;
-}
-
-/* Ensure consistent spacing between form elements */
-label {
-display: block;
-margin-bottom: 5px;
+  width: 100%;
+  padding-right: 35px;
+  box-sizing: border-box;
 }
 
 /* Modal Styles */
 .modal {
-display: none;
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background-color: rgba(0, 0, 0, 0.5);
-z-index: 1000;
-justify-content: center;
-align-items: center;
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal.visible {
-display: flex;
+  display: flex;
 }
 
 .modal-content {
-background-color: white;
-padding: 25px;
-border-radius: 8px;
-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-min-width: 300px;
-max-width: 90%;
-position: relative;
-animation: modalFadeIn 0.3s ease-out;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  animation: modalFadeIn 0.3s ease-out;
 }
 
 @keyframes modalFadeIn {
-from {
-  opacity: 0;
-  transform: translateY(-20px);
-}
-to {
-  opacity: 1;
-  transform: translateY(0);
-}
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .close-modal {
-position: absolute;
-top: 15px;
-right: 15px;
-font-size: 24px;
-cursor: pointer;
-color: #aaa;
-line-height: 1;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #aaa;
+  line-height: 1;
 }
 
 .close-modal:hover {
-color: #555;
+  color: #555;
 }
 
 #modal-title {
-margin-top: 0;
-margin-bottom: 15px;
-font-size: 18px;
-color: #24292f;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #24292f;
 }
 
 #modal-message {
-margin-bottom: 20px;
-color: #444;
-line-height: 1.5;
+  margin-bottom: 20px;
+  color: #444;
+  line-height: 1.5;
 }
 
-/* Fix modal button styling */
 .modal-actions {
-display: flex;
-justify-content: flex-end;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .modal-button {
-padding: 8px 16px;
-background-color: #2e2e2e;
-color: white;
-border: none;
-border-radius: 4px;
-cursor: pointer;
-font-size: 14px;
-font-weight: 500;
-min-width: 80px;
-width: auto;
+  padding: 8px 16px;
+  background-color: #2e2e2e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 80px;
+  width: auto;
 }
 
 .modal-button:hover {
-background-color: #3a3a3a;
+  background-color: #3a3a3a;
+}
+
+/* Email Verification Page Specific Styles */
+.verification-container {
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.verification-icon {
+  font-size: 48px;
+  color: #2e2e2e;
+  margin-bottom: 20px;
+}
+
+.verification-title {
+  font-size: 22px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.verification-text {
+  margin-bottom: 24px;
+  line-height: 1.5;
+  color: #555;
+  font-size: 14px;
+}
+
+.verification-timer {
+  margin: 24px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#resend-email {
+  background-color: transparent;
+  color: #2e2e2e;
+  border: 1px solid #2e2e2e;
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: auto;
+  display: inline-block;
+}
+
+#resend-email:hover {
+  background-color: #f5f5f5;
+}
+
+/* Media Queries */
+/* Tablet (768px and up) */
+@media screen and (min-width: 768px) {
+  .container {
+    flex-direction: row;
+  }
+
+  .left-side {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .right-side {
+    flex: 1;
+    padding: 40px;
+  }
+
+  .form-wrapper h2 {
+    font-size: 24px;
+  }
+
+  .verification-container {
+    padding: 40px;
+  }
+
+  .verification-icon {
+    font-size: 64px;
+  }
+
+  .verification-title {
+    font-size: 24px;
+  }
+
+  .verification-text {
+    font-size: 16px;
+  }
+}
+
+/* Laptop (1024px and up) */
+@media screen and (min-width: 1024px) {
+  .right-side {
+    padding: 60px 40px;
+  }
+
+  .form-wrapper {
+    max-width: 450px;
+  }
+
+  input {
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  button {
+    padding: 14px;
+    font-size: 16px;
+  }
+}
+
+/* Laptop L (1440px and up) */
+@media screen and (min-width: 1440px) {
+  .form-wrapper {
+    max-width: 500px;
+  }
+
+  .form-wrapper h2 {
+    font-size: 28px;
+  }
+
+  input {
+    padding: 14px;
+    font-size: 16px;
+  }
+
+  button {
+    padding: 16px;
+    font-size: 17px;
+  }
 }
