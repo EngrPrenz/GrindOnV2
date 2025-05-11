@@ -1,3 +1,48 @@
+/* Base table styles */
+#ordersTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  /* Using auto layout instead of fixed to better handle action buttons */
+  table-layout: auto;
+}
+
+#ordersTable th, #ordersTable td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  word-wrap: break-word; /* Prevents text overflow */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Show ellipsis for overflowing text */
+}
+
+#ordersTable th {
+  background-color: #f9f9f9;
+  font-weight: bold;
+  color: #555;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+#ordersTable tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Dark mode support for table */
+.dark-mode #ordersTable th {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+.dark-mode #ordersTable td {
+  border-bottom: 1px solid #4a5568;
+}
+
+.dark-mode #ordersTable tr:hover {
+  background-color: #2d3748;
+}
+
 /* Status badge styles */
 .status-badge {
   padding: 4px 10px;
@@ -31,9 +76,13 @@
   cursor: pointer;
   border: none;
   margin-right: 5px;
+  margin-bottom: 5px;
   transition: all 0.3s ease;
   letter-spacing: 0.5px;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  display: inline-block; /* Ensure buttons appear properly */
+  min-width: 80px; /* Minimum width for buttons */
+  text-align: center; /* Center text in buttons */
 }
 .ship-btn {
   background-color: #6366F1;
@@ -50,25 +99,6 @@
   background-color: #DC2626;
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
   transform: translateY(-2px);
-}
-
-/* Table styles */
-#ordersTable {
-  width: 100%;
-  border-collapse: collapse;
-}
-#ordersTable th, #ordersTable td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-}
-#ordersTable th {
-  background-color: #f9f9f9;
-  font-weight: bold;
-  color: #555;
-}
-#ordersTable tr:hover {
-  background-color: #f5f5f5;
 }
 
 .receipt-thumbnail {
@@ -373,13 +403,95 @@
   color: #F9FAFB;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 640px) {
+/* Table wrapper for horizontal scrolling on small screens */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  /* Make horizontal scrolling smoother */
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #f5f5f5;
+}
+
+/* Main container for page layout */
+.main-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem;
+  margin: 0 auto;
+}
+
+/* Card container for the table */
+.card-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dark-mode .card-container {
+  background-color: #1F2937;
+}
+
+/* Page header section */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0;
+}
+
+.dark-mode .page-title {
+  color: #F9FAFB;
+}
+
+/* Small mobile devices (portrait phones, less than 576px) */
+@media (max-width: 575.98px) {
+  /* Stack action buttons */
+  .action-btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  /* Smaller text for table cells */
+  #ordersTable th, #ordersTable td {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  
+  /* Smaller status badges */
+  .status-badge {
+    font-size: 12px;
+    min-width: 70px;
+    padding: 3px 8px;
+  }
+  
+  /* Hide less important columns */
+  .hide-xs {
+    display: none;
+  }
+  
+  /* Adjust modal content for small screens */
   .notification-modal-content,
-  .confirmation-modal-content,
-  .receipt-modal-content {
-    padding: 20px;
-    width: 85%;
+  .confirmation-modal-content {
+    padding: 15px;
+    width: 95%;
   }
   
   #notificationTitle,
@@ -392,21 +504,293 @@
     font-size: 14px;
   }
   
-  .notification-icon-container i,
-  .confirmation-icon-container i {
-    font-size: 36px;
-  }
-  
   .modal-btn {
     padding: 8px 16px;
     font-size: 14px;
+    min-width: 80px;
   }
   
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .card-container {
+    padding: 1rem;
+  }
+}
+
+/* Medium devices (tablets, 576px and up) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+  #ordersTable th, #ordersTable td {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .hide-sm {
+    display: none;
+  }
+  
+  .page-title {
+    font-size: 1.6rem;
+  }
+}
+
+/* OPTIMIZED FOR 1024px by 864px */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .main-container {
+    max-width: 99%; /* Near full width utilization */
+    padding: 0.75rem;
+  }
+  
+  #ordersTable th, #ordersTable td {
+    padding: 8px 10px; /* Reduced padding */
+    font-size: 14px; /* Smaller font */
+  }
+  
+  .card-container {
+    padding: 1rem; /* Reduced padding */
+  }
+  
+  /* Optimize column widths for better fit */
+  #ordersTable {
+    min-width: 100%;
+  }
+  
+  /* More compact action column */
+  #ordersTable th:last-child, 
+  #ordersTable td:last-child {
+    width: auto;
+    min-width: 180px; /* Reduced minimum width */
+    white-space: nowrap;
+  }
+  
+  /* Adjusted column widths for better fit */
+  #ordersTable th:nth-child(1), #ordersTable td:nth-child(1) { width: 7%; } /* Order ID */
+  #ordersTable th:nth-child(2), #ordersTable td:nth-child(2) { width: 15%; } /* Customer */
+  #ordersTable th:nth-child(3), #ordersTable td:nth-child(3) { width: 10%; } /* Date */
+  #ordersTable th:nth-child(4), #ordersTable td:nth-child(4) { width: 9%; } /* Status */
+  #ordersTable th:nth-child(5), #ordersTable td:nth-child(5) { width: 8%; } /* Total */
+  #ordersTable th:nth-child(6), #ordersTable td:nth-child(6) { width: 10%; } /* Receipt */
+  
+  /* More compact action buttons */
+  .action-btn {
+    padding: 6px 10px; /* Reduced padding */
+    font-size: 14px; /* Smaller font */
+    min-width: 75px; /* Smaller minimum width */
+    margin-right: 4px; /* Reduced spacing */
+  }
+  
+  /* More compact status badges */
+  .status-badge {
+    padding: 3px 8px;
+    font-size: 13px;
+    min-width: 70px;
+  }
+}
+
+/* OPTIMIZED FOR 1024px by 864px - Additional low height adjustments */
+@media (min-width: 768px) and (max-width: 1023.98px) and (max-height: 900px) {
+  .card-container {
+    padding: 0.75rem; /* Further reduced padding for low height */
+  }
+  
+  #ordersTable th, #ordersTable td {
+    padding: 6px 8px; /* Further reduced padding */
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .page-header {
+    margin-bottom: 1rem;
+  }
+  
+  /* Make table slightly more compact for low height screens */
+  #ordersTable {
+    margin-bottom: 1rem;
+  }
+  
+  /* Smaller receipt thumbnails */
+  .receipt-thumbnail {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* OPTIMIZED FOR 1440px by 960px */
+@media (min-width: 1024px) and (max-width: 1440px) {
+  .main-container {
+    max-width: 98%; /* Use more horizontal space */
+    padding: 0.75rem 1rem;
+  }
+  
+  #ordersTable th, #ordersTable td {
+    padding: 10px 12px; /* Optimized padding */
+    font-size: 14px;
+  }
+  
+  .card-container {
+    padding: 1.25rem;
+  }
+  
+  /* Optimize column widths for better fit */
+  #ordersTable th:nth-child(1), #ordersTable td:nth-child(1) { width: 7%; } /* Order ID */
+  #ordersTable th:nth-child(2), #ordersTable td:nth-child(2) { width: 14%; } /* Customer */
+  #ordersTable th:nth-child(3), #ordersTable td:nth-child(3) { width: 10%; } /* Date */
+  #ordersTable th:nth-child(4), #ordersTable td:nth-child(4) { width: 8%; } /* Status */
+  #ordersTable th:nth-child(5), #ordersTable td:nth-child(5) { width: 7%; } /* Total */
+  #ordersTable th:nth-child(6), #ordersTable td:nth-child(6) { width: 9%; } /* Receipt */
+  
+  /* Optimize action buttons */
+  .action-btn {
+    padding: 7px 12px;
+    font-size: 14px;
+    min-width: 80px;
+  }
+  
+  /* Ensure actions column has enough space */
+  #ordersTable th:last-child, 
+  #ordersTable td:last-child {
+    width: auto;
+    min-width: 200px;
+    white-space: nowrap;
+  }
+}
+
+/* OPTIMIZED FOR 1440px by 960px - Additional low height adjustments */
+@media (min-width: 1024px) and (max-width: 1440px) and (max-height: 960px) {
+  #ordersTable th, #ordersTable td {
+    padding: 8px 10px; /* Further reduced padding for low height */
+  }
+  
+  .page-title {
+    font-size: 1.6rem;
+  }
+  
+  /* More compact spacing overall */
+  .card-container {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Slightly more compact action buttons for low height */
   .action-btn {
     padding: 6px 10px;
-    font-size: 14px;
-    display: block;
-    width: 100%;
-    margin-bottom: 5px;
+  }
+}
+
+/* Exactly 1440px screens - fine tuning */
+@media (width: 1440px) {
+  .main-container {
+    max-width: 96%; /* Slightly more margin for exactly 1440px */
+  }
+  
+  #ordersTable th, #ordersTable td {
+    padding: 10px 12px;
+  }
+  
+  /* Slightly larger buttons on exactly 1440px */
+  .action-btn {
+    padding: 8px 14px;
+  }
+}
+
+/* Exactly 1024px screens - fine tuning */
+@media (width: 1024px) {
+  .main-container {
+    max-width: 99%; /* Maximize available space */
+  }
+  
+  #ordersTable th, #ordersTable td {
+    padding: 8px 10px;
+    font-size: 13.5px; /* Slightly smaller font */
+  }
+  
+  /* Make action buttons more compact */
+  .action-btn {
+    padding: 6px 10px;
+    font-size: 13.5px;
+    min-width: 75px;
+    margin-right: 3px;
+    margin-bottom: 3px;
+  }
+  
+  /* More compact status badges */
+  .status-badge {
+    min-width: 65px;
+    padding: 3px 6px;
+    font-size: 13px;
+  }
+}
+
+/* Large desktop devices (1680px and up) */
+@media (min-width: 1680px) {
+  .main-container {
+    max-width: 85%;
+  }
+  
+  #ordersTable th, #ordersTable td {
+    padding: 18px 24px;
+    font-size: 16px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .card-container {
+    padding: 2rem;
+  }
+  
+  /* Larger buttons for large screens */
+  .action-btn {
+    padding: 10px 18px;
+    font-size: 16px;
+  }
+  
+  /* Optimize column widths for larger screens */
+  #ordersTable th:nth-child(1), #ordersTable td:nth-child(1) { width: 7%; } /* Order ID */
+  #ordersTable th:nth-child(2), #ordersTable td:nth-child(2) { width: 13%; } /* Customer */
+  #ordersTable th:nth-child(3), #ordersTable td:nth-child(3) { width: 10%; } /* Date */
+  #ordersTable th:nth-child(4), #ordersTable td:nth-child(4) { width: 10%; } /* Status */
+  #ordersTable th:nth-child(5), #ordersTable td:nth-child(5) { width: 10%; } /* Total */
+  #ordersTable th:nth-child(6), #ordersTable td:nth-child(6) { width: 10%; } /* Receipt */
+  
+  /* Wider actions column for larger screens */
+  #ordersTable th:last-child, 
+  #ordersTable td:last-child {
+    width: auto;
+    min-width: 280px; /* Even more space for buttons on large screens */
+    white-space: nowrap;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    font-size: 12pt;
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+  
+  #ordersTable th, #ordersTable td {
+    padding: 8pt 10pt;
+    border-bottom: 1pt solid #ddd;
+  }
+  
+  .status-badge {
+    border: 1pt solid #000;
+    padding: 2pt 6pt;
+  }
+  
+  .card-container {
+    box-shadow: none;
+    padding: 0;
   }
 }
