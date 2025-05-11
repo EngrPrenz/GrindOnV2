@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import {
   getFirestore,
   collection,
@@ -7,9 +7,10 @@ import {
   getDocs,
   updateDoc,
   doc,
+  getDoc,
   Timestamp
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { checkAdminAuth, initAdminName } from "./admin_auth.js";
 
 // Firebase configuration
@@ -49,6 +50,9 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Set up notification modal functionality
     setupNotificationModal();
     
+    // Set up filter buttons
+    setupFilterButtons();
+    
     // Add loading state to the table before fetching messages
     showTableLoadingState();
     
@@ -59,6 +63,25 @@ document.addEventListener("DOMContentLoaded", async function() {
     showNotification("Error", "Failed to initialize page: " + error.message, "error");
   }
 });
+
+// Set up filter buttons
+function setupFilterButtons() {
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  
+  filterButtons.forEach(button => {
+    button.addEventListener('click', async () => {
+      // Set active class
+      document.querySelector('.filter-btn.active').classList.remove('active');
+      button.classList.add('active');
+      
+      // Add loading state
+      showTableLoadingState();
+      
+      // Fetch messages with filter
+      await fetchMessages(button.dataset.filter);
+    });
+  });
+}
 
 // Show loading state for the table
 function showTableLoadingState() {
@@ -237,12 +260,12 @@ function formatDate(timestamp) {
 }
 
 // Fetch messages from Firestore
-async function fetchMessages() {
+async function fetchMessages(filter = 'all') {
   const messagesTableBody = document.querySelector("#messagesTable tbody");
   
   try {
     const messagesRef = collection(db, "messages");
-    const q = query(messagesRef, orderBy("timestamp", "desc"));
+    let q = query(messagesRef, orderBy("timestamp", "desc"));
     const querySnapshot = await getDocs(q);
     
     // Create new table content with a hidden class
@@ -257,30 +280,46 @@ async function fetchMessages() {
         </tr>
       `;
     } else {
+      let hasMessages = false;
+      
       querySnapshot.forEach((doc) => {
         const message = doc.data();
-        const row = `
+        
+        // Apply filter
+        if (filter === 'all' || message.status === filter) {
+          hasMessages = true;
+          const row = `
+            <tr>
+              <td>${formatDate(message.timestamp)}</td>
+              <td>${message.name || 'N/A'}</td>
+              <td>${message.email || 'N/A'}</td>
+              <td>${message.phone || 'N/A'}</td>
+              <td>
+                <div class="message-preview">
+                  ${message.status === 'unread' ? '<span class="unread-indicator"></span>' : ''}
+                  ${message.message || 'No message content'}
+                </div>
+              </td>
+              <td><span class="status-badge status-${message.status}">${message.status}</span></td>
+              <td>
+                <button class="action-btn view-btn" data-id="${doc.id}">
+                  <i class="fas fa-eye"></i> View
+                </button>
+              </td>
+            </tr>
+          `;
+          tableContent.innerHTML += row;
+        }
+      });
+      
+      // If no messages match the filter
+      if (!hasMessages) {
+        tableContent.innerHTML = `
           <tr>
-            <td>${formatDate(message.timestamp)}</td>
-            <td>${message.name}</td>
-            <td>${message.email}</td>
-            <td>${message.phone}</td>
-            <td>
-              <div class="message-preview">
-                ${message.status === 'unread' ? '<span class="unread-indicator"></span>' : ''}
-                ${message.message}
-              </div>
-            </td>
-            <td><span class="status-badge status-${message.status}">${message.status}</span></td>
-            <td>
-              <button class="action-btn view-btn" data-id="${doc.id}">
-                <i class="fas fa-eye"></i> View
-              </button>
-            </td>
+            <td colspan="7" style="text-align: center;">No ${filter} messages found</td>
           </tr>
         `;
-        tableContent.innerHTML += row;
-      });
+      }
     }
     
     // Add a small delay to simulate loading and make the transition noticeable
@@ -327,12 +366,12 @@ async function viewMessage(messageId) {
     const message = messageSnap.data();
     
     // Update modal content
-    document.getElementById('messageTitle').textContent = `Message from ${message.name}`;
+    document.getElementById('messageTitle').textContent = `Message from ${message.name || 'Unknown'}`;
     document.getElementById('messageDate').textContent = formatDate(message.timestamp);
-    document.getElementById('messageName').textContent = message.name;
-    document.getElementById('messageEmail').textContent = message.email;
-    document.getElementById('messagePhone').textContent = message.phone;
-    document.getElementById('messageText').textContent = message.message;
+    document.getElementById('messageName').textContent = message.name || 'N/A';
+    document.getElementById('messageEmail').textContent = message.email || 'N/A';
+    document.getElementById('messagePhone').textContent = message.phone || 'N/A';
+    document.getElementById('messageText').textContent = message.message || 'No message content';
     
     // Show modal
     const modal = document.getElementById('messageModal');
@@ -347,7 +386,10 @@ async function viewMessage(messageId) {
           await updateDoc(messageRef, { status: 'read' });
           showNotification("Success", "Message marked as read", "success");
           modal.style.display = 'none';
-          fetchMessages(); // Refresh the table
+          
+          // Get current active filter and refresh the table
+          const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+          fetchMessages(activeFilter);
         } catch (error) {
           console.error("Error marking message as read:", error);
           showNotification("Error", "Failed to mark message as read", "error");
@@ -361,4 +403,4 @@ async function viewMessage(messageId) {
     console.error("Error viewing message:", error);
     showNotification("Error", "Failed to view message: " + error.message, "error");
   }
-} 
+}
