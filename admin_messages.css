@@ -1,0 +1,267 @@
+/* Base table styles */
+#messagesTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  table-layout: auto;
+}
+
+#messagesTable th, #messagesTable td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#messagesTable th {
+  background-color: #f9f9f9;
+  font-weight: bold;
+  color: #555;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+#messagesTable tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Dark mode support for table */
+.dark-mode #messagesTable th {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+.dark-mode #messagesTable td {
+  border-bottom: 1px solid #4a5568;
+}
+
+.dark-mode #messagesTable tr:hover {
+  background-color: #2d3748;
+}
+
+/* Status badge styles */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-unread {
+  background-color: #E3F2FD;
+  color: #1976D2;
+}
+
+.status-read {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+}
+
+/* Action buttons */
+.action-btn {
+  padding: 8px 14px;
+  border-radius: 5px;
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
+}
+
+.view-btn {
+  background-color: #6366F1;
+}
+
+.view-btn:hover {
+  background-color: #4F46E5;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Message Modal Styles */
+.message-modal-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 10px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  transform: scale(0.9);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.message-modal-content.show {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.message-header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.message-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.message-date {
+  color: #666;
+  font-size: 14px;
+}
+
+.message-body {
+  margin-bottom: 20px;
+}
+
+.message-info {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.message-info p {
+  margin: 5px 0;
+}
+
+.message-content {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.message-content h4 {
+  margin-top: 0;
+  color: #333;
+}
+
+.message-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Dark mode support for modal */
+.dark-mode .message-modal-content {
+  background-color: #1F2937;
+  color: #F9FAFB;
+}
+
+.dark-mode .message-header {
+  border-bottom-color: #4B5563;
+}
+
+.dark-mode .message-header h3 {
+  color: #F9FAFB;
+}
+
+.dark-mode .message-date {
+  color: #9CA3AF;
+}
+
+.dark-mode .message-info,
+.dark-mode .message-content {
+  background-color: #374151;
+}
+
+.dark-mode .message-content h4 {
+  color: #F9FAFB;
+}
+
+/* Loading animation styles */
+.loading-row td {
+  padding: 12px 15px;
+  vertical-align: middle;
+}
+
+.loading-placeholder {
+  height: 20px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading-pulse 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Dark mode support for loading placeholders */
+.dark-mode .loading-placeholder {
+  background: linear-gradient(90deg, #3a3a3a 25%, #444444 50%, #3a3a3a 75%);
+  background-size: 200% 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .message-modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .message-actions {
+    flex-direction: column;
+  }
+  
+  .message-actions button {
+    width: 100%;
+  }
+  
+  #messagesTable th, #messagesTable td {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  
+  .action-btn {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}
+
+/* Message preview truncation */
+.message-preview {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Unread message indicator */
+.unread-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #1976D2;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.dark-mode .unread-indicator {
+  background-color: #64B5F6;
+} 
