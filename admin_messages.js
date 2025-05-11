@@ -56,8 +56,9 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Add loading state to the table before fetching messages
     showTableLoadingState();
     
-    // Fetch messages
+    // Fetch messages and update counter
     await fetchMessages();
+    await updateUnreadMessagesCounter();
   } catch (error) {
     console.error("Error initializing page:", error);
     showNotification("Error", "Failed to initialize page: " + error.message, "error");
@@ -389,7 +390,8 @@ async function viewMessage(messageId) {
           
           // Get current active filter and refresh the table
           const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
-          fetchMessages(activeFilter);
+          await fetchMessages(activeFilter);
+          await updateUnreadMessagesCounter(); // Update the counter
         } catch (error) {
           console.error("Error marking message as read:", error);
           showNotification("Error", "Failed to mark message as read", "error");
@@ -402,5 +404,29 @@ async function viewMessage(messageId) {
   } catch (error) {
     console.error("Error viewing message:", error);
     showNotification("Error", "Failed to view message: " + error.message, "error");
+  }
+}
+
+// Update unread messages counter
+async function updateUnreadMessagesCounter() {
+  try {
+    const messagesRef = collection(db, "messages");
+    const querySnapshot = await getDocs(messagesRef);
+    
+    let unreadCount = 0;
+    querySnapshot.forEach((doc) => {
+      const message = doc.data();
+      if (message.status === 'unread') {
+        unreadCount++;
+      }
+    });
+    
+    // Update counter in sidebar
+    const counter = document.getElementById('unreadMessagesCounter');
+    if (counter) {
+      counter.textContent = unreadCount > 0 ? unreadCount : '';
+    }
+  } catch (error) {
+    console.error("Error updating unread messages counter:", error);
   }
 }

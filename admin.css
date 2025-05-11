@@ -113,6 +113,53 @@ body.dark-mode {
   color: #f87171;
 }
 
+/* Sidebar notification counter */
+.notification-counter {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 0 4px;
+  z-index: 2;
+  pointer-events: none; /* Prevent counter from interfering with button clicks */
+}
+
+.notification-counter:empty {
+  display: none;
+}
+
+.dark-mode .notification-counter {
+  background-color: #dc2626;
+}
+
+/* Adjust menu items to accommodate counter */
+.menu-items a {
+  position: relative;
+  padding-right: 45px;
+}
+
+/* Ensure counter stays visible even when menu item is hovered */
+.sidebar a:hover .notification-counter {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Ensure counter stays visible even when menu item is active */
+.sidebar a.active .notification-counter {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* Main Content Area */
 .main {
   margin-left: 240px;

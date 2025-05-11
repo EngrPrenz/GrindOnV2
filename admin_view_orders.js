@@ -55,8 +55,9 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Add loading state to the table before fetching orders
     showTableLoadingState();
     
-    // Fetch orders
+    // Fetch orders and update counter
     await fetchPendingOrders();
+    await updatePendingOrdersCounter();
   } catch (error) {
     console.error("Error initializing page:", error);
     showNotification("Error", "Failed to initialize page: " + error.message, "error");
@@ -421,6 +422,30 @@ async function fetchPendingOrders() {
 // Make the openReceiptModal function globally available
 window.openReceiptModal = openReceiptModal;
 
+// Update pending orders counter
+async function updatePendingOrdersCounter() {
+  try {
+    const ordersRef = collection(db, "orders");
+    const querySnapshot = await getDocs(ordersRef);
+    
+    let pendingCount = 0;
+    querySnapshot.forEach((doc) => {
+      const order = doc.data();
+      if (order.status && order.status.toLowerCase() === "pending") {
+        pendingCount++;
+      }
+    });
+    
+    // Update counter in sidebar
+    const counter = document.getElementById('pendingOrdersCounter');
+    if (counter) {
+      counter.textContent = pendingCount > 0 ? pendingCount : '';
+    }
+  } catch (error) {
+    console.error("Error updating pending orders counter:", error);
+  }
+}
+
 // Fulfill an order and reduce stock for variations
 async function fulfillOrder(orderId) {
   try {
@@ -519,7 +544,8 @@ async function fulfillOrder(orderId) {
     
     // Show loading state before refreshing the table
     showTableLoadingState();
-    fetchPendingOrders(); // Refresh the table
+    await fetchPendingOrders(); // Refresh the table
+    await updatePendingOrdersCounter(); // Update the counter
   } catch (error) {
     console.error("Error fulfilling order:", error);
     showNotification("Error", `Failed to ship the order: ${error.message}`, "error");
@@ -536,7 +562,8 @@ async function declineOrder(orderId) {
       
       // Show loading state before refreshing the table
       showTableLoadingState();
-      fetchPendingOrders(); // Refresh the table
+      await fetchPendingOrders(); // Refresh the table
+      await updatePendingOrdersCounter(); // Update the counter
     } catch (error) {
       console.error("Error declining order: ", error);
       showNotification("Error", "Failed to decline the order: " + error.message, "error");
