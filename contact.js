@@ -2,7 +2,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebas
 import {
   getFirestore,
   doc,
-  getDoc
+  getDoc,
+  collection,
+  addDoc
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 import {
@@ -97,5 +99,44 @@ onAuthStateChanged(auth, (user) => {
         <span style="color: white;">Register</span>
       </a>
     `;
+  }
+});
+
+// Add contact form submission handler
+document.addEventListener('DOMContentLoaded', function() {
+  const contactForm = document.querySelector('form[action="{{ route(\'contact.submit\') }}"]');
+  
+  if (contactForm) {
+    contactForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Get form data
+      const name = this.querySelector('input[name="name"]').value;
+      const email = this.querySelector('input[name="email"]').value;
+      const phone = this.querySelector('input[name="phone"]').value;
+      const message = this.querySelector('textarea[name="message"]').value;
+      
+      try {
+        // Add to Firestore
+        const messagesRef = collection(db, "messages");
+        await addDoc(messagesRef, {
+          name: name,
+          email: email,
+          phone: phone,
+          message: message,
+          timestamp: new Date(),
+          status: "unread" // Add status for admin to track read/unread messages
+        });
+        
+        // Show success message
+        alert("Message sent successfully! We'll get back to you soon.");
+        
+        // Clear form
+        this.reset();
+      } catch (error) {
+        console.error("Error sending message:", error);
+        alert("Failed to send message. Please try again.");
+      }
+    });
   }
 });
