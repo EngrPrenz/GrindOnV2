@@ -104,11 +104,16 @@ onAuthStateChanged(auth, (user) => {
 
 // Add contact form submission handler
 document.addEventListener('DOMContentLoaded', function() {
-  const contactForm = document.querySelector('form[action="{{ route(\'contact.submit\') }}"]');
+  const contactForm = document.getElementById('contactForm');
   
   if (contactForm) {
     contactForm.addEventListener('submit', async function(e) {
       e.preventDefault();
+      
+      // Disable form submission while processing
+      const submitButton = this.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = 'SENDING...';
       
       // Get form data
       const name = this.querySelector('input[name="name"]').value;
@@ -125,17 +130,28 @@ document.addEventListener('DOMContentLoaded', function() {
           phone: phone,
           message: message,
           timestamp: new Date(),
-          status: "unread" // Add status for admin to track read/unread messages
+          status: "unread"
         });
         
-        // Show success message
-        alert("Message sent successfully! We'll get back to you soon.");
+        // Show success modal
+        $('#successModal').modal('show');
         
         // Clear form
         this.reset();
+        
+        // Refresh page after modal is closed
+        $('#successModal').on('hidden.bs.modal', function () {
+          window.location.reload();
+        });
+        
       } catch (error) {
         console.error("Error sending message:", error);
-        alert("Failed to send message. Please try again.");
+        // Show error modal
+        $('#errorModal').modal('show');
+      } finally {
+        // Re-enable form submission
+        submitButton.disabled = false;
+        submitButton.textContent = 'SEND';
       }
     });
   }
