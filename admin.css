@@ -35,6 +35,8 @@ body {
   background-color: var(--light-bg);
   color: var(--light-text);
   transition: background-color 0.3s, color 0.3s;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 body.dark-mode {
@@ -52,6 +54,7 @@ body.dark-mode {
   display: flex;
   flex-direction: column;
   transition: all 0.3s;
+  z-index: 1000;
 }
 
 .logo {
@@ -70,6 +73,8 @@ body.dark-mode {
   display: flex;
   flex-direction: column;
   padding-top: 20px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .sidebar a {
@@ -166,6 +171,7 @@ body.dark-mode {
   flex-grow: 1;
   padding: 20px;
   transition: all 0.3s;
+  width: calc(100% - 240px);
 }
 
 /* Top Bar */
@@ -633,28 +639,44 @@ body.dark-mode {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+  .sidebar {
+    width: 200px;
+  }
+  
+  .main {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+  
+  .woodmark-logo {
+    max-height: 35px;
   }
 }
 
 @media (max-width: 768px) {
   .sidebar {
     width: 70px;
+    transform: translateX(0);
   }
   
-  .sidebar .logo-text, .sidebar a span {
+  .sidebar.collapsed {
+    transform: translateX(-70px);
+  }
+  
+  .sidebar .logo-text, 
+  .sidebar a span {
     display: none;
   }
   
   .sidebar a {
     justify-content: center;
     padding: 15px;
+    margin: 4px 5px;
   }
   
   .sidebar a i {
     margin-right: 0;
+    font-size: 20px;
   }
   
   .sidebar a:hover {
@@ -663,19 +685,55 @@ body.dark-mode {
   
   .main {
     margin-left: 70px;
+    width: calc(100% - 70px);
   }
   
-  /* Adjust logo size for collapsed sidebar */
   .woodmark-logo {
     max-height: 30px;
+  }
+  
+  /* Add hamburger menu for mobile */
+  .menu-toggle {
+    display: block;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  .menu-toggle i {
+    font-size: 20px;
   }
 }
 
 @media (max-width: 480px) {
+  .sidebar {
+    width: 100%;
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  
+  .main {
+    margin-left: 0;
+    width: 100%;
+  }
+  
   .top-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
+    padding: 10px;
   }
   
   .right-elements {
@@ -685,6 +743,28 @@ body.dark-mode {
   
   .stats-row {
     grid-template-columns: 1fr;
+  }
+  
+  .menu-toggle {
+    display: block;
+  }
+}
+
+/* Add overlay for mobile menu */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+@media (max-width: 480px) {
+  .sidebar-overlay.active {
+    display: block;
   }
 }
 
