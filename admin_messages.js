@@ -260,6 +260,11 @@ function formatDate(timestamp) {
   });
 }
 
+// Pagination state
+let currentPage = 1;
+const itemsPerPage = 10;
+let totalMessages = 0;
+
 // Fetch messages from Firestore
 async function fetchMessages(filter = 'all') {
   const messagesTableBody = document.querySelector("#messagesTable tbody");
@@ -281,14 +286,32 @@ async function fetchMessages(filter = 'all') {
         </tr>
       `;
     } else {
-      let hasMessages = false;
+      let filteredMessages = [];
       
       querySnapshot.forEach((doc) => {
         const message = doc.data();
         
         // Apply filter
         if (filter === 'all' || message.status === filter) {
-          hasMessages = true;
+          filteredMessages.push({ id: doc.id, ...message });
+        }
+      });
+      
+      totalMessages = filteredMessages.length;
+
+      if (filteredMessages.length === 0) {
+        tableContent.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center;">No ${filter} messages found</td>
+          </tr>
+        `;
+      } else {
+        // Calculate pagination
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedMessages = filteredMessages.slice(startIndex, endIndex);
+
+        paginatedMessages.forEach((message) => {
           const row = `
             <tr>
               <td>${formatDate(message.timestamp)}</td>
@@ -303,23 +326,17 @@ async function fetchMessages(filter = 'all') {
               </td>
               <td><span class="status-badge status-${message.status}">${message.status}</span></td>
               <td>
-                <button class="action-btn view-btn" data-id="${doc.id}">
+                <button class="action-btn view-btn" data-id="${message.id}">
                   <i class="fas fa-eye"></i> View
                 </button>
               </td>
             </tr>
           `;
           tableContent.innerHTML += row;
-        }
-      });
-      
-      // If no messages match the filter
-      if (!hasMessages) {
-        tableContent.innerHTML = `
-          <tr>
-            <td colspan="7" style="text-align: center;">No ${filter} messages found</td>
-          </tr>
-        `;
+        });
+
+        // Add pagination controls
+        updatePaginationControls();
       }
     }
     
@@ -351,6 +368,119 @@ async function fetchMessages(filter = 'all') {
     `;
     showNotification("Error", "Failed to load messages: " + error.message, "error");
   }
+}
+
+// Update pagination controls
+function updatePaginationControls() {
+  const totalPages = Math.ceil(totalMessages / itemsPerPage);
+  
+  // Create pagination container if it doesn't exist
+  let paginationContainer = document.querySelector('.pagination-container');
+  if (!paginationContainer) {
+    paginationContainer = document.createElement('div');
+    paginationContainer.className = 'pagination-container';
+    document.querySelector('.messages-section').appendChild(paginationContainer);
+  }
+  
+  // Generate pagination HTML
+  let paginationHTML = `
+    <div class="pagination">
+      <button class="pagination-btn" id="prevPage" ${currentPage === 1 ? 'disabled' : ''}>
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      
+      <div class="page-numbers">
+        ${generatePageNumbers(currentPage, totalPages)}
+      </div>
+      
+      <button class="pagination-btn" id="nextPage" ${currentPage === totalPages ? 'disabled' : ''}>
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+    <div class="pagination-info">
+      Showing ${((currentPage - 1) * itemsPerPage) + 1} to ${Math.min(currentPage * itemsPerPage, totalMessages)} of ${totalMessages} messages
+    </div>
+  `;
+  
+  paginationContainer.innerHTML = paginationHTML;
+  
+  // Add event listeners
+  document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      showTableLoadingState();
+      fetchMessages(document.querySelector('.filter-btn.active').dataset.filter);
+    }
+  });
+  
+  document.getElementById('nextPage').addEventListener('click', () => {
+    if (currentPage < totalPages) {
+      currentPage++;
+      showTableLoadingState();
+      fetchMessages(document.querySelector('.filter-btn.active').dataset.filter);
+    }
+  });
+  
+  // Add event listeners for page numbers
+  document.querySelectorAll('.page-number').forEach(button => {
+    button.addEventListener('click', () => {
+      const page = parseInt(button.dataset.page);
+      if (page !== currentPage) {
+        currentPage = page;
+        showTableLoadingState();
+        fetchMessages(document.querySelector('.filter-btn.active').dataset.filter);
+      }
+    });
+  });
+}
+
+// Generate page numbers with ellipsis
+function generatePageNumbers(currentPage, totalPages) {
+  let pages = [];
+  const maxVisiblePages = 5;
+  
+  if (totalPages <= maxVisiblePages) {
+    // Show all pages if total pages is less than max visible
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    // Always show first page
+    pages.push(1);
+    
+    // Calculate start and end of visible pages
+    let start = Math.max(2, currentPage - 1);
+    let end = Math.min(totalPages - 1, currentPage + 1);
+    
+    // Adjust if at the start
+    if (currentPage <= 2) {
+      end = 4;
+    }
+    // Adjust if at the end
+    if (currentPage >= totalPages - 1) {
+      start = totalPages - 3;
+    }
+    
+    // Add ellipsis and middle pages
+    if (start > 2) pages.push('...');
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    if (end < totalPages - 1) pages.push('...');
+    
+    // Always show last page
+    pages.push(totalPages);
+  }
+  
+  return pages.map(page => {
+    if (page === '...') {
+      return '<span class="ellipsis">...</span>';
+    }
+    return `
+      <button class="page-number ${page === currentPage ? 'active' : ''}" 
+              data-page="${page}">${page}</button>
+    `;
+  }).join('');
 }
 
 // View message details

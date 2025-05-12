@@ -292,6 +292,11 @@ function initTheme() {
   });
 }
 
+// Pagination state
+let currentPage = 1;
+const itemsPerPage = 10;
+let totalOrders = 0;
+
 // Fetch pending orders from Firestore - fixed to handle case-sensitivity
 async function fetchPendingOrders() {
   const ordersTableBody = document.querySelector("#ordersTable tbody");
@@ -309,7 +314,7 @@ async function fetchPendingOrders() {
     tableContent.className = 'new-table-content';
     tableContent.style.opacity = '0';
     
-    let pendingOrdersFound = false;
+    let pendingOrders = [];
 
     if (querySnapshot.empty) {
       tableContent.innerHTML = `
@@ -322,15 +327,31 @@ async function fetchPendingOrders() {
         const order = doc.data();
         
         // Case-insensitive check for "pending" status
-        // This ensures we match "pending", "Pending", "PENDING", etc.
         if (order.status && order.status.toLowerCase() === "pending") {
-          pendingOrdersFound = true;
+          pendingOrders.push({ id: doc.id, ...order });
+        }
+      });
+
+      totalOrders = pendingOrders.length;
+
+      if (pendingOrders.length === 0) {
+        tableContent.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center;">No pending orders found</td>
+          </tr>
+        `;
+      } else {
+        // Calculate pagination
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedOrders = pendingOrders.slice(startIndex, endIndex);
+
+        paginatedOrders.forEach((order) => {
           const totalQuantity = order.items.reduce((sum, item) => sum + (item.quantity || 1), 0);
           
           // Handle payment proof/receipt
           let receiptCell;
           if (order.paymentMethod && order.paymentMethod.toLowerCase() !== 'cod') {
-            // Check for payment proof URL (from either field)
             const receiptUrl = order.paymentProofUrl || order.bankProofUrl || '';
             
             if (receiptUrl) {
@@ -345,12 +366,9 @@ async function fetchPendingOrders() {
             receiptCell = `<span class="no-receipt">Cash on Delivery</span>`;
           }
           
-          // Log for debugging
-          console.log(`Found pending order: ${doc.id}`, order);
-          
           const row = `
             <tr>
-              <td>${doc.id}</td>
+              <td>${order.id}</td>
               <td>${order.items.map(item => item.name).join(", ")}</td>
               <td>${order.firstName || ''} ${order.lastName || ''}</td>
               <td>${totalQuantity}</td>
@@ -359,21 +377,16 @@ async function fetchPendingOrders() {
               <td>${receiptCell}</td>
               <td><span class="status-badge status-pending">${order.status}</span></td>
               <td>
-                <button class="action-btn ship-btn" data-id="${doc.id}"><i class="fas fa-shipping-fast"></i> Ship Order</button>
-                <button class="action-btn decline-btn" data-id="${doc.id}"><i class="fas fa-times-circle"></i> Decline</button>
+                <button class="action-btn ship-btn" data-id="${order.id}"><i class="fas fa-shipping-fast"></i> Ship Order</button>
+                <button class="action-btn decline-btn" data-id="${order.id}"><i class="fas fa-times-circle"></i> Decline</button>
               </td>
             </tr>
           `;
           tableContent.innerHTML += row;
-        }
-      });
+        });
 
-      if (!pendingOrdersFound) {
-        tableContent.innerHTML = `
-          <tr>
-            <td colspan="9" style="text-align: center;">No pending orders found</td>
-          </tr>
-        `;
+        // Add pagination controls
+        updatePaginationControls();
       }
     }
     
@@ -406,7 +419,7 @@ async function fetchPendingOrders() {
           });
         });
       }, 50);
-    }, 800); // Simulate loading delay
+    }, 800);
     
   } catch (error) {
     console.error("Error fetching orders: ", error);
@@ -417,6 +430,119 @@ async function fetchPendingOrders() {
     `;
     showNotification("Error", "Failed to load orders: " + error.message, "error");
   }
+}
+
+// Update pagination controls
+function updatePaginationControls() {
+  const totalPages = Math.ceil(totalOrders / itemsPerPage);
+  
+  // Create pagination container if it doesn't exist
+  let paginationContainer = document.querySelector('.pagination-container');
+  if (!paginationContainer) {
+    paginationContainer = document.createElement('div');
+    paginationContainer.className = 'pagination-container';
+    document.querySelector('.orders-section').appendChild(paginationContainer);
+  }
+  
+  // Generate pagination HTML
+  let paginationHTML = `
+    <div class="pagination">
+      <button class="pagination-btn" id="prevPage" ${currentPage === 1 ? 'disabled' : ''}>
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      
+      <div class="page-numbers">
+        ${generatePageNumbers(currentPage, totalPages)}
+      </div>
+      
+      <button class="pagination-btn" id="nextPage" ${currentPage === totalPages ? 'disabled' : ''}>
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+    <div class="pagination-info">
+      Showing ${((currentPage - 1) * itemsPerPage) + 1} to ${Math.min(currentPage * itemsPerPage, totalOrders)} of ${totalOrders} orders
+    </div>
+  `;
+  
+  paginationContainer.innerHTML = paginationHTML;
+  
+  // Add event listeners
+  document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      showTableLoadingState();
+      fetchPendingOrders();
+    }
+  });
+  
+  document.getElementById('nextPage').addEventListener('click', () => {
+    if (currentPage < totalPages) {
+      currentPage++;
+      showTableLoadingState();
+      fetchPendingOrders();
+    }
+  });
+  
+  // Add event listeners for page numbers
+  document.querySelectorAll('.page-number').forEach(button => {
+    button.addEventListener('click', () => {
+      const page = parseInt(button.dataset.page);
+      if (page !== currentPage) {
+        currentPage = page;
+        showTableLoadingState();
+        fetchPendingOrders();
+      }
+    });
+  });
+}
+
+// Generate page numbers with ellipsis
+function generatePageNumbers(currentPage, totalPages) {
+  let pages = [];
+  const maxVisiblePages = 5;
+  
+  if (totalPages <= maxVisiblePages) {
+    // Show all pages if total pages is less than max visible
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    // Always show first page
+    pages.push(1);
+    
+    // Calculate start and end of visible pages
+    let start = Math.max(2, currentPage - 1);
+    let end = Math.min(totalPages - 1, currentPage + 1);
+    
+    // Adjust if at the start
+    if (currentPage <= 2) {
+      end = 4;
+    }
+    // Adjust if at the end
+    if (currentPage >= totalPages - 1) {
+      start = totalPages - 3;
+    }
+    
+    // Add ellipsis and middle pages
+    if (start > 2) pages.push('...');
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    if (end < totalPages - 1) pages.push('...');
+    
+    // Always show last page
+    pages.push(totalPages);
+  }
+  
+  return pages.map(page => {
+    if (page === '...') {
+      return '<span class="ellipsis">...</span>';
+    }
+    return `
+      <button class="page-number ${page === currentPage ? 'active' : ''}" 
+              data-page="${page}">${page}</button>
+    `;
+  }).join('');
 }
 
 // Make the openReceiptModal function globally available
