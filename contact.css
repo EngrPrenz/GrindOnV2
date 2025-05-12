@@ -105,14 +105,26 @@ form .custom-button:hover {
   pointer-events: auto;
 }
 
+/* Modal Header Close Button */
 .modal-header .close {
   color: white;
   text-shadow: none;
-  opacity: 0.8;
-  pointer-events: auto;
+  opacity: 1;
+  padding: 1rem;
+  margin: -1rem -1rem -1rem auto;
+  cursor: pointer;
 }
 
-.modal-header .close:hover {
+.modal-header .close:hover,
+.modal-header .close:focus {
+  color: white;
+  opacity: 1;
+  text-decoration: none;
+}
+
+/* Remove Bootstrap's default hover styles */
+.modal-header .close:not(:disabled):not(.disabled):hover,
+.modal-header .close:not(:disabled):not(.disabled):focus {
   opacity: 1;
 }
 
@@ -246,4 +258,78 @@ body.modal-open .loading-screen {
   .map-responsive {
     padding-bottom: 100%;
   }
+}
+
+/* Login Required Modal Specific Styles */
+#loginRequiredModal .modal-content {
+  border: 2px solid black;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+#loginRequiredModal .modal-header {
+  background-color: black;
+  color: white;
+  padding: 1.5rem;
+  border-bottom: none;
+}
+
+#loginRequiredModal .modal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+#loginRequiredModal .modal-body {
+  padding: 2rem;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+#loginRequiredModal .modal-footer {
+  border-top: none;
+  padding: 1.5rem;
+  justify-content: center;
+  gap: 1rem;
+}
+
+#loginRequiredModal .btn {
+  padding: 10px 30px;
+  font-weight: 500;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+#loginRequiredModal .btn-secondary {
+  background-color: #6c757d;
+  border: 2px solid #6c757d;
+}
+
+#loginRequiredModal .btn-secondary:hover {
+  background-color: white;
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+#loginRequiredModal .btn-primary {
+  background-color: black;
+  border: 2px solid black;
+  color: white;
+}
+
+#loginRequiredModal .btn-primary:hover {
+  background-color: white;
+  color: black;
+  border-color: black;
+}
+
+/* Loading animation styles */
+.loading-state {
+  position: relative;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+button[type="submit"]:disabled {
+  background-color: #666 !important;
+  border-color: #666 !important;
+  cursor: not-allowed;
 }
