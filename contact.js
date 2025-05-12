@@ -110,18 +110,57 @@ document.addEventListener('DOMContentLoaded', function() {
     contactForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       
+      // Show loading animation
+      window.showPageLoading();
+      
       // Disable form submission while processing
       const submitButton = this.querySelector('button[type="submit"]');
       submitButton.disabled = true;
       submitButton.textContent = 'SENDING...';
       
-      // Get form data
-      const name = this.querySelector('input[name="name"]').value;
-      const email = this.querySelector('input[name="email"]').value;
-      const phone = this.querySelector('input[name="phone"]').value;
-      const message = this.querySelector('textarea[name="message"]').value;
-      
       try {
+        // Add artificial delay for loading animation
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check if user is logged in
+        const user = auth.currentUser;
+        if (!user) {
+          // Show login required modal
+          const loginModal = $('#loginRequiredModal');
+          loginModal.modal('show');
+          
+          // Handle modal close events (X button or clicking outside)
+          loginModal.on('hidden.bs.modal', function () {
+            // Reset button state and hide loading
+            submitButton.disabled = false;
+            submitButton.textContent = 'SEND';
+            window.hidePageLoading();
+          });
+          
+          // Handle Cancel button click
+          document.getElementById('cancelLoginBtn').addEventListener('click', function() {
+            loginModal.modal('hide');
+            // Reset button state and hide loading
+            submitButton.disabled = false;
+            submitButton.textContent = 'SEND';
+            window.hidePageLoading();
+          });
+          
+          // Handle Go to Login button click
+          document.getElementById('goToLoginBtn').addEventListener('click', function() {
+            // Keep loading animation for page transition
+            window.location.href = 'login.html';
+          });
+          
+          return;
+        }
+        
+        // Get form data
+        const name = this.querySelector('input[name="name"]').value;
+        const email = this.querySelector('input[name="email"]').value;
+        const phone = this.querySelector('input[name="phone"]').value;
+        const message = this.querySelector('textarea[name="message"]').value;
+        
         // Add to Firestore
         const messagesRef = collection(db, "messages");
         await addDoc(messagesRef, {
@@ -130,8 +169,12 @@ document.addEventListener('DOMContentLoaded', function() {
           phone: phone,
           message: message,
           timestamp: new Date(),
-          status: "unread"
+          status: "unread",
+          userId: user.uid
         });
+        
+        // Hide loading before showing success modal
+        window.hidePageLoading();
         
         // Show success modal
         $('#successModal').modal('show');
@@ -146,12 +189,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
       } catch (error) {
         console.error("Error sending message:", error);
+        // Hide loading before showing error modal
+        window.hidePageLoading();
         // Show error modal
         $('#errorModal').modal('show');
       } finally {
-        // Re-enable form submission
-        submitButton.disabled = false;
-        submitButton.textContent = 'SEND';
+        // Only reset button if we're not showing the login modal
+        if (auth.currentUser) {
+          submitButton.disabled = false;
+          submitButton.textContent = 'SEND';
+        }
       }
     });
   }
