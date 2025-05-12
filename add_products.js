@@ -88,26 +88,7 @@ function initTheme() {
 function initDragAndDrop() {
   const uploadImage = document.getElementById('uploadImage');
   if (uploadImage) {
-    uploadImage.addEventListener('change', function(e) {
-      const files = this.files;
-      const previewContainer = document.getElementById('imagePreviewContainer');
-      
-      if (previewContainer) {
-        previewContainer.innerHTML = '';
-        
-        if (files.length > 0) {
-          for (let file of files) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              const img = document.createElement('img');
-              img.src = e.target.result;
-              previewContainer.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-          }
-        }
-      }
-    });
+    uploadImage.addEventListener('change', handleImagePreview);
     
     // Make the upload area highlight on drag
     const uploadArea = document.querySelector('.upload-area');
@@ -125,6 +106,25 @@ function initDragAndDrop() {
           this.classList.remove('active');
         });
       });
+    }
+  }
+}
+
+// Handle image preview
+function handleImagePreview(e) {
+  const files = e.target.files;
+  const previewContainer = document.getElementById('imagePreviewContainer');
+  previewContainer.innerHTML = '';
+
+  if (files.length > 0) {
+    for (let file of files) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        previewContainer.appendChild(img);
+      };
+      reader.readAsDataURL(file);
     }
   }
 }
@@ -217,25 +217,6 @@ document.getElementById("addProductForm").addEventListener("submit", async (e) =
   } catch (error) {
     console.error("Error adding product:", error);
     showModal('error', 'Add Product Failed', 'Failed to add product.');
-  }
-});
-
-// Show image previews
-document.getElementById("uploadImage").addEventListener("change", function () {
-  const files = this.files;
-  const previewContainer = document.getElementById("imagePreviewContainer");
-  previewContainer.innerHTML = "";
-
-  if (files.length > 0) {
-    for (let file of files) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const img = document.createElement("img");
-        img.src = e.target.result;
-        previewContainer.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    }
   }
 });
 
